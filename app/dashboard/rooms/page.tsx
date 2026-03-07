@@ -5,13 +5,15 @@ import { Button } from '@/components/ui/button';
 import { CreateRoomDialog } from '@/features/rooms/components/create-room-dialog';
 import { RoomsList } from '@/features/rooms/components/rooms-list';
 import type { InterviewRoom } from '@/features/rooms/types/room';
-import { PlusIcon } from 'lucide-react';
-import Router from 'next/router';
+import { PlusIcon, TableIcon } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 const RoomsPage = () => {
   const [rooms, setRooms] = useState<InterviewRoom[]>([]);
   const [createOpen, setCreateOpen] = useState(false);
   const [editingRoom, setEditingRoom] = useState<InterviewRoom | null>(null);
+
+  const router = useRouter();
 
   const handleCreateRoom = useCallback((data: Omit<InterviewRoom, 'id' | 'createdAt'>) => {
     const room: InterviewRoom = {
@@ -76,6 +78,10 @@ const RoomsPage = () => {
       <div className="flex items-center justify-between mb-10">
         <h1 className="text-2xl font-bold">Interview rooms</h1>
         <div className="flex gap-2">
+          <Button variant="outline" onClick={() => router.push('/dashboard/rooms/table')}>
+            <TableIcon className="w-4 h-4" />
+            View more
+          </Button>
           <Button
             variant="outline"
             onClick={() => {
@@ -84,11 +90,7 @@ const RoomsPage = () => {
             }}
           >
             <PlusIcon className="w-4 h-4" />
-            Create interview room
-          </Button>
-          <Button variant="outline" onClick={() => Router.push('/rooms/tables')}>
-            <PlusIcon className="w-4 h-4" />
-            View detail in table
+            Add Interview Room
           </Button>
         </div>
       </div>

@@ -16,10 +16,10 @@ const DashboardPage = () => {
             <DownloadIcon className="w-4 h-4 mr-1" />
             Download
           </Button>
-          <Button variant="outline">
+          {/* <Button variant="outline">
             <PlusIcon className="w-4 h-4" />
             Add Interview
-          </Button>
+          </Button> */}
         </div>
       </div>
       <DashboardStats />
