@@ -15,7 +15,7 @@ import {
 import * as React from 'react';
 
 import { cn } from '@/lib/utils';
-
+import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Breadcrumb,
@@ -206,10 +206,10 @@ const NavMenuItem = ({ item }: { item: NavItem }) => {
     return (
       <SidebarMenuItem>
         <SidebarMenuButton asChild isActive={item.isActive}>
-          <a href={item.href}>
+          <Link href={item.href} className="flex items-center gap-2">
             <Icon className="size-4" />
             <span>{item.label}</span>
-          </a>
+          </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
     );
@@ -230,7 +230,10 @@ const NavMenuItem = ({ item }: { item: NavItem }) => {
             {item.children!.map((child) => (
               <SidebarMenuSubItem key={child.label}>
                 <SidebarMenuSubButton asChild isActive={child.isActive}>
-                  <a href={child.href}>{child.label}</a>
+                  <Link href={child.href} className="flex items-center gap-2">
+                    <Icon className="size-4" />
+                    <span>{child.label}</span>
+                  </Link>
                 </SidebarMenuSubButton>
               </SidebarMenuSubItem>
             ))}
