@@ -35,25 +35,25 @@ export default function InterviewRoom({ params }: { params: Promise<{ roomId: st
       const videoClient = await createVideoClient(userId);
       const callInstance = await joinInterviewCall(videoClient, roomId);
 
-      const chatClient = await createChatClient(userId);
-      const channelInstance = await createInterviewChannel(chatClient, roomId, [
-        'candidate-123',
-        'interviewer-1'
-      ]);
+      // const chatClient = await createChatClient(userId);
+      // const channelInstance = await createInterviewChannel(chatClient, roomId, [
+      //   'candidate-123',
+      //   'interviewer-1'
+      // ]);
 
       setVideoClient(videoClient);
       setCall(callInstance);
-      setChatClient(chatClient);
-      setChannel(channelInstance);
+      // setChatClient(chatClient);
+      // setChannel(channelInstance);
     }
 
     init();
   }, [roomId]);
 
-  // if (!client || !call) return <div>Connecting...</div>;
-  if (!videoClient || !call || !chatClient || !channel) {
-    return <div>Connecting...</div>;
-  }
+  if (!videoClient || !call) return <div>Connecting...</div>;
+  // if (!videoClient || !call || !chatClient || !channel) {
+  //   return <div>Connecting...</div>;
+  // }
 
   return (
     <div className="flex flex-row w-full p-4 h-screen">
@@ -72,7 +72,8 @@ export default function InterviewRoom({ params }: { params: Promise<{ roomId: st
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel className="w-full h-full">
-              <InterviewChat client={chatClient} channel={channel} />
+              Chat will be here
+              {/* <InterviewChat client={chatClient} channel={channel} /> */}
             </ResizablePanel>
           </ResizablePanelGroup>
         </ResizablePanel>
