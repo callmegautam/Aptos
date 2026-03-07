@@ -88,9 +88,9 @@ export default function InterviewRoom({ params }: { params: Promise<{ roomId: st
   return (
     <div className="flex flex-row w-full p-4 h-screen">
       <ResizablePanelGroup orientation="horizontal" className="w-full h-full rounded-lg border">
-        <ResizablePanel className="w-1/2">
-          <ResizablePanelGroup orientation="vertical" className="w-full h-full">
-            <ResizablePanel className="w-full h-full">
+        <div className="w-1/2">
+          <ResizablePanelGroup orientation="vertical" className="w-full h-full border">
+            <ResizablePanel className="w-full h-full border">
               <StreamTheme className="str-video__theme-dark w-full flex flex-col relative">
                 <StreamVideo client={videoClient}>
                   <StreamCall call={call}>
@@ -107,14 +107,13 @@ export default function InterviewRoom({ params }: { params: Promise<{ roomId: st
                 </StreamVideo>
               </StreamTheme>
             </ResizablePanel>
-            <ResizableHandle withHandle />
-            <ResizablePanel className="w-full h-full">
+            {/* <ResizableHandle withHandle /> */}
+            <ResizablePanel className="w-full h-full" defaultSize="42%">
               Chat will be here
               {/* <InterviewChat client={chatClient} channel={channel} /> */}
             </ResizablePanel>
           </ResizablePanelGroup>
-        </ResizablePanel>
-        <ResizableHandle withHandle />
+        </div>
         <ResizablePanel className="w-1/2">
           <div className="w-full h-full">
             <CodingEditor />
