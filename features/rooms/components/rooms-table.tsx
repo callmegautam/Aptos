@@ -1,171 +1,342 @@
 'use client';
 
+import { useState } from 'react';
 import {
-  Table,
-  TableHeader,
-  TableRow,
-  TableHead,
-  TableBody,
-  TableCell
-} from '@/components/ui/table';
+  type ColumnDef,
+  type SortingState,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable
+} from '@tanstack/react-table';
+import { ChevronLeft, ChevronRight, Eye, Pencil, Trash2, MoreHorizontal } from 'lucide-react';
 
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   DropdownMenu,
-  DropdownMenuTrigger,
   DropdownMenuContent,
-  DropdownMenuItem
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+import Image from 'next/image';
 
-import { MoreVertical, Calendar, Clock, Copy, Link } from 'lucide-react';
+type Status = 'available' | 'occupied';
 
-import { useState } from 'react';
+const tempRoomImage =
+  'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=80&q=80';
 
-import type { InterviewRoom, RoomStatus } from '@/features/rooms/types/room';
-
-const STATUS_CONFIG: Record<RoomStatus, { label: string; variant: any }> = {
-  draft: { label: 'Draft', variant: 'secondary' },
-  scheduled: { label: 'Scheduled', variant: 'default' },
-  live: { label: 'Live', variant: 'default' },
-  completed: { label: 'Completed', variant: 'outline' },
-  cancelled: { label: 'Cancelled', variant: 'destructive' }
-};
-
-function formatDateShort(date: Date) {
-  return new Intl.DateTimeFormat(undefined, {
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit'
-  }).format(date);
+interface Room {
+  id: string;
+  image: string;
+  name: string;
+  type: string;
+  capacity: number;
+  status: Status;
 }
 
-function getInviteLink(roomId: string) {
-  if (typeof window !== 'undefined') {
-    return `${window.location.origin}/join/${roomId}`;
+const statusConfig: Record<Status, { label: string; className: string }> = {
+  available: {
+    label: 'Available',
+    className: 'bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
+  },
+  occupied: {
+    label: 'Occupied',
+    className: 'bg-rose-500/15 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400'
   }
-  return '';
-}
-
-type RoomsTableProps = {
-  rooms: InterviewRoom[];
-  onEdit: (room: InterviewRoom) => void;
-  onDelete: (room: InterviewRoom) => void;
 };
 
-export function RoomsTable({ rooms, onEdit, onDelete }: RoomsTableProps) {
-  const [copiedId, setCopiedId] = useState<string | null>(null);
+function StatusBadge({ status }: { status: Status }) {
+  const config = statusConfig[status];
+  return (
+    <Badge variant="outline" className={cn('border-0', config.className)}>
+      {config.label}
+    </Badge>
+  );
+}
 
-  const copyInviteLink = async (roomId: string) => {
-    const link = getInviteLink(roomId);
+const columns: ColumnDef<Room>[] = [
+  {
+    id: 'select',
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')
+        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Select row"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false
+  },
+  {
+    accessorKey: 'image',
+    header: 'Room Image',
+    cell: ({ row }) => {
+      const image = row.getValue('image') as string;
+      return (
+        <div className="flex items-center">
+          <Image
+            src={image}
+            alt="room"
+            width={40}
+            height={40}
+            className="rounded-lg object-cover"
+          />
+        </div>
+      );
+    }
+  },
+  {
+    accessorKey: 'name',
+    header: 'Room Name',
+    cell: ({ row }) => <span className="font-medium">{row.getValue('name')}</span>
+  },
+  {
+    accessorKey: 'type',
+    header: 'Type'
+  },
+  {
+    accessorKey: 'capacity',
+    header: 'Capacity',
+    cell: ({ row }) => <div className="font-medium">{row.getValue('capacity')}</div>
+  },
+  {
+    accessorKey: 'status',
+    header: 'Status',
+    cell: ({ row }) => <StatusBadge status={row.getValue('status')} />
+  },
+  {
+    id: 'actions',
+    cell: () => (
+      <div className="text-right">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <MoreHorizontal className="h-4 w-4" />
+              <span className="sr-only">Open menu</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem>
+              <Eye className="mr-2 h-4 w-4" />
+              View details
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Pencil className="mr-2 h-4 w-4" />
+              Edit
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="text-destructive">
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    )
+  }
+];
 
-    await navigator.clipboard.writeText(link);
+const data: Room[] = [
+  {
+    id: '1',
+    image: tempRoomImage,
+    name: 'Conference Room A',
+    type: 'Conference',
+    capacity: 15,
+    status: 'available'
+  },
+  {
+    id: '2',
+    image: tempRoomImage,
+    name: 'Meeting Room B',
+    type: 'Meeting',
+    capacity: 8,
+    status: 'occupied'
+  },
+  {
+    id: '3',
+    image: tempRoomImage,
+    name: 'Workshop Room C',
+    type: 'Workshop',
+    capacity: 25,
+    status: 'available'
+  }
+];
 
-    setCopiedId(roomId);
+export default function RoomsTable() {
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [rowSelection, setRowSelection] = useState({});
+  const [globalFilter, setGlobalFilter] = useState('');
 
-    setTimeout(() => {
-      setCopiedId(null);
-    }, 2000);
-  };
+  const table = useReactTable({
+    data,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onSortingChange: setSorting,
+    onRowSelectionChange: setRowSelection,
+    onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: 'includesString',
+    state: {
+      sorting,
+      rowSelection,
+      globalFilter
+    },
+    initialState: {
+      pagination: { pageSize: 5 }
+    }
+  });
+
+  const pageCount = table.getPageCount();
+  const currentPage = table.getState().pagination.pageIndex + 1;
 
   return (
-    <div className="border rounded-lg">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Room</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Field</TableHead>
-            <TableHead>Candidate</TableHead>
-            <TableHead>Interviewer</TableHead>
-            <TableHead>Scheduled</TableHead>
-            <TableHead>Created</TableHead>
-            <TableHead>Invite</TableHead>
-            <TableHead className="w-12.5"></TableHead>
-          </TableRow>
-        </TableHeader>
+    <div className="w-full space-y-4 px-10">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">Show</span>
+          <Select
+            value={String(table.getState().pagination.pageSize)}
+            onValueChange={(value) => table.setPageSize(Number(value))}
+          >
+            <SelectTrigger className="h-8 w-16">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {[5, 10, 20].map((size) => (
+                <SelectItem key={size} value={String(size)}>
+                  {size}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <span className="text-sm text-muted-foreground">entries</span>
+        </div>
+        <Input
+          placeholder="Search..."
+          value={globalFilter}
+          onChange={(e) => setGlobalFilter(e.target.value)}
+          className="h-8 w-full sm:w-64"
+        />
+      </div>
 
-        <TableBody>
-          {rooms.map((room) => {
-            const status = STATUS_CONFIG[room.status];
-
-            return (
-              <TableRow key={room.id}>
-                <TableCell className="font-medium">{room.name}</TableCell>
-
-                <TableCell>
-                  <Badge variant={status.variant}>{status.label}</Badge>
-                </TableCell>
-
-                <TableCell>{room.field}</TableCell>
-
-                <TableCell>{room.candidateName || 'Not assigned'}</TableCell>
-
-                <TableCell>{room.interviewerName || 'Not assigned'}</TableCell>
-
-                <TableCell>
-                  {room.scheduledAt ? (
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                      <Calendar className="h-4 w-4" />
-                      {formatDateShort(room.scheduledAt)}
-                    </div>
-                  ) : (
-                    '-'
-                  )}
-                </TableCell>
-
-                <TableCell>
-                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                    <Clock className="h-4 w-4" />
-                    {formatDateShort(room.createdAt)}
-                  </div>
-                </TableCell>
-
-                <TableCell>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => copyInviteLink(room.id)}
-                    className="gap-1"
-                  >
-                    {copiedId === room.id ? (
-                      <>
-                        <Copy className="h-4 w-4" />
-                        Copied
-                      </>
-                    ) : (
-                      <>
-                        <Link className="h-4 w-4" />
-                        Link
-                      </>
-                    )}
-                  </Button>
-                </TableCell>
-
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button size="icon" variant="ghost">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => onEdit(room)}>Edit</DropdownMenuItem>
-
-                      <DropdownMenuItem className="text-red-500" onClick={() => onDelete(room)}>
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+      <div className="rounded-lg border">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-24 text-center">
+                  No results.
                 </TableCell>
               </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-pretty text-sm text-muted-foreground">
+          Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}{' '}
+          to{' '}
+          {Math.min(
+            (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
+            table.getFilteredRowModel().rows.length
+          )}{' '}
+          of {table.getFilteredRowModel().rows.length} entries
+        </p>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+            aria-label="Previous page"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            <span className="sr-only">Previous page</span>
+          </Button>
+          {Array.from({ length: pageCount }, (_, i) => i + 1).map((page) => (
+            <Button
+              key={page}
+              variant={currentPage === page ? 'default' : 'outline'}
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => table.setPageIndex(page - 1)}
+              aria-label={`Go to page ${page}`}
+            >
+              {page}
+            </Button>
+          ))}
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+            aria-label="Next page"
+          >
+            <ChevronRight className="h-4 w-4" />
+            <span className="sr-only">Next page</span>
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
