@@ -8,6 +8,19 @@
   background: transparent;
 } */
 
+.str-chat__theme-dark {
+  --str-chat__primary-color: #6366f1;
+  --str-chat__background-color: #262626;
+}
+
+.str-chat__theme-dark .str-chat__message-input {
+  background: #1f2937;
+}
+
+.str-chat__theme-dark .str-chat__message-text {
+  color: #e5e7eb;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 :root {

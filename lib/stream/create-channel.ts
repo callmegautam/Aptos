@@ -5,6 +5,20 @@ export async function createInterviewChannel(
   roomId: string,
   members: string[]
 ) {
+  console.log('Creating interview channel for members:', members);
+
+  await fetch('/api/stream-users', {
+    method: 'POST',
+    body: JSON.stringify({
+      users: members.map((id) => ({
+        id,
+        name: id
+      }))
+    })
+  });
+
+  console.log('Upserted users:', members);
+
   const channel = client.channel('messaging', roomId, {
     members
   });

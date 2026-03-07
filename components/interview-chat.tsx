@@ -4,7 +4,7 @@ import { Chat, Channel, MessageList, MessageInput, Window } from 'stream-chat-re
 
 export default function InterviewChat({ client, channel }: any) {
   return (
-    <Chat client={client}>
+    <Chat client={client} theme="str-chat__theme-dark">
       <Channel channel={channel}>
         <Window>
           <MessageList />
