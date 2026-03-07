@@ -144,7 +144,7 @@ export function RoomCard({ room, onEdit, onDelete }: RoomCardProps) {
       {/* Top accent bar by field */}
       <div
         className={cn(
-          'absolute top-0 left-0 right-0 h-1 bg-gradient-to-r opacity-80',
+          'absolute top-0 left-0 right-0 h-1 bg-linear-to-r opacity-80',
           fieldConf.accent
         )}
       />
