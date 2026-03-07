@@ -8,26 +8,18 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from '@/components/ui/dialog';
-import {
-  Field,
-  FieldGroup,
-  FieldLabel,
-} from '@/components/ui/field';
+import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from '@/components/ui/select';
-import type {
-  InterviewRoom,
-  InterviewField,
-  RoomStatus,
-} from '@/features/dashboard/types/room';
+import type { InterviewRoom, InterviewField, RoomStatus } from '@/features/dashboard/types/room';
 import { INTERVIEW_FIELD, ROOM_STATUS } from '@/features/dashboard/types/room';
 
 type RoomFormData = Omit<InterviewRoom, 'id' | 'createdAt'> & {
@@ -48,7 +40,7 @@ const defaultFormState = (): RoomFormData => ({
   field: 'fullstack',
   candidateName: '',
   interviewerName: '',
-  scheduledAt: undefined,
+  scheduledAt: undefined
 });
 
 function toDatetimeLocal(d: Date | undefined): string {
@@ -67,7 +59,7 @@ export function CreateRoomDialog({
   open,
   onOpenChange,
   editingRoom,
-  onSubmit,
+  onSubmit
 }: CreateRoomDialogProps) {
   const isEdit = !!editingRoom;
   const [form, setForm] = React.useState<RoomFormData>(defaultFormState());
@@ -82,7 +74,7 @@ export function CreateRoomDialog({
         candidateName: editingRoom.candidateName ?? '',
         interviewerName: editingRoom.interviewerName ?? '',
         scheduledAt: editingRoom.scheduledAt,
-        createdAt: editingRoom.createdAt,
+        createdAt: editingRoom.createdAt
       });
     } else {
       setForm(defaultFormState());
@@ -97,7 +89,7 @@ export function CreateRoomDialog({
       name: form.name.trim(),
       description: form.description?.trim() || undefined,
       candidateName: form.candidateName?.trim() || undefined,
-      interviewerName: form.interviewerName?.trim() || undefined,
+      interviewerName: form.interviewerName?.trim() || undefined
     };
     onSubmit(payload, isEdit);
     setForm(defaultFormState());
@@ -113,9 +105,7 @@ export function CreateRoomDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-h-[90vh] max-w-md flex flex-col p-0 gap-0">
         <DialogHeader className="px-6 pt-6 pb-4 border-b border-border">
-          <DialogTitle>
-            {isEdit ? 'Edit interview room' : 'Create interview room'}
-          </DialogTitle>
+          <DialogTitle>{isEdit ? 'Edit interview room' : 'Create interview room'}</DialogTitle>
           <DialogDescription>
             {isEdit
               ? 'Update room details. Changes are saved locally.'
@@ -140,9 +130,7 @@ export function CreateRoomDialog({
                 <Input
                   id="room-description"
                   value={form.description ?? ''}
-                  onChange={(e) =>
-                    setForm((p) => ({ ...p, description: e.target.value }))
-                  }
+                  onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
                   placeholder="Brief description or purpose"
                 />
               </Field>
@@ -151,9 +139,7 @@ export function CreateRoomDialog({
                   <FieldLabel>Status</FieldLabel>
                   <Select
                     value={form.status}
-                    onValueChange={(v) =>
-                      setForm((p) => ({ ...p, status: v as RoomStatus }))
-                    }
+                    onValueChange={(v) => setForm((p) => ({ ...p, status: v as RoomStatus }))}
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Status" />
@@ -171,9 +157,7 @@ export function CreateRoomDialog({
                   <FieldLabel>Field</FieldLabel>
                   <Select
                     value={form.field}
-                    onValueChange={(v) =>
-                      setForm((p) => ({ ...p, field: v as InterviewField }))
-                    }
+                    onValueChange={(v) => setForm((p) => ({ ...p, field: v as InterviewField }))}
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Field" />
@@ -193,9 +177,7 @@ export function CreateRoomDialog({
                 <Input
                   id="candidate-name"
                   value={form.candidateName ?? ''}
-                  onChange={(e) =>
-                    setForm((p) => ({ ...p, candidateName: e.target.value }))
-                  }
+                  onChange={(e) => setForm((p) => ({ ...p, candidateName: e.target.value }))}
                   placeholder="Candidate name"
                 />
               </Field>
@@ -204,9 +186,7 @@ export function CreateRoomDialog({
                 <Input
                   id="interviewer-name"
                   value={form.interviewerName ?? ''}
-                  onChange={(e) =>
-                    setForm((p) => ({ ...p, interviewerName: e.target.value }))
-                  }
+                  onChange={(e) => setForm((p) => ({ ...p, interviewerName: e.target.value }))}
                   placeholder="Interviewer name"
                 />
               </Field>
@@ -219,7 +199,7 @@ export function CreateRoomDialog({
                   onChange={(e) =>
                     setForm((p) => ({
                       ...p,
-                      scheduledAt: fromDatetimeLocal(e.target.value),
+                      scheduledAt: fromDatetimeLocal(e.target.value)
                     }))
                   }
                 />

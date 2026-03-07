@@ -31,12 +31,7 @@ export function RoomsList({ rooms, onEdit, onDelete }: RoomsListProps) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {rooms.map((room) => (
-        <RoomCard
-          key={room.id}
-          room={room}
-          onEdit={onEdit}
-          onDelete={onDelete}
-        />
+        <RoomCard key={room.id} room={room} onEdit={onEdit} onDelete={onDelete} />
       ))}
     </div>
   );

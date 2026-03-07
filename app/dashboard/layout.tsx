@@ -129,9 +129,7 @@ const sidebarData: SidebarData = {
     {
       title: 'Team',
       defaultOpen: true,
-      items: [
-        { label: 'Interviewers', icon: Users, href: '/dashboard/interviewers' }
-      ]
+      items: [{ label: 'Interviewers', icon: Users, href: '/dashboard/interviewers' }]
     }
   ],
   footerGroup: {
@@ -338,7 +336,25 @@ interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
+// function getPageTitle(pathname: string): string {
+//   return (
+//     (pathname?.split('/').pop()?.replace(/-/g, ' ').charAt(0).toUpperCase() ?? '') +
+//     (pathname?.split('/').pop()?.replace(/-/g, ' ').slice(1) ?? '')
+//   );
+// }
+
+function getPageTitle(pathname: string): string {
+  if (!pathname) return '';
+
+  const segment = pathname.split('/').pop() ?? '';
+  const formatted = segment.replace(/-/g, ' ');
+
+  return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+}
+
 export function DashboardLayout({ children, className }: DashboardLayoutProps) {
+  const pathname = usePathname();
+
   return (
     <SidebarProvider className={cn(className)}>
       <AppSidebar />
@@ -366,7 +382,7 @@ export function DashboardLayout({ children, className }: DashboardLayoutProps) {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>Dashboard</BreadcrumbPage>
+                <BreadcrumbPage>{getPageTitle(pathname ?? '')}</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>

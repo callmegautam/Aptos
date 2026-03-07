@@ -12,23 +12,20 @@ const RoomsPage = () => {
   const [createOpen, setCreateOpen] = useState(false);
   const [editingRoom, setEditingRoom] = useState<InterviewRoom | null>(null);
 
-  const handleCreateRoom = useCallback(
-    (data: Omit<InterviewRoom, 'id' | 'createdAt'>) => {
-      const room: InterviewRoom = {
-        id: crypto.randomUUID(),
-        name: data.name,
-        description: data.description,
-        status: data.status,
-        field: data.field,
-        candidateName: data.candidateName,
-        interviewerName: data.interviewerName,
-        scheduledAt: data.scheduledAt,
-        createdAt: new Date(),
-      };
-      setRooms((prev) => [room, ...prev]);
-    },
-    []
-  );
+  const handleCreateRoom = useCallback((data: Omit<InterviewRoom, 'id' | 'createdAt'>) => {
+    const room: InterviewRoom = {
+      id: crypto.randomUUID(),
+      name: data.name,
+      description: data.description,
+      status: data.status,
+      field: data.field,
+      candidateName: data.candidateName,
+      interviewerName: data.interviewerName,
+      scheduledAt: data.scheduledAt,
+      createdAt: new Date()
+    };
+    setRooms((prev) => [room, ...prev]);
+  }, []);
 
   const handleSubmit = useCallback(
     (data: Omit<InterviewRoom, 'id' | 'createdAt'> & { createdAt?: Date }, isEdit: boolean) => {
@@ -44,7 +41,7 @@ const RoomsPage = () => {
                   field: data.field,
                   candidateName: data.candidateName,
                   interviewerName: data.interviewerName,
-                  scheduledAt: data.scheduledAt,
+                  scheduledAt: data.scheduledAt
                 }
               : r
           )
@@ -62,13 +59,16 @@ const RoomsPage = () => {
     setCreateOpen(true);
   }, []);
 
-  const handleDelete = useCallback((room: InterviewRoom) => {
-    setRooms((prev) => prev.filter((r) => r.id !== room.id));
-    if (editingRoom?.id === room.id) {
-      setEditingRoom(null);
-      setCreateOpen(false);
-    }
-  }, [editingRoom]);
+  const handleDelete = useCallback(
+    (room: InterviewRoom) => {
+      setRooms((prev) => prev.filter((r) => r.id !== room.id));
+      if (editingRoom?.id === room.id) {
+        setEditingRoom(null);
+        setCreateOpen(false);
+      }
+    },
+    [editingRoom]
+  );
 
   return (
     <div>
@@ -87,11 +87,7 @@ const RoomsPage = () => {
           </Button>
         </div>
       </div>
-      <RoomsList
-        rooms={rooms}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+      <RoomsList rooms={rooms} onEdit={handleEdit} onDelete={handleDelete} />
       <CreateRoomDialog
         open={createOpen}
         onOpenChange={setCreateOpen}

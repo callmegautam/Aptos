@@ -8,7 +8,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import type { InterviewRoom, RoomStatus } from '@/features/dashboard/types/room';
 import {
@@ -24,35 +24,34 @@ import {
   SmartphoneIcon,
   LinkIcon,
   CalendarIcon,
-  ClockIcon,
+  ClockIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const STATUS_CONFIG: Record<RoomStatus, { label: string; className: string }> = {
   draft: {
     label: 'Draft',
-    className: 'bg-muted/80 text-muted-foreground border-transparent',
+    className: 'bg-muted/80 text-muted-foreground border-transparent'
   },
   scheduled: {
     label: 'Scheduled',
     className:
-      'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800',
+      'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800'
   },
   live: {
     label: 'Live',
     className:
-      'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800',
+      'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800'
   },
   completed: {
     label: 'Completed',
     className:
-      'bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700',
+      'bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
   },
   cancelled: {
     label: 'Cancelled',
-    className:
-      'bg-red-500/10 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800',
-  },
+    className: 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800'
+  }
 };
 
 const FIELD_CONFIG = {
@@ -60,32 +59,32 @@ const FIELD_CONFIG = {
     label: 'Backend',
     icon: ServerIcon,
     accent: 'from-amber-500/20 to-orange-500/10',
-    iconBg: 'bg-amber-500/15 text-amber-700 dark:text-amber-400',
+    iconBg: 'bg-amber-500/15 text-amber-700 dark:text-amber-400'
   },
   frontend: {
     label: 'Frontend',
     icon: LayoutDashboardIcon,
     accent: 'from-sky-500/20 to-blue-500/10',
-    iconBg: 'bg-sky-500/15 text-sky-700 dark:text-sky-400',
+    iconBg: 'bg-sky-500/15 text-sky-700 dark:text-sky-400'
   },
   fullstack: {
     label: 'Fullstack',
     icon: LayersIcon,
     accent: 'from-violet-500/20 to-purple-500/10',
-    iconBg: 'bg-violet-500/15 text-violet-700 dark:text-violet-400',
+    iconBg: 'bg-violet-500/15 text-violet-700 dark:text-violet-400'
   },
   app: {
     label: 'App',
     icon: SmartphoneIcon,
     accent: 'from-emerald-500/20 to-teal-500/10',
-    iconBg: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400',
-  },
+    iconBg: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400'
+  }
 } as const;
 
 function formatDate(date: Date) {
   return new Intl.DateTimeFormat(undefined, {
     dateStyle: 'medium',
-    timeStyle: 'short',
+    timeStyle: 'short'
   }).format(date);
 }
 
@@ -94,7 +93,7 @@ function formatDateShort(date: Date) {
     month: 'short',
     day: 'numeric',
     hour: 'numeric',
-    minute: '2-digit',
+    minute: '2-digit'
   }).format(date);
 }
 
@@ -184,10 +183,7 @@ export function RoomCard({ room, onEdit, onDelete }: RoomCardProps) {
                       <PencilIcon className="h-4 w-4" />
                       Edit
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                      variant="destructive"
-                      onClick={() => onDelete(room)}
-                    >
+                    <DropdownMenuItem variant="destructive" onClick={() => onDelete(room)}>
                       <Trash2Icon className="h-4 w-4" />
                       Delete
                     </DropdownMenuItem>
@@ -197,16 +193,11 @@ export function RoomCard({ room, onEdit, onDelete }: RoomCardProps) {
               <div className="mt-2 flex items-center gap-2 flex-wrap">
                 <Badge
                   variant="outline"
-                  className={cn(
-                    'text-xs font-medium shrink-0',
-                    statusConf.className
-                  )}
+                  className={cn('text-xs font-medium shrink-0', statusConf.className)}
                 >
                   {statusConf.label}
                 </Badge>
-                <span className="text-xs text-muted-foreground">
-                  {fieldConf.label}
-                </span>
+                <span className="text-xs text-muted-foreground">{fieldConf.label}</span>
               </div>
             </div>
           </div>
