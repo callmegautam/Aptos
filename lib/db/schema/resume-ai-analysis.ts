@@ -1,0 +1,23 @@
+import { bigserial, pgTable, text, bigint, integer } from 'drizzle-orm/pg-core';
+import { interviewRooms } from './interview-rooms';
+import { resumes } from './resumes';
+
+export const resumeAiAnalysis = pgTable('resume_ai_analysis', {
+  id: bigserial('id', { mode: 'number' }).primaryKey(),
+
+  roomId: bigint('room_id', { mode: 'number' })
+    .references(() => interviewRooms.id)
+    .notNull(),
+
+  resumeId: bigint('resume_id', { mode: 'number' })
+    .references(() => resumes.id)
+    .notNull(),
+
+  matchScore: integer('match_score').notNull(),
+
+  strengths: text('strengths').notNull(),
+
+  weaknesses: text('weaknesses').notNull(),
+
+  skillAlignment: text('skill_alignment').notNull()
+});
