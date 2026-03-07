@@ -1,92 +1,63 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+
 import {
   DropdownMenu,
+  DropdownMenuTrigger,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
+  DropdownMenuItem
 } from '@/components/ui/dropdown-menu';
-import type { InterviewRoom, RoomStatus } from '@/features/rooms/types/room';
-import {
-  CopyIcon,
-  MoreVerticalIcon,
-  PencilIcon,
-  Trash2Icon,
-  UserIcon,
-  UsersIcon,
-  ServerIcon,
-  LayoutDashboardIcon,
-  LayersIcon,
-  SmartphoneIcon,
-  LinkIcon,
-  CalendarIcon,
-  ClockIcon
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
 
-const STATUS_CONFIG: Record<RoomStatus, { label: string; className: string }> = {
-  draft: {
-    label: 'Draft',
-    className: 'bg-muted/80 text-muted-foreground border-transparent'
-  },
-  scheduled: {
-    label: 'Scheduled',
-    className:
-      'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800'
-  },
-  live: {
-    label: 'Live',
-    className:
-      'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800'
-  },
-  completed: {
-    label: 'Completed',
-    className:
-      'bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
-  },
-  cancelled: {
-    label: 'Cancelled',
-    className: 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800'
-  }
+import {
+  MoreVertical,
+  User,
+  Users,
+  Calendar,
+  Clock,
+  Copy,
+  Link,
+  Server,
+  LayoutDashboard,
+  Layers,
+  Smartphone
+} from 'lucide-react';
+
+import type { InterviewRoom, RoomStatus } from '@/features/rooms/types/room';
+
+const STATUS_CONFIG: Record<RoomStatus, { label: string; variant: any }> = {
+  draft: { label: 'Draft', variant: 'secondary' },
+  scheduled: { label: 'Scheduled', variant: 'default' },
+  live: { label: 'Live', variant: 'default' },
+  completed: { label: 'Completed', variant: 'outline' },
+  cancelled: { label: 'Cancelled', variant: 'destructive' }
 };
 
 const FIELD_CONFIG = {
   backend: {
     label: 'Backend',
-    icon: ServerIcon,
-    accent: 'from-amber-500/20 to-orange-500/10',
-    iconBg: 'bg-amber-500/15 text-amber-700 dark:text-amber-400'
+    icon: Server,
+    color: 'bg-amber-500/10 text-amber-600'
   },
   frontend: {
     label: 'Frontend',
-    icon: LayoutDashboardIcon,
-    accent: 'from-sky-500/20 to-blue-500/10',
-    iconBg: 'bg-sky-500/15 text-sky-700 dark:text-sky-400'
+    icon: LayoutDashboard,
+    color: 'bg-sky-500/10 text-sky-600'
   },
   fullstack: {
     label: 'Fullstack',
-    icon: LayersIcon,
-    accent: 'from-violet-500/20 to-purple-500/10',
-    iconBg: 'bg-violet-500/15 text-violet-700 dark:text-violet-400'
+    icon: Layers,
+    color: 'bg-violet-500/10 text-violet-600'
   },
   app: {
     label: 'App',
-    icon: SmartphoneIcon,
-    accent: 'from-emerald-500/20 to-teal-500/10',
-    iconBg: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400'
+    icon: Smartphone,
+    color: 'bg-emerald-500/10 text-emerald-600'
   }
 } as const;
-
-function formatDate(date: Date) {
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: 'medium',
-    timeStyle: 'short'
-  }).format(date);
-}
 
 function formatDateShort(date: Date) {
   return new Intl.DateTimeFormat(undefined, {
@@ -101,12 +72,7 @@ function getInviteLink(roomId: string): string {
   if (typeof window !== 'undefined') {
     return `${window.location.origin}/join/${roomId}`;
   }
-  return `${
-    (typeof process !== 'undefined' &&
-      (process as unknown as { env?: { NEXT_PUBLIC_APP_URL?: string } }).env
-        ?.NEXT_PUBLIC_APP_URL) ??
-    ''
-  }/join/${roomId}`;
+  return '';
 }
 
 type RoomCardProps = {
@@ -117,6 +83,7 @@ type RoomCardProps = {
 
 export function RoomCard({ room, onEdit, onDelete }: RoomCardProps) {
   const [copied, setCopied] = useState(false);
+
   const statusConf = STATUS_CONFIG[room.status];
   const fieldConf = FIELD_CONFIG[room.field];
   const FieldIcon = fieldConf.icon;
@@ -124,163 +91,107 @@ export function RoomCard({ room, onEdit, onDelete }: RoomCardProps) {
   const inviteLink = getInviteLink(room.id);
 
   const copyInviteLink = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(inviteLink);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // ignore
-    }
+    await navigator.clipboard.writeText(inviteLink);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   }, [inviteLink]);
 
   return (
-    <Card
-      className={cn(
-        'group relative overflow-hidden rounded-xl border transition-all duration-200',
-        'hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5',
-        'hover:border-primary/25 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/30'
-      )}
-    >
-      {/* Top accent bar by field */}
-      <div
-        className={cn(
-          'absolute top-0 left-0 right-0 h-1 bg-gradient-to-r opacity-80',
-          fieldConf.accent
-        )}
-      />
-
-      <CardContent className="p-0">
-        {/* Main content area */}
-        <div className="p-5">
-          {/* Header row: field logo, title, status, menu */}
-          <div className="flex items-start gap-4">
-            <div
-              className={cn(
-                'flex h-12 w-12 shrink-0 items-center justify-center rounded-xl shadow-sm transition-all duration-200 group-hover:shadow group-hover:scale-[1.02]',
-                fieldConf.iconBg
-              )}
-            >
-              <FieldIcon className="h-6 w-6" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center justify-between gap-2">
-                <h3 className="text-base font-semibold tracking-tight text-foreground truncate">
-                  {room.name}
-                </h3>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 shrink-0 rounded-full opacity-60 transition-opacity hover:opacity-100 hover:bg-muted"
-                      aria-label="Room actions"
-                    >
-                      <MoreVerticalIcon className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-44">
-                    <DropdownMenuItem onClick={() => onEdit(room)}>
-                      <PencilIcon className="h-4 w-4" />
-                      Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuItem variant="destructive" onClick={() => onDelete(room)}>
-                      <Trash2Icon className="h-4 w-4" />
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-              <div className="mt-2 flex items-center gap-2 flex-wrap">
-                <Badge
-                  variant="outline"
-                  className={cn('text-xs font-medium shrink-0', statusConf.className)}
-                >
-                  {statusConf.label}
-                </Badge>
-                <span className="text-xs text-muted-foreground">{fieldConf.label}</span>
-              </div>
-            </div>
+    <Card className="transition hover:shadow-md">
+      {/* HEADER */}
+      <CardHeader className="flex flex-row items-start justify-between space-y-0">
+        <div className="flex items-start gap-3">
+          {/* Field Icon */}
+          <div
+            className={`flex h-10 w-10 items-center justify-center rounded-lg ${fieldConf.color}`}
+          >
+            <FieldIcon className="h-5 w-5 text-muted-foreground" />
           </div>
 
-          {/* Description */}
-          {room.description && (
-            <p className="mt-4 text-sm text-muted-foreground line-clamp-2 leading-relaxed">
-              {room.description}
-            </p>
+          <div>
+            <CardTitle className="text-base font-semibold">{room.name}</CardTitle>
+
+            <div className="flex gap-2 mt-2">
+              <Badge variant={statusConf.variant}>{statusConf.label}</Badge>
+
+              <Badge variant="outline">{fieldConf.label}</Badge>
+            </div>
+          </div>
+        </div>
+
+        {/* ACTION MENU */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => onEdit(room)}>Edit</DropdownMenuItem>
+
+            <DropdownMenuItem className="text-red-500" onClick={() => onDelete(room)}>
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </CardHeader>
+
+      {/* CONTENT */}
+      <CardContent className="space-y-4">
+        {room.description && <p className="text-sm text-muted-foreground">{room.description}</p>}
+
+        {/* Candidate */}
+        <div className="flex items-center gap-2 text-sm">
+          <User className="h-4 w-4 text-muted-foreground" />
+          <span className="text-muted-foreground">Candidate:</span>
+          <span className="font-medium">{room.candidateName || 'Not assigned'}</span>
+        </div>
+
+        {/* Interviewer */}
+        <div className="flex items-center gap-2 text-sm">
+          <Users className="h-4 w-4 text-muted-foreground" />
+          <span className="text-muted-foreground">Interviewer:</span>
+          <span className="font-medium">{room.interviewerName || 'Not assigned'}</span>
+        </div>
+
+        {/* Dates */}
+        <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+          {room.scheduledAt && (
+            <span className="flex items-center gap-1">
+              <Calendar className="h-3 w-3" />
+              {formatDateShort(room.scheduledAt)}
+            </span>
           )}
 
-          {/* People: candidate & interviewer */}
-          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:gap-6">
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted">
-                <UserIcon className="h-4 w-4 text-muted-foreground" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Candidate
-                </p>
-                <p className="text-sm font-medium truncate">
-                  {room.candidateName || 'Not assigned'}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted">
-                <UsersIcon className="h-4 w-4 text-muted-foreground" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Interviewer
-                </p>
-                <p className="text-sm font-medium truncate">
-                  {room.interviewerName || 'Not assigned'}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Dates */}
-          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-            {room.scheduledAt && (
-              <span className="flex items-center gap-1.5">
-                <CalendarIcon className="h-3.5 w-3.5" />
-                {formatDateShort(room.scheduledAt)}
-              </span>
-            )}
-            <span className="flex items-center gap-1.5">
-              <ClockIcon className="h-3.5 w-3.5" />
-              Created {formatDateShort(room.createdAt)}
-            </span>
-          </div>
-        </div>
-
-        {/* Copy invite link - full width bar */}
-        <div className="border-t border-border bg-muted/30 px-5 py-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            className={cn(
-              'w-full gap-2 font-medium transition-all',
-              copied
-                ? 'text-emerald-600 dark:text-emerald-400'
-                : 'text-muted-foreground hover:text-foreground hover:bg-background/80'
-            )}
-            onClick={copyInviteLink}
-          >
-            {copied ? (
-              <>
-                <CopyIcon className="h-4 w-4" />
-                Link copied!
-              </>
-            ) : (
-              <>
-                <LinkIcon className="h-4 w-4" />
-                Copy invite link
-              </>
-            )}
-          </Button>
+          <span className="flex items-center gap-1">
+            <Clock className="h-3 w-3" />
+            Created {formatDateShort(room.createdAt)}
+          </span>
         </div>
       </CardContent>
+
+      {/* FOOTER */}
+      <CardFooter className="border-t">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full justify-start gap-2"
+          onClick={copyInviteLink}
+        >
+          {copied ? (
+            <>
+              <Copy className="h-4 w-4" />
+              Link copied
+            </>
+          ) : (
+            <>
+              <Link className="h-4 w-4" />
+              Copy invite link
+            </>
+          )}
+        </Button>
+      </CardFooter>
     </Card>
   );
 }
