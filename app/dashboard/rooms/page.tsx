@@ -2,9 +2,9 @@
 
 import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { CreateRoomDialog } from '@/features/dashboard/components/create-room-dialog';
-import { RoomsList } from '@/features/dashboard/components/rooms-list';
-import type { InterviewRoom } from '@/features/dashboard/types/room';
+import { CreateRoomDialog } from '@/features/rooms/components/create-room-dialog';
+import { RoomsList } from '@/features/rooms/components/rooms-list';
+import type { InterviewRoom } from '@/features/rooms/types/room';
 import { PlusIcon } from 'lucide-react';
 
 const RoomsPage = () => {

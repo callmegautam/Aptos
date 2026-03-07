@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import type { InterviewRoom, RoomStatus } from '@/features/dashboard/types/room';
+import type { InterviewRoom, RoomStatus } from '@/features/rooms/types/room';
 import {
   CopyIcon,
   MoreVerticalIcon,

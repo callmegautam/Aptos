@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 // import InterviewTable from '@/features/dashboard/components/interview-table';
 import { PlusIcon } from 'lucide-react';
+import InterviewersTable from '@/features/interviewers/components/table';
 
 const InterviewersPage = () => {
   return (
@@ -14,7 +15,7 @@ const InterviewersPage = () => {
           </Button>
         </div>
       </div>
-      {/* <InterviewTable /> */}
+      <InterviewersTable />
     </div>
   );
 };

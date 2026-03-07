@@ -1,8 +1,8 @@
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { RoomCard } from '@/features/dashboard/components/room-card';
-import type { InterviewRoom } from '@/features/dashboard/types/room';
+import { RoomCard } from '@/features/rooms/components/room-card';
+import type { InterviewRoom } from '@/features/rooms/types/room';
 import { Video } from 'lucide-react';
 
 type RoomsListProps = {

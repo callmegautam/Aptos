@@ -19,8 +19,8 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-import type { InterviewRoom, InterviewField, RoomStatus } from '@/features/dashboard/types/room';
-import { INTERVIEW_FIELD, ROOM_STATUS } from '@/features/dashboard/types/room';
+import type { InterviewRoom, InterviewField, RoomStatus } from '@/features/rooms/types/room';
+import { INTERVIEW_FIELD, ROOM_STATUS } from '@/features/rooms/types/room';
 
 type RoomFormData = Omit<InterviewRoom, 'id' | 'createdAt'> & {
   createdAt?: Date;
