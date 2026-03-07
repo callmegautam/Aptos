@@ -1,5 +1,5 @@
 'use client';
-import { GalleryVerticalEnd } from 'lucide-react';
+import { GalleryVerticalEnd, GalleryVerticalEndIcon } from 'lucide-react';
 
 import RegisterForm from '@/features/auth/components/register-form';
 import { usePathname } from 'next/navigation';
@@ -21,7 +21,7 @@ export default function RegistrationPage({ children }: { children: React.ReactNo
         <div className="flex justify-center gap-2 md:justify-start">
           <a href="#" className="flex items-center gap-2 font-medium">
             <div className="flex size-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <GalleryVerticalEnd className="size-4" />
+              <GalleryVerticalEndIcon className="size-4" />
             </div>
             Aptos Inc.
           </a>
