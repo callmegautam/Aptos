@@ -6,7 +6,10 @@ import {
   StreamCall,
   SpeakerLayout,
   CallControls,
-  StreamTheme
+  StreamTheme,
+  ParticipantView,
+  DefaultParticipantViewUI,
+  useCallStateHooks
 } from '@stream-io/video-react-sdk';
 
 import { createVideoClient } from '@/lib/stream/video-client';
@@ -25,11 +28,13 @@ export default function InterviewRoom({ params }: { params: Promise<{ roomId: st
 
   const [chatClient, setChatClient] = useState<any>(null);
   const [channel, setChannel] = useState<any>(null);
-
+  const { useLocalParticipant } = useCallStateHooks();
+  const localParticipant = useLocalParticipant();
   useEffect(() => {
     async function init() {
       // const userId = 'candidate-' + Math.floor(Math.random() * 1000);
       const userId = 'candidate-123';
+
       // const userId = 'interviewer-1';
 
       const videoClient = await createVideoClient(userId);
@@ -61,11 +66,14 @@ export default function InterviewRoom({ params }: { params: Promise<{ roomId: st
         <ResizablePanel className="w-1/2">
           <ResizablePanelGroup orientation="vertical" className="w-full h-full">
             <ResizablePanel className="w-full h-full">
-              <StreamTheme className="str-video__theme-dark w-full flex flex-col">
+              <StreamTheme className="str-video__theme-dark w-full flex flex-col relative">
                 <StreamVideo client={videoClient}>
                   <StreamCall call={call}>
-                    <SpeakerLayout />
-                    <CallControls />
+                    <SpeakerLayout participantsBarPosition="bottom" excludeLocalParticipant />
+                    <FloatingSelfView />
+                    <div className="absolute bottom-[-5] left-1/2 -translate-x-1/2 z-10">
+                      <CallControls />
+                    </div>
                   </StreamCall>
                 </StreamVideo>
               </StreamTheme>
@@ -92,6 +100,18 @@ function CodingEditor() {
   return (
     <div className="w-full h-full">
       <h1>Coding Editor</h1>
+    </div>
+  );
+}
+function FloatingSelfView() {
+  const { useLocalParticipant } = useCallStateHooks();
+  const localParticipant = useLocalParticipant();
+
+  if (!localParticipant) return null;
+
+  return (
+    <div className="absolute bottom-24 right-4 w-40 h-28 rounded-xl overflow-hidden border shadow-xl">
+      <ParticipantView participant={localParticipant} />
     </div>
   );
 }
