@@ -1,7 +1,13 @@
 'use client';
 
 import { useEffect, useState, use } from 'react';
-import { StreamVideo, StreamCall, SpeakerLayout, CallControls } from '@stream-io/video-react-sdk';
+import {
+  StreamVideo,
+  StreamCall,
+  SpeakerLayout,
+  CallControls,
+  StreamTheme
+} from '@stream-io/video-react-sdk';
 
 import { createVideoClient } from '@/lib/stream/video-client';
 import { joinInterviewCall } from '@/lib/stream/create-call';
@@ -29,13 +35,20 @@ export default function InterviewRoom({ params }: { params: Promise<{ roomId: st
   if (!client || !call) return <div>Connecting...</div>;
 
   return (
-    <div className="str-video__theme-dark">
+    <StreamTheme className="str-video__theme-dark h-screen w-full">
       <StreamVideo client={client}>
         <StreamCall call={call}>
-          <SpeakerLayout />
-          <CallControls />
+          <div className="flex h-full flex-col">
+            <div className="flex-1">
+              <SpeakerLayout />
+            </div>
+
+            <div className="p-4  backdrop-blur">
+              <CallControls />
+            </div>
+          </div>
         </StreamCall>
       </StreamVideo>
-    </div>
+    </StreamTheme>
   );
 }

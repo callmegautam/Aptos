@@ -4,6 +4,10 @@
 @import '@stream-io/video-react-sdk/dist/css/styles.css';
 @import 'stream-chat-react/dist/css/v2/index.css';
 
+/* .str-video__call-controls {
+  background: transparent;
+} */
+
 @custom-variant dark (&:is(.dark *));
 
 :root {
