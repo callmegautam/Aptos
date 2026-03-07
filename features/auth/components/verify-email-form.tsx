@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { FieldGroup, FieldDescription } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { MailIcon } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 
 type VerifyEmailFormProps = {
   className?: string;
@@ -15,6 +17,9 @@ export function VerifyEmailForm({
   className,
   email = 'olivia@untitledui.com'
 }: VerifyEmailFormProps) {
+  const searchParams = useSearchParams();
+
+  const redirectBack = searchParams.get('redirect');
   return (
     <form className={cn('flex flex-col gap-6 w-full max-w-md', className)}>
       <FieldGroup>
@@ -59,9 +64,9 @@ export function VerifyEmailForm({
 
         {/* Back */}
         <FieldDescription className="text-center">
-          <a href="/auth/login" className="underline underline-offset-4">
+          <Link href={redirectBack || '/login'} className="underline underline-offset-4">
             ← Back to log in
-          </a>
+          </Link>
         </FieldDescription>
       </FieldGroup>
     </form>

@@ -5,12 +5,17 @@ import { Button } from '@/components/ui/button';
 import { Field, FieldGroup, FieldLabel, FieldDescription } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { CheckIcon, LockIcon } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 
 type ResetPasswordFormProps = {
   className?: string;
 };
 
 export function ResetPasswordForm({ className }: ResetPasswordFormProps) {
+  const searchParams = useSearchParams();
+
+  const redirectBack = searchParams.get('redirect');
   return (
     <form className={cn('flex flex-col gap-6', className)}>
       <FieldGroup>
@@ -66,9 +71,9 @@ export function ResetPasswordForm({ className }: ResetPasswordFormProps) {
 
         {/* Back to login */}
         <FieldDescription className="text-center">
-          <a href="/auth/login" className="underline underline-offset-4">
+          <Link href={redirectBack || '/login'} className="underline underline-offset-4">
             ← Back to log in
-          </a>
+          </Link>
         </FieldDescription>
       </FieldGroup>
     </form>

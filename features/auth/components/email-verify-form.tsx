@@ -4,12 +4,17 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { FieldGroup, FieldDescription } from '@/components/ui/field';
 import { CheckCircleIcon } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 
 type EmailVerifiedFormProps = {
   className?: string;
 };
 
 export function EmailVerifiedForm({ className }: EmailVerifiedFormProps) {
+  const searchParams = useSearchParams();
+
+  const redirectBack = searchParams.get('redirect');
   return (
     <div className={cn('flex flex-col gap-6 w-full max-w-md', className)}>
       <FieldGroup>
@@ -44,9 +49,9 @@ export function EmailVerifiedForm({ className }: EmailVerifiedFormProps) {
 
         {/* Back to login */}
         <FieldDescription className="text-center">
-          <a href="/auth/login" className="underline underline-offset-4">
+          <Link href={redirectBack || '/login'} className="underline underline-offset-4">
             ← Back to log in
-          </a>
+          </Link>
         </FieldDescription>
       </FieldGroup>
     </div>
