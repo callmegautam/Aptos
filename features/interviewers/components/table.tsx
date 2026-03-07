@@ -40,33 +40,30 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 
-type Status = 'completed' | 'pending' | 'processing' | 'cancelled';
+type Status = 'active' | 'inactive';
+
+const tempImage = 'https://galaxypfp.com/wp-content/uploads/2025/10/aesthetic-cute-cat-pfp.webp';
 
 interface Item {
   id: string;
+  avatar: string;
   name: string;
-  date: string;
+  email: string;
+  phone: string;
+  total_interviews: number;
   status: Status;
-  amount: string;
 }
 
 const statusConfig: Record<Status, { label: string; className: string }> = {
-  completed: {
-    label: 'Completed',
+  active: {
+    label: 'Active',
     className: 'bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
   },
-  pending: {
-    label: 'Pending',
+  inactive: {
+    label: 'Inactive',
     className: 'bg-amber-500/15 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400'
-  },
-  processing: {
-    label: 'Processing',
-    className: 'bg-blue-500/15 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400'
-  },
-  cancelled: {
-    label: 'Cancelled',
-    className: 'bg-rose-500/15 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400'
   }
 };
 
@@ -102,24 +99,52 @@ const columns: ColumnDef<Item>[] = [
     enableHiding: false
   },
   {
+    accessorKey: 'avatar',
+    header: 'Avatar',
+    cell: ({ row }) => {
+      const avatar = row.getValue('avatar') as string;
+
+      return (
+        <div className="flex items-center">
+          <Image
+            src={avatar}
+            alt="avatar"
+            width={30}
+            height={30}
+            className="rounded-full object-cover"
+          />
+        </div>
+      );
+    }
+  },
+  {
     accessorKey: 'name',
     header: 'Name',
     cell: ({ row }) => <span className="font-medium">{row.getValue('name')}</span>
   },
   {
-    accessorKey: 'date',
-    header: 'Date'
+    accessorKey: 'email',
+    header: 'Email'
+  },
+  {
+    accessorKey: 'phone',
+    header: 'Phone No'
+  },
+  {
+    accessorKey: 'total_interviews',
+    header: 'Total Interviews',
+    cell: ({ row }) => <div className="font-medium">{row.getValue('total_interviews')}</div>
   },
   {
     accessorKey: 'status',
     header: 'Status',
     cell: ({ row }) => <StatusBadge status={row.getValue('status')} />
   },
-  {
-    accessorKey: 'amount',
-    header: () => <div className="text-right">Amount</div>,
-    cell: ({ row }) => <div className="text-right font-medium">{row.getValue('amount')}</div>
-  },
+  // {
+  //   accessorKey: 'amount',
+  //   header: () => <div className="text-right">Amount</div>,
+  //   cell: ({ row }) => <div className="text-right font-medium">{row.getValue('amount')}</div>
+  // },
   {
     id: 'actions',
     cell: () => (
@@ -155,59 +180,30 @@ const columns: ColumnDef<Item>[] = [
 const data: Item[] = [
   {
     id: '1',
+    avatar: tempImage,
     name: 'Project Alpha',
-    date: 'Jan 15, 2024',
-    status: 'completed',
-    amount: '$2,500'
+    email: 'abc@gmail.com',
+    phone: '9929929929',
+    total_interviews: 23,
+    status: 'active'
   },
   {
     id: '2',
+    avatar: tempImage,
     name: 'Website Redesign',
-    date: 'Feb 3, 2024',
-    status: 'processing',
-    amount: '$4,200'
+    email: 'abc@gmail.com',
+    phone: '9929929929',
+    total_interviews: 23,
+    status: 'inactive'
   },
   {
     id: '3',
+    avatar: tempImage,
     name: 'Mobile App MVP',
-    date: 'Feb 18, 2024',
-    status: 'pending',
-    amount: '$8,750'
-  },
-  {
-    id: '4',
-    name: 'Brand Identity',
-    date: 'Mar 5, 2024',
-    status: 'completed',
-    amount: '$1,800'
-  },
-  {
-    id: '5',
-    name: 'Marketing Campaign',
-    date: 'Mar 22, 2024',
-    status: 'cancelled',
-    amount: '$3,400'
-  },
-  {
-    id: '6',
-    name: 'Analytics Dashboard',
-    date: 'Apr 8, 2024',
-    status: 'processing',
-    amount: '$5,600'
-  },
-  {
-    id: '7',
-    name: 'E-commerce Platform',
-    date: 'Apr 25, 2024',
-    status: 'pending',
-    amount: '$12,000'
-  },
-  {
-    id: '8',
-    name: 'API Integration',
-    date: 'May 10, 2024',
-    status: 'completed',
-    amount: '$3,200'
+    email: 'abc@gmail.com',
+    phone: '9929929929',
+    total_interviews: 23,
+    status: 'active'
   }
 ];
 
@@ -241,7 +237,7 @@ export default function InterviewersTable() {
   const currentPage = table.getState().pagination.pageIndex + 1;
 
   return (
-    <div className="max-w-3xl w-full space-y-4">
+    <div className="w-full space-y-4  px-10">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">Show</span>
