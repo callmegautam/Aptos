@@ -16,6 +16,7 @@ import * as React from 'react';
 
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Breadcrumb,
@@ -120,36 +121,16 @@ const sidebarData: SidebarData = {
       title: 'Overview',
       defaultOpen: true,
       items: [
-        {
-          label: 'Dashboard',
-          icon: LayoutDashboard,
-          href: '/dashboard',
-          isActive: true
-        },
-        {
-          label: 'Rooms',
-          icon: Video,
-          href: '/dashboard/rooms',
-          isActive: false
-        },
-        {
-          label: 'Reports',
-          icon: FileCheck,
-          href: '/dashboard/reports',
-          isActive: false
-        }
+        { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
+        { label: 'Rooms', icon: Video, href: '/dashboard/rooms' },
+        { label: 'Reports', icon: FileCheck, href: '/dashboard/reports' }
       ]
     },
     {
       title: 'Team',
       defaultOpen: true,
       items: [
-        {
-          label: 'Interviewers',
-          icon: Users,
-          href: '/dashboard/interviewers',
-          isActive: false
-        }
+        { label: 'Interviewers', icon: Users, href: '/dashboard/interviewers' }
       ]
     }
   ],
@@ -310,7 +291,15 @@ const NavUser = ({ user }: { user: UserData }) => {
   );
 };
 
+function isActivePath(pathname: string, href: string): boolean {
+  if (pathname === href) return true;
+  if (href !== '/dashboard' && pathname.startsWith(href + '/')) return true;
+  return false;
+}
+
 const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
+  const pathname = usePathname();
+
   return (
     <Sidebar {...props}>
       <SidebarHeader>
@@ -324,7 +313,13 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
               <SidebarGroupContent>
                 <SidebarMenu>
                   {group.items.map((item) => (
-                    <NavMenuItem key={item.label} item={item} />
+                    <NavMenuItem
+                      key={item.label}
+                      item={{
+                        ...item,
+                        isActive: isActivePath(pathname ?? '', item.href)
+                      }}
+                    />
                   ))}
                 </SidebarMenu>
               </SidebarGroupContent>
