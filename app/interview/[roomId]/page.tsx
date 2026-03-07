@@ -20,6 +20,28 @@ import { createInterviewChannel } from '@/lib/stream/create-channel';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 
+function VideoLayout() {
+  const { useParticipants } = useCallStateHooks();
+  const participants = useParticipants();
+
+  const excludeLocalParticipant = participants.length > 1;
+
+  return (
+    <>
+      <SpeakerLayout
+        participantsBarPosition="bottom"
+        excludeLocalParticipant={excludeLocalParticipant}
+      />
+
+      {excludeLocalParticipant && <FloatingSelfView />}
+
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 z-10">
+        <CallControls />
+      </div>
+    </>
+  );
+}
+
 export default function InterviewRoom({ params }: { params: Promise<{ roomId: string }> }) {
   const { roomId } = use(params);
 
@@ -27,9 +49,12 @@ export default function InterviewRoom({ params }: { params: Promise<{ roomId: st
   const [call, setCall] = useState<any>(null);
 
   const [chatClient, setChatClient] = useState<any>(null);
+  const [participants, setParticipants] = useState<any>([]);
   const [channel, setChannel] = useState<any>(null);
+  const [excludeLocalParticipant, setExcludeLocalParticipant] = useState<boolean>(false);
   const { useLocalParticipant } = useCallStateHooks();
   const localParticipant = useLocalParticipant();
+
   useEffect(() => {
     async function init() {
       // const userId = 'candidate-' + Math.floor(Math.random() * 1000);
@@ -69,11 +94,15 @@ export default function InterviewRoom({ params }: { params: Promise<{ roomId: st
               <StreamTheme className="str-video__theme-dark w-full flex flex-col relative">
                 <StreamVideo client={videoClient}>
                   <StreamCall call={call}>
-                    <SpeakerLayout participantsBarPosition="bottom" excludeLocalParticipant />
+                    {/* <SpeakerLayout
+                      participantsBarPosition="bottom"
+                      excludeLocalParticipant={excludeLocalParticipant}
+                    />
                     <FloatingSelfView />
                     <div className="absolute bottom-[-5] left-1/2 -translate-x-1/2 z-10">
                       <CallControls />
-                    </div>
+                    </div> */}
+                    <VideoLayout />
                   </StreamCall>
                 </StreamVideo>
               </StreamTheme>
@@ -110,7 +139,7 @@ function FloatingSelfView() {
   if (!localParticipant) return null;
 
   return (
-    <div className="absolute bottom-24 right-4 w-40 h-28 rounded-xl overflow-hidden border shadow-xl">
+    <div className="absolute bottom-2 right-2 w-40 h-28 rounded-xl overflow-hidden border shadow-xl">
       <ParticipantView participant={localParticipant} />
     </div>
   );
