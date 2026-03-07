@@ -6,6 +6,7 @@ import { CreateRoomDialog } from '@/features/rooms/components/create-room-dialog
 import { RoomsList } from '@/features/rooms/components/rooms-list';
 import type { InterviewRoom } from '@/features/rooms/types/room';
 import { PlusIcon } from 'lucide-react';
+import Router from 'next/router';
 
 const RoomsPage = () => {
   const [rooms, setRooms] = useState<InterviewRoom[]>([]);
@@ -84,6 +85,10 @@ const RoomsPage = () => {
           >
             <PlusIcon className="w-4 h-4" />
             Create interview room
+          </Button>
+          <Button variant="outline" onClick={() => Router.push('/rooms/tables')}>
+            <PlusIcon className="w-4 h-4" />
+            View detail in table
           </Button>
         </div>
       </div>
