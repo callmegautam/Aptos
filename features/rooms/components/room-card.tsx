@@ -113,7 +113,6 @@ export function RoomCard({ room, onEdit, onDelete }: RoomCardProps) {
 
             <div className="flex gap-2 mt-2">
               <Badge variant={statusConf.variant}>{statusConf.label}</Badge>
-
               <Badge variant="outline">{fieldConf.label}</Badge>
             </div>
           </div>
@@ -139,8 +138,6 @@ export function RoomCard({ room, onEdit, onDelete }: RoomCardProps) {
 
       {/* CONTENT */}
       <CardContent className="space-y-4">
-        {room.description && <p className="text-sm text-muted-foreground">{room.description}</p>}
-
         {/* Candidate */}
         <div className="flex items-center gap-2 text-sm">
           <User className="h-4 w-4 text-muted-foreground" />
