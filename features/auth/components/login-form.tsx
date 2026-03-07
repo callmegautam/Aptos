@@ -8,13 +8,35 @@ import {
   FieldSeparator
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import Link from 'next/link';
 
 type LoginFormProps = {
   className?: string;
   header?: string;
+  registerRedirection?: string;
+  user?: string;
 };
 
-export function LoginForm({ className, header = 'Login to your account' }: LoginFormProps) {
+export function LoginForm({
+  className,
+  user = 'company',
+  header = 'Login to your account',
+  registerRedirection = '/register'
+}: LoginFormProps) {
+  let forgetPasswordRedirection = '/login';
+
+  if (user === 'company') {
+    forgetPasswordRedirection = '/login';
+  } else if (user === 'candidate') {
+    forgetPasswordRedirection = '/login/candidate';
+  } else if (user === 'interviewer') {
+    forgetPasswordRedirection = '/login/interviewer';
+  } else if (user === 'admin') {
+    forgetPasswordRedirection = '/login/admin';
+  } else {
+    forgetPasswordRedirection = '/login';
+  }
+
   return (
     <form className={cn('flex flex-col gap-6 ', className)}>
       <FieldGroup>
@@ -31,9 +53,12 @@ export function LoginForm({ className, header = 'Login to your account' }: Login
         <Field>
           <div className="flex items-center">
             <FieldLabel htmlFor="password">Password</FieldLabel>
-            <a href="#" className="ml-auto text-sm underline-offset-4 hover:underline">
+            <Link
+              href={`/forget-password?redirect=${forgetPasswordRedirection}`}
+              className="ml-auto text-sm underline-offset-4 hover:underline"
+            >
               Forgot your password?
-            </a>
+            </Link>
           </div>
           <Input id="password" type="password" required />
         </Field>
@@ -59,9 +84,9 @@ export function LoginForm({ className, header = 'Login to your account' }: Login
           </Button>
           <FieldDescription className="text-center">
             Don&apos;t have an account?{' '}
-            <a href="#" className="underline underline-offset-4">
+            <Link href={registerRedirection} className="underline underline-offset-4">
               Sign up
-            </a>
+            </Link>
           </FieldDescription>
         </Field>
       </FieldGroup>

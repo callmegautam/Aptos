@@ -3,22 +3,24 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Field, FieldDescription, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 type ForgotPasswordFormProps = {
   className?: string;
-  header?: string;
 };
 
-export function ForgotPasswordForm({
-  className,
-  header = 'Forgot password?'
-}: ForgotPasswordFormProps) {
+export function ForgotPasswordForm({ className }: ForgotPasswordFormProps) {
+  const searchParams = useSearchParams();
+
+  const redirectBack = searchParams.get('redirect');
+
   return (
     <form className={cn('flex flex-col gap-6 w-full max-w-md', className)}>
       <FieldGroup>
         {/* Header */}
         <div className="flex flex-col items-center gap-1 text-center">
-          <h1 className="text-2xl font-bold">{header}</h1>
+          <h1 className="text-2xl font-bold">Forgot password?</h1>
 
           <p className="text-sm text-muted-foreground">
             No worries, we'll send you reset instructions.
@@ -42,9 +44,9 @@ export function ForgotPasswordForm({
         {/* Back to login */}
         <FieldDescription className="text-center">
           Remember your password?{' '}
-          <a href="/auth/login" className="underline underline-offset-4">
+          <Link href={redirectBack || '/login'} className="underline underline-offset-4">
             Back to log in
-          </a>
+          </Link>
         </FieldDescription>
       </FieldGroup>
     </form>

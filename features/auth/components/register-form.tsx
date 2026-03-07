@@ -8,16 +8,19 @@ import {
   FieldSeparator
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import Link from 'next/link';
 type RegisterFormProps = {
   className?: string;
   header?: string;
   name?: string;
+  LoginRedirection?: string;
 };
 
 export default function RegisterForm({
   className,
   header = 'Create your account',
-  name = 'Company name'
+  name = 'Company name',
+  LoginRedirection = '/login'
 }: RegisterFormProps) {
   return (
     <form className={cn('flex flex-col gap-6', className)}>
@@ -60,7 +63,7 @@ export default function RegisterForm({
             Sign up with Google
           </Button>
           <FieldDescription className="px-6 text-center">
-            Already have an account? <a href="#">Sign in</a>
+            Already have an account? <Link href={LoginRedirection}>Sign in</Link>
           </FieldDescription>
         </Field>
       </FieldGroup>
