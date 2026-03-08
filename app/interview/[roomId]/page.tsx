@@ -12,6 +12,7 @@ import {
   useCallStateHooks
 } from '@stream-io/video-react-sdk';
 
+import Editor from '@monaco-editor/react';
 import { createVideoClient } from '@/lib/stream/video-client';
 import { joinInterviewCall } from '@/lib/stream/create-call';
 import InterviewChat from '@/components/interview-chat';
@@ -126,9 +127,12 @@ export default function InterviewRoom({ params }: { params: Promise<{ roomId: st
 
 function CodingEditor() {
   return (
-    <div className="w-full h-full">
-      <h1>Coding Editor</h1>
-    </div>
+    <Editor
+      height="100%"
+      defaultLanguage="javascript"
+      defaultValue="console.log('Hello, world!');"
+      theme="vs-dark"
+    />
   );
 }
 function FloatingSelfView() {

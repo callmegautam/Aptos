@@ -13,16 +13,17 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@monaco-editor/react": "^4.7.0",
     "@neondatabase/serverless": "^1.0.2",
     "@stream-io/node-sdk": "^0.7.44",
     "@stream-io/video-react-sdk": "^1.33.3",
     "@tanstack/react-table": "^8.21.3",
-    "framer-motion": "^11.15.0",
     "@types/bcrypt": "^6.0.0",
     "bcrypt": "^6.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.1",
+    "framer-motion": "^11.15.0",
     "lucide-react": "^0.577.0",
     "next": "16.1.6",
     "next-auth": "^4.24.13",
