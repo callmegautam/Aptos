@@ -4,22 +4,46 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { FieldGroup, FieldDescription } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { MailIcon } from 'lucide-react';
+import { MailIcon, TruckElectricIcon } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { useEffect, useRef, useState } from 'react';
+import toast from 'react-hot-toast';
 
 type VerifyEmailFormProps = {
   className?: string;
-  email?: string;
 };
 
-export function VerifyEmailForm({
-  className,
-  email = 'olivia@untitledui.com'
-}: VerifyEmailFormProps) {
+export function VerifyEmailForm({ className }: VerifyEmailFormProps) {
+  const [email, setEmail] = useState('');
+  const [redirect, setRedirect] = useState('');
   const searchParams = useSearchParams();
+  const [error, setError] = useState(true);
 
-  const redirectBack = searchParams.get('redirect');
+  useEffect(() => {
+    const redirectionLink = searchParams.get('redirect');
+    const emailVerify = searchParams.get('email');
+
+    if (!redirectionLink || !emailVerify) {
+      // toast.error('Please provide email and redirect link');
+      return;
+    }
+    setError(false);
+
+    setEmail(emailVerify);
+    setRedirect(redirectionLink);
+  }, []);
+
+  if (error) {
+    return (
+      <>
+        <div className="flex justify-center items-center">
+          <h1>Please provide email and redirection link</h1>
+        </div>
+      </>
+    );
+  }
+
   return (
     <form className={cn('flex flex-col gap-6 w-full max-w-md', className)}>
       <FieldGroup>
@@ -64,7 +88,7 @@ export function VerifyEmailForm({
 
         {/* Back */}
         <FieldDescription className="text-center">
-          <Link href={redirectBack || '/login'} className="underline underline-offset-4">
+          <Link href={redirect || '/login'} className="underline underline-offset-4">
             ← Back to log in
           </Link>
         </FieldDescription>

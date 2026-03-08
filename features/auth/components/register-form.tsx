@@ -13,6 +13,8 @@ import { useEffect, useState } from 'react';
 import { registerFormSchema, RegisterFormSchemaType } from '@/types/auth';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
+import { HTTP_STATUS } from '@/types/http';
 
 type RegisterFormProps = {
   className?: string;
@@ -40,25 +42,31 @@ export default function RegisterForm({
     setAccountType(user);
   }, []);
 
+  const router = useRouter();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const loadingToast = toast.loading('Creating account...');
 
     try {
       const { success, data, error } = registerFormSchema.safeParse(registerForm);
 
       if (!success) {
-        toast.error('Invalid input');
+        toast.error('Invalid input', { id: loadingToast });
         return;
       }
 
       const response = await axios.post('/api/auth/register', { ...data, accountType });
 
-      if (response.status !== 200) {
-        toast.error(response.data.error);
+      if (response.status !== HTTP_STATUS.CREATED) {
+        console.log('resposne error 200', response);
+        toast.error(response.data.error, { id: loadingToast });
         return;
       }
+      console.log('resposne', response);
 
-      toast.success(response.data.message);
+      toast.success(response.data.message, { id: loadingToast });
+      router.push(`/verify-email?email=${response.data.email}&redirect=/dashboard`);
 
       console.log(response);
     } catch (error) {
