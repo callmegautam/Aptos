@@ -5,6 +5,9 @@ import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { HTTP_STATUS } from '@/types/http';
 import { verifyOtp } from '@/lib/mail/otp';
+import { signToken } from '@/lib/auth/jwt';
+import { COOKIE_OPTIONS } from '@/config/cookies';
+import { cookies } from 'next/headers';
 
 const verifySchema = z.object({
   email: z.string().email(),
@@ -41,6 +44,14 @@ export async function POST(req: Request) {
     if (company) {
       await db.update(companies).set({ emailVerified: true }).where(eq(companies.id, company.id));
 
+      const token = await signToken({
+        id: company.id,
+        email: company.email
+      });
+
+      const cookieStore = await cookies();
+      cookieStore.set('token', token, COOKIE_OPTIONS);
+
       return NextResponse.json(
         { message: 'Email verified successfully' },
         { status: HTTP_STATUS.OK }
@@ -59,6 +70,14 @@ export async function POST(req: Request) {
         .update(candidates)
         .set({ emailVerified: true })
         .where(eq(candidates.id, candidate.id));
+
+      const token = await signToken({
+        id: candidate.id,
+        email: candidate.email
+      });
+
+      const cookieStore = await cookies();
+      cookieStore.set('token', token, COOKIE_OPTIONS);
 
       return NextResponse.json(
         { message: 'Email verified successfully' },
