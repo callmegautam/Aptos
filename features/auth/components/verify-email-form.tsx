@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import { HTTP_STATUS } from '@/types/http';
+import { useUserStore } from '@/lib/store/user-store';
 
 type VerifyEmailFormProps = {
   className?: string;
@@ -22,6 +23,7 @@ export function VerifyEmailForm({ className }: VerifyEmailFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [otp, setOtp] = useState(['', '', '', '']);
   const [error, setError] = useState(true);
+  const setUser = useUserStore((state) => state.setUser);
 
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -61,6 +63,13 @@ export function VerifyEmailForm({ className }: VerifyEmailFormProps) {
       }
 
       toast.success(response.data.message);
+
+      setUser({
+        email: response.data.user.email,
+        name: response.data.user.name,
+        role: response.data.user.role
+      });
+
       router.push(redirect || '/dashboard');
     } catch (error) {
       toast.error('Something went wrong');
