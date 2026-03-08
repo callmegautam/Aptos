@@ -13,6 +13,8 @@ import { loginFormSchema, LoginFormSchema } from '@/types/auth';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { HTTP_STATUS } from '@/types/http';
+import { useRouter } from 'next/navigation';
 
 type LoginFormProps = {
   className?: string;
@@ -28,7 +30,7 @@ export function LoginForm({
   registerRedirection = '/register'
 }: LoginFormProps) {
   let forgetPasswordRedirection = '/login';
-
+  const router = useRouter();
   if (user === 'company') {
     forgetPasswordRedirection = '/login';
   } else if (user === 'candidate') {
@@ -58,16 +60,19 @@ export function LoginForm({
       const { success, data, error } = loginFormSchema.safeParse(loginForm);
 
       if (!success) {
-        toast.error('login error');
+        toast.error('Invalid input');
         return;
       }
 
       const response = await axios.post('/api/auth/login', { ...data, accountType });
-      toast.success('login successfully');
-
-      console.log(response);
+      if (response.status !== HTTP_STATUS.OK) {
+        toast.error(response.data.error);
+        return;
+      }
+      toast.success(response.data.message);
+      router.push(`/verify-email?email=${response.data.email}&redirect=/dashboard`);
     } catch (error) {
-      toast.error('somingthing went wrong');
+      toast.error('Something went wrong');
       console.log('something went wrong');
     }
   };
