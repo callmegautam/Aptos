@@ -6,7 +6,7 @@ export const resumes = pgTable('resumes', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),
 
   candidateId: bigint('candidate_id', { mode: 'number' })
-    .references(() => candidates.id)
+    .references(() => candidates.id, { onDelete: 'cascade' })
     .notNull(),
 
   fileUrl: text('file_url').notNull(),

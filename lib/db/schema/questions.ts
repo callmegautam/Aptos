@@ -7,7 +7,7 @@ export const questions = pgTable('questions', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),
 
   roomId: bigint('room_id', { mode: 'number' })
-    .references(() => interviewRooms.id)
+    .references(() => interviewRooms.id, { onDelete: 'cascade' })
     .notNull(),
 
   type: questionTypeEnum('type').notNull(),

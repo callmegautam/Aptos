@@ -8,14 +8,16 @@ export const interviewRooms = pgTable('interview_rooms', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),
 
   companyId: bigint('company_id', { mode: 'number' })
-    .references(() => companies.id)
+    .references(() => companies.id, { onDelete: 'cascade' })
     .notNull(),
 
   interviewerId: bigint('interviewer_id', { mode: 'number' })
-    .references(() => interviewers.id)
+    .references(() => interviewers.id, { onDelete: 'cascade' })
     .notNull(),
 
-  candidateId: bigint('candidate_id', { mode: 'number' }).references(() => candidates.id),
+  candidateId: bigint('candidate_id', { mode: 'number' })
+    .references(() => candidates.id, { onDelete: 'cascade' })
+    .notNull(),
 
   roomCode: text('room_code').notNull(),
 

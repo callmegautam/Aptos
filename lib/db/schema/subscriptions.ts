@@ -5,7 +5,7 @@ export const subscriptions = pgTable('subscriptions', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),
 
   companyId: bigint('company_id', { mode: 'number' })
-    .references(() => companies.id)
+    .references(() => companies.id, { onDelete: 'cascade' })
     .notNull(),
 
   tier: text('tier').notNull()

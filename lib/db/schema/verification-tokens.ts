@@ -8,9 +8,13 @@ export type VerificationTokenType = (typeof tokenTypes)[number];
 export const verificationTokens = pgTable('verification_tokens', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),
 
-  companyId: bigint('company_id', { mode: 'number' }).references(() => companies.id),
+  companyId: bigint('company_id', { mode: 'number' }).references(() => companies.id, {
+    onDelete: 'cascade'
+  }),
 
-  candidateId: bigint('candidate_id', { mode: 'number' }).references(() => candidates.id),
+  candidateId: bigint('candidate_id', { mode: 'number' }).references(() => candidates.id, {
+    onDelete: 'cascade'
+  }),
 
   token: varchar('token', { length: 255 }).notNull().unique(),
 

@@ -6,11 +6,11 @@ export const resumeAiAnalysis = pgTable('resume_ai_analysis', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),
 
   roomId: bigint('room_id', { mode: 'number' })
-    .references(() => interviewRooms.id)
+    .references(() => interviewRooms.id, { onDelete: 'cascade' })
     .notNull(),
 
   resumeId: bigint('resume_id', { mode: 'number' })
-    .references(() => resumes.id)
+    .references(() => resumes.id, { onDelete: 'cascade' })
     .notNull(),
 
   matchScore: integer('match_score').notNull(),

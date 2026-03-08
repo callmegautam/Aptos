@@ -15,6 +15,6 @@ export const interviewers = pgTable('interviewers', {
   phone: varchar('phone', { length: 20 }),
 
   companyId: bigint('company_id', { mode: 'number' })
-    .references(() => companies.id)
+    .references(() => companies.id, { onDelete: 'cascade' })
     .notNull()
 });

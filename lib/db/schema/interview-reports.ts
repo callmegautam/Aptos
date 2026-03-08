@@ -11,7 +11,7 @@ export const interviewReports = pgTable('interview_reports', {
     .notNull(),
 
   candidateId: bigint('candidate_id', { mode: 'number' })
-    .references(() => candidates.id)
+    .references(() => candidates.id, { onDelete: 'cascade' })
     .notNull(),
 
   resumeScore: integer('resume_score').notNull(),
