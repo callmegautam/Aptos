@@ -71,8 +71,8 @@ export function VerifyEmailForm({ className }: VerifyEmailFormProps) {
       });
 
       router.push(redirect || '/dashboard');
-    } catch (error) {
-      toast.error('Something went wrong');
+    } catch (error: any) {
+      toast.error(error?.response?.data?.error);
     } finally {
       setIsLoading(false);
     }

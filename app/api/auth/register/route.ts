@@ -83,7 +83,7 @@ export async function POST(req: Request) {
 
     if (existingCompany) {
       // throw new Error('A company with this email already exists');
-      return { user: existingCompany, otp: null, alreadyExists: true };
+      return NextResponse.json({ error: 'Email already exists' }, { status: HTTP_STATUS.CONFLICT });
     }
 
     const [existingCandidate] = await db
@@ -93,7 +93,7 @@ export async function POST(req: Request) {
       .limit(1);
 
     if (existingCandidate) {
-      return { user: existingCandidate, otp: null, alreadyExists: true };
+      return NextResponse.json({ error: 'Email already exists' }, { status: HTTP_STATUS.CONFLICT });
     }
 
     const result =
