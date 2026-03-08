@@ -1,4 +1,4 @@
-import { pgTable, bigserial, text } from 'drizzle-orm/pg-core';
+import { boolean, pgTable, bigserial, text } from 'drizzle-orm/pg-core';
 
 export const companies = pgTable('companies', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),
@@ -9,5 +9,7 @@ export const companies = pgTable('companies', {
 
   passwordHash: text('password_hash').notNull(),
 
-  avatarUrl: text('avatar_url')
+  avatarUrl: text('avatar_url'),
+
+  emailVerified: boolean('email_verified').default(false)
 });

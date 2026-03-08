@@ -1,4 +1,4 @@
-import { bigserial, pgTable, text, varchar } from 'drizzle-orm/pg-core';
+import { bigserial, boolean, pgTable, text, varchar } from 'drizzle-orm/pg-core';
 
 export const candidates = pgTable('candidates', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),
@@ -11,5 +11,7 @@ export const candidates = pgTable('candidates', {
 
   avatarUrl: text('avatar_url'),
 
-  phone: varchar('phone', { length: 20 })
+  phone: varchar('phone', { length: 20 }),
+
+  emailVerified: boolean('email_verified').default(false)
 });
