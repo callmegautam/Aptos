@@ -61,25 +61,27 @@ export function LoginForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    const loadingToast = toast.loading('Creating account...');
     setIsLoading(true);
 
     try {
       const { success, data, error } = loginFormSchema.safeParse(loginForm);
 
       if (!success) {
-        toast.error('Invalid input');
+        toast.error('Invalid input', { id: loadingToast });
+        setIsLoading(false);
         return null;
       }
 
       const response = await axios.post('/api/auth/login', { ...data, accountType });
 
       if (response.status !== HTTP_STATUS.OK) {
-        toast.error(response.data.error);
+        toast.error(response.data.error, { id: loadingToast });
+        setIsLoading(false);
         return null;
       }
 
-      toast.success(response.data.message);
+      toast.success(response.data.message, { id: loadingToast });
       router.push('/dashboard');
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -87,14 +89,14 @@ export function LoginForm({
         const status = error.response?.status;
 
         if (status === HTTP_STATUS.FORBIDDEN) {
-          toast.error(message);
+          toast.error(message, { id: loadingToast });
           router.push(`/verify-email?email=${loginForm.email}&redirect=/dashboard`);
           return;
         }
 
-        toast.error(message);
+        toast.error(message, { id: loadingToast });
       } else {
-        toast.error('Something went wrong');
+        toast.error('Something went wrong', { id: loadingToast });
       }
     } finally {
       setIsLoading(false);
