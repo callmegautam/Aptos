@@ -10,7 +10,7 @@ export default function RegistrationPage({ children }: { children: React.ReactNo
   if (pathname === '/register') {
     imageSrc = '/images/company.png';
   } else {
-    imageSrc = 'images/candidate.png';
+    imageSrc = '/images/candidate.png';
   }
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
