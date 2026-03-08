@@ -109,8 +109,10 @@ export async function POST(req: Request) {
 
     return NextResponse.json(
       {
-        message: `${accountType} registered. OTP sent to email.`,
-        userId: result.user.id
+        message: `OTP sent to email.`,
+        userId: result.user.id,
+        email: email,
+        accountType: accountType
       },
       { status: HTTP_STATUS.CREATED }
     );
