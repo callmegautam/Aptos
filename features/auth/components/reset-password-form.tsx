@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { CheckIcon, LockIcon } from 'lucide-react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { HTTP_STATUS } from '@/types/http';
 import toast from 'react-hot-toast';
@@ -26,11 +26,22 @@ export function ResetPasswordForm({ className }: ResetPasswordFormProps) {
   const [password, setPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
 
+  useEffect(() => {
+    if (!email) {
+      toast.error('Email is required');
+    }
+  }, [email]);
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (password !== confirmPassword) {
       toast.error('Passwords do not match');
+      return;
+    }
+
+    if (password.length < 8) {
+      toast.error('Password must be at least 8 characters');
       return;
     }
 
@@ -44,11 +55,8 @@ export function ResetPasswordForm({ className }: ResetPasswordFormProps) {
         toast.success('Password reset successfully');
         router.push('/login');
       }
-
-      console.log(response.data);
     } catch (error: any) {
       toast.error(error?.response?.data?.message || 'Something went wrong');
-      console.log(error);
     }
   };
 
@@ -75,14 +83,26 @@ export function ResetPasswordForm({ className }: ResetPasswordFormProps) {
         <Field>
           <FieldLabel htmlFor="password">Password</FieldLabel>
 
-          <Input id="password" type="password" required />
+          <Input
+            id="password"
+            type="password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
         </Field>
 
         {/* Confirm Password */}
         <Field>
           <FieldLabel htmlFor="confirm-password">Confirm password</FieldLabel>
 
-          <Input id="confirm-password" type="password" required />
+          <Input
+            id="confirm-password"
+            type="password"
+            required
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+          />
         </Field>
 
         {/* Password Rules */}
