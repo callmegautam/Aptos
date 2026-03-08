@@ -8,24 +8,24 @@ import { Button } from '@/components/ui/button';
 const sections = [
   {
     title: '1. Acceptance of Terms',
-    text: 'By accessing or using Aptos ("the Service"), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use the Service.',
+    text: 'By accessing or using Aptos ("the Service"), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use the Service.'
   },
   {
     title: '2. Use of the Service',
-    text: 'Aptos provides an AI-powered interview platform for hiring teams, universities, and candidates. You agree to use the Service only for lawful purposes and in accordance with these terms and any applicable laws and regulations.',
+    text: 'Aptos provides an AI-powered interview platform for hiring teams, universities, and candidates. You agree to use the Service only for lawful purposes and in accordance with these terms and any applicable laws and regulations.'
   },
   {
     title: '3. Account and Registration',
-    text: 'You may need to create an account to use certain features. You are responsible for maintaining the confidentiality of your account credentials and for all activity under your account.',
+    text: 'You may need to create an account to use certain features. You are responsible for maintaining the confidentiality of your account credentials and for all activity under your account.'
   },
   {
     title: '4. Privacy',
-    text: 'Your use of the Service is also governed by our Privacy Policy. Please review our Privacy Policy to understand how we collect, use, and protect your information.',
+    text: 'Your use of the Service is also governed by our Privacy Policy. Please review our Privacy Policy to understand how we collect, use, and protect your information.'
   },
   {
     title: '5. Contact',
-    text: 'For questions about these Terms of Service, please contact us via our Contact page.',
-  },
+    text: 'For questions about these Terms of Service, please contact us via our Contact page.'
+  }
 ];
 
 export default function TermsPage() {
@@ -41,7 +41,10 @@ export default function TermsPage() {
       />
 
       <section className="relative overflow-hidden border-b border-border/50">
-        <div className="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-primary/10 opacity-80" aria-hidden />
+        <div
+          className="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-primary/10 opacity-80"
+          aria-hidden
+        />
         <div className="container relative px-4 pt-24 pb-16 md:pt-32 md:pb-24">
           <motion.div
             className="mx-auto max-w-4xl text-center"
@@ -60,10 +63,15 @@ export default function TermsPage() {
               </span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
-              Please read these terms carefully before using Aptos. By using the Service, you agree to be bound by these terms.
+              Please read these terms carefully before using Aptos. By using the Service, you agree
+              to be bound by these terms.
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-              <Button asChild size="lg" className="h-12 rounded-xl px-8 shadow-lg shadow-primary/25">
+              <Button
+                asChild
+                size="lg"
+                className="h-12 rounded-xl px-8 shadow-lg shadow-primary/25"
+              >
                 <Link href="/landing/contact">Contact us</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="h-12 rounded-xl border-2 px-8">
@@ -83,7 +91,7 @@ export default function TermsPage() {
             viewport={{ once: true, margin: '-60px' }}
             variants={{
               visible: { transition: { staggerChildren: 0.08 } },
-              hidden: {},
+              hidden: {}
             }}
           >
             {sections.map(({ title, text }) => (
@@ -92,13 +100,19 @@ export default function TermsPage() {
                 variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
                 className="relative overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:border-primary/25 hover:shadow-lg md:p-8"
               >
-                <div className="absolute inset-x-0 top-0 h-0.5 bg-linear-to-r from-primary/80 via-primary to-primary/80 opacity-80" aria-hidden />
+                <div
+                  className="absolute inset-x-0 top-0 h-0.5 bg-linear-to-r from-primary/80 via-primary to-primary/80 opacity-80"
+                  aria-hidden
+                />
                 <h2 className="text-lg font-semibold text-foreground">{title}</h2>
                 <p className="mt-3 text-base leading-relaxed text-muted-foreground">
                   {title === '5. Contact' ? (
                     <>
                       For questions about these Terms of Service, please contact us at{' '}
-                      <Link href="/landing/contact" className="font-medium text-primary hover:underline">
+                      <Link
+                        href="/landing/contact"
+                        className="font-medium text-primary hover:underline"
+                      >
                         Contact
                       </Link>
                       .
@@ -116,7 +130,10 @@ export default function TermsPage() {
       <section className="border-t border-border/50 py-16 md:py-20">
         <div className="container px-4">
           <div className="relative mx-auto max-w-2xl overflow-hidden rounded-2xl border border-primary/25 bg-linear-to-br from-primary/10 via-transparent to-primary/5 p-8 text-center md:p-10">
-            <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-primary/50 to-transparent" aria-hidden />
+            <div
+              className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-primary/50 to-transparent"
+              aria-hidden
+            />
             <h2 className="text-2xl font-bold tracking-tight md:text-3xl">Ready to get started?</h2>
             <p className="mt-3 text-muted-foreground">
               Start with a free trial or contact us for enterprise inquiries.

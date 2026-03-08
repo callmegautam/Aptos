@@ -9,23 +9,23 @@ const values = [
   {
     icon: Target,
     title: 'Mission',
-    text: 'Make every interview consistent, efficient, and data-driven so teams can hire with confidence.',
+    text: 'Make every interview consistent, efficient, and data-driven so teams can hire with confidence.'
   },
   {
     icon: ShieldCheck,
     title: 'Fairness first',
-    text: 'Structured, bias-aware evaluation so every candidate is assessed on the same criteria.',
+    text: 'Structured, bias-aware evaluation so every candidate is assessed on the same criteria.'
   },
   {
     icon: Zap,
     title: 'Speed at scale',
-    text: 'Screen thousands of candidates without sacrificing quality or burning out your team.',
+    text: 'Screen thousands of candidates without sacrificing quality or burning out your team.'
   },
   {
     icon: Users2,
     title: 'Human + AI',
-    text: 'AI that augments decision-making—clear insights and explainable scores for hiring teams.',
-  },
+    text: 'AI that augments decision-making—clear insights and explainable scores for hiring teams.'
+  }
 ];
 
 export default function AboutPage() {
@@ -41,7 +41,10 @@ export default function AboutPage() {
       />
 
       <section className="relative overflow-hidden border-b border-border/50">
-        <div className="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-primary/10 opacity-80" aria-hidden />
+        <div
+          className="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-primary/10 opacity-80"
+          aria-hidden
+        />
         <div className="container relative px-4 pt-24 pb-16 md:pt-32 md:pb-24">
           <motion.div
             className="mx-auto max-w-4xl text-center"
@@ -59,10 +62,15 @@ export default function AboutPage() {
               </span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
-              We built Aptos to accelerate hiring with structured, fair, and insightful AI interviews—so you can focus on finding the right talent.
+              We built Aptos to accelerate hiring with structured, fair, and insightful AI
+              interviews—so you can focus on finding the right talent.
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-              <Button asChild size="lg" className="h-12 rounded-xl px-8 shadow-lg shadow-primary/25">
+              <Button
+                asChild
+                size="lg"
+                className="h-12 rounded-xl px-8 shadow-lg shadow-primary/25"
+              >
                 <Link href="/landing/contact">Get in touch</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="h-12 rounded-xl border-2 px-8">
@@ -75,7 +83,9 @@ export default function AboutPage() {
 
       <section className="py-20 md:py-28">
         <div className="container px-4">
-          <p className="text-center text-sm font-medium uppercase tracking-widest text-primary">What we believe</p>
+          <p className="text-center text-sm font-medium uppercase tracking-widest text-primary">
+            What we believe
+          </p>
           <h2 className="mt-2 text-center text-2xl font-bold tracking-tight md:text-3xl">
             Mission & values
           </h2>
@@ -86,7 +96,7 @@ export default function AboutPage() {
             viewport={{ once: true, margin: '-60px' }}
             variants={{
               visible: { transition: { staggerChildren: 0.08 } },
-              hidden: {},
+              hidden: {}
             }}
           >
             {values.map(({ icon: Icon, title, text }) => (
@@ -95,7 +105,10 @@ export default function AboutPage() {
                 variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
                 className="group relative overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg md:p-8"
               >
-                <div className="absolute inset-x-0 top-0 h-0.5 bg-linear-to-r from-primary/80 via-primary to-primary/80 opacity-80" aria-hidden />
+                <div
+                  className="absolute inset-x-0 top-0 h-0.5 bg-linear-to-r from-primary/80 via-primary to-primary/80 opacity-80"
+                  aria-hidden
+                />
                 <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-2 ring-primary/20 transition-colors group-hover:bg-primary/15">
                   <Icon className="size-6" />
                 </div>
@@ -114,10 +127,16 @@ export default function AboutPage() {
               One platform for fair, scalable hiring
             </h2>
             <p className="mt-4 text-muted-foreground">
-              Aptos combines room management, AI-assisted interviews, and analytics so hiring teams and universities can evaluate candidates consistently—without the bias and bottlenecks of traditional screening.
+              Aptos combines room management, AI-assisted interviews, and analytics so hiring teams
+              and universities can evaluate candidates consistently—without the bias and bottlenecks
+              of traditional screening.
             </p>
             <ul className="mt-8 space-y-3 text-left">
-              {['Structured interviews with explainable AI', 'Consistent criteria for every candidate', 'Built for volume hiring and admissions'].map((item) => (
+              {[
+                'Structured interviews with explainable AI',
+                'Consistent criteria for every candidate',
+                'Built for volume hiring and admissions'
+              ].map((item) => (
                 <li key={item} className="flex items-center gap-3">
                   <CheckCircle2 className="size-5 shrink-0 text-primary" />
                   <span className="text-muted-foreground">{item}</span>
@@ -131,9 +150,16 @@ export default function AboutPage() {
       <section className="border-t border-border/50 py-16 md:py-20">
         <div className="container px-4">
           <div className="relative mx-auto max-w-2xl overflow-hidden rounded-2xl border border-primary/25 bg-linear-to-br from-primary/10 via-transparent to-primary/5 p-8 text-center md:p-10">
-            <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-primary/50 to-transparent" aria-hidden />
-            <h2 className="text-2xl font-bold tracking-tight md:text-3xl">Ready to transform your hiring?</h2>
-            <p className="mt-3 text-muted-foreground">Start with a free trial or schedule a demo.</p>
+            <div
+              className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-primary/50 to-transparent"
+              aria-hidden
+            />
+            <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
+              Ready to transform your hiring?
+            </h2>
+            <p className="mt-3 text-muted-foreground">
+              Start with a free trial or schedule a demo.
+            </p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
               <Button asChild size="lg" className="h-12 rounded-xl px-8">
                 <Link href="/register">Start free trial</Link>

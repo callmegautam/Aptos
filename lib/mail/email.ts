@@ -93,7 +93,7 @@ async function sendEmail(to: string, subject: string, html: string) {
 
   try {
     const { data, error } = await resend.emails.send({
-      from: process.env.EMAIL_FROM ?? 'onboarding@resend.dev',
+      from: 'onboarding@resend.dev',
       to,
       subject,
       html
