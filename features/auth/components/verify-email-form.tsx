@@ -5,10 +5,12 @@ import { Button } from '@/components/ui/button';
 import { FieldGroup, FieldDescription } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { MailIcon, TruckElectricIcon } from 'lucide-react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
+import axios from 'axios';
+import { HTTP_STATUS } from '@/types/http';
 
 type VerifyEmailFormProps = {
   className?: string;
@@ -17,8 +19,11 @@ type VerifyEmailFormProps = {
 export function VerifyEmailForm({ className }: VerifyEmailFormProps) {
   const [email, setEmail] = useState('');
   const [redirect, setRedirect] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [otp, setOtp] = useState('');
   const searchParams = useSearchParams();
   const [error, setError] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const redirectionLink = searchParams.get('redirect');
@@ -44,6 +49,27 @@ export function VerifyEmailForm({ className }: VerifyEmailFormProps) {
     );
   }
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const response = await axios.post('/api/auth/verify-email', { email, otp });
+
+      if (response.status !== HTTP_STATUS.OK) {
+        toast.error(response.data.error);
+        return;
+      }
+
+      toast.success(response.data.message);
+      router.push(redirect || '/dashboard');
+    } catch (error) {
+      toast.error('Something went wrong');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <form className={cn('flex flex-col gap-6 w-full max-w-md', className)}>
       <FieldGroup>
@@ -67,10 +93,17 @@ export function VerifyEmailForm({ className }: VerifyEmailFormProps) {
 
         {/* OTP Inputs */}
         <div className="flex justify-center gap-4">
-          <Input maxLength={1} className="h-14 w-14 text-center text-lg" />
-          <Input maxLength={1} className="h-14 w-14 text-center text-lg" />
-          <Input maxLength={1} className="h-14 w-14 text-center text-lg" />
-          <Input maxLength={1} className="h-14 w-14 text-center text-lg" />
+          {Array.from({ length: 4 }).map((_, index) => (
+            <Input
+              key={index}
+              maxLength={1}
+              className="h-14 w-14 text-center text-lg"
+              value={otp[index]}
+              onChange={(e) =>
+                setOtp((prev) => prev.slice(0, index) + e.target.value + prev.slice(index + 1))
+              }
+            />
+          ))}
         </div>
 
         {/* Button */}

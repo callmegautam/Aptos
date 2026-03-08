@@ -43,35 +43,74 @@ export default function RegisterForm({
   }, []);
 
   const router = useRouter();
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+
+  //   const loadingToast = toast.loading('Creating account...');
+
+  //   try {
+  //     const { success, data, error } = registerFormSchema.safeParse(registerForm);
+
+  //     if (!success) {
+  //       toast.error('Invalid input', { id: loadingToast });
+  //       return;
+  //     }
+
+  //     const response = await axios.post('/api/auth/register', { ...data, accountType });
+
+  //     if (response.status === HTTP_STATUS.CONFLICT) {
+  //       toast.error(response.data.error, { id: loadingToast });
+  //       return;
+  //     }
+
+  //     if (response.status === HTTP_STATUS.INTERNAL_SERVER_ERROR) {
+  //       toast.error(response.data.error, { id: loadingToast });
+  //       return;
+  //     }
+
+  //     if (response.status !== HTTP_STATUS.CREATED) {
+  //       console.log('resposne error ', response);
+  //       toast.error(response.data.error, { id: loadingToast });
+  //       return;
+  //     }
+
+  //     console.log('resposne', response);
+
+  //     toast.success(response.data.message, { id: loadingToast });
+  //     router.push(`/verify-email?email=${response.data.email}&redirect=/dashboard`);
+
+  //     console.log(response);
+  //   } catch (error) {
+  //     toast.error('Something went wrong', { id: loadingToast });
+  //     console.log('something went wrong');
+  //   }
+  // };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const loadingToast = toast.loading('Creating account...');
 
+    const parsed = registerFormSchema.safeParse(registerForm);
+
+    if (!parsed.success) {
+      toast.error('Invalid input', { id: loadingToast });
+      return;
+    }
+
     try {
-      const { success, data, error } = registerFormSchema.safeParse(registerForm);
+      const { data } = await axios.post('/api/auth/register', {
+        ...parsed.data,
+        accountType: user
+      });
 
-      if (!success) {
-        toast.error('Invalid input', { id: loadingToast });
-        return;
-      }
+      toast.success(data.message, { id: loadingToast });
 
-      const response = await axios.post('/api/auth/register', { ...data, accountType });
+      router.push(`/verify-email?email=${data.email}&redirect=/dashboard`);
+    } catch (error: any) {
+      const message = error?.response?.data?.error || 'Something went wrong';
 
-      if (response.status !== HTTP_STATUS.CREATED) {
-        console.log('resposne error 200', response);
-        toast.error(response.data.error, { id: loadingToast });
-        return;
-      }
-      console.log('resposne', response);
-
-      toast.success(response.data.message, { id: loadingToast });
-      router.push(`/verify-email?email=${response.data.email}&redirect=/dashboard`);
-
-      console.log(response);
-    } catch (error) {
-      toast.error('Something went wrong');
-      console.log('something went wrong');
+      toast.error(message, { id: loadingToast });
     }
   };
 
