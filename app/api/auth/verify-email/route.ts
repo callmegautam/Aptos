@@ -53,7 +53,15 @@ export async function POST(req: Request) {
       cookieStore.set('token', token, COOKIE_OPTIONS);
 
       return NextResponse.json(
-        { message: 'Email verified successfully' },
+        {
+          message: 'Email verified successfully',
+          user: {
+            id: company.id,
+            email: company.email,
+            role: 'company',
+            name: company.name
+          }
+        },
         { status: HTTP_STATUS.OK }
       );
     }
@@ -80,7 +88,15 @@ export async function POST(req: Request) {
       cookieStore.set('token', token, COOKIE_OPTIONS);
 
       return NextResponse.json(
-        { message: 'Email verified successfully' },
+        {
+          message: 'Email verified successfully',
+          user: {
+            id: candidate.id,
+            email: candidate.email,
+            role: 'candidate',
+            name: candidate.name
+          }
+        },
         { status: HTTP_STATUS.OK }
       );
     }
