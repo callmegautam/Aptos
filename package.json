@@ -24,6 +24,7 @@
     "@types/axios": "^0.14.4",
     "@types/bcrypt": "^6.0.0",
     "@types/nodemailer": "^7.0.11",
+    "@upstash/redis": "^1.36.3",
     "axios": "^1.13.6",
     "bcrypt": "^6.0.0",
     "class-variance-authority": "^0.7.1",

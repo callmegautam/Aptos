@@ -74,25 +74,28 @@ export function LoginForm({
 
       const response = await axios.post('/api/auth/login', { ...data, accountType });
 
-      if (response.status === HTTP_STATUS.UNAUTHORIZED) {
-        toast.error(response.data.error);
-        return null;
-      }
-
-      if (response.status === HTTP_STATUS.FORBIDDEN) {
-        toast.error(response.data.error);
-        router.push(`/verify-email?email=${data.email}&redirect=/dashboard`);
-        return null;
-      }
-
       if (response.status !== HTTP_STATUS.OK) {
         toast.error(response.data.error);
         return null;
       }
+
       toast.success(response.data.message);
       router.push('/dashboard');
     } catch (error) {
-      toast.error('Something went wrong');
+      if (axios.isAxiosError(error)) {
+        const message = error.response?.data?.error || 'Request failed';
+        const status = error.response?.status;
+
+        if (status === HTTP_STATUS.FORBIDDEN) {
+          toast.error(message);
+          router.push(`/verify-email?email=${loginForm.email}&redirect=/dashboard`);
+          return;
+        }
+
+        toast.error(message);
+      } else {
+        toast.error('Something went wrong');
+      }
     } finally {
       setIsLoading(false);
     }
