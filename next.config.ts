@@ -1,30 +1,21 @@
 import type { NextConfig } from 'next';
+import path from 'path';
+import { config } from 'dotenv';
+
+config({ path: path.join(process.cwd(), 'app', '.env'), quiet: true });
 
 const nextConfig: NextConfig = {
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
-        pathname: '/**'
-      }
-    ]
-  },
   /* config options here */
   images: {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'galaxypfp.com'
-      }
-    ]
-  },
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
         hostname: 'images.unsplash.com',
         pathname: '/**'
+      },
+      {
+        protocol: 'https',
+        hostname: 'galaxypfp.com'
       }
     ]
   }

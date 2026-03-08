@@ -13,10 +13,15 @@ const plans = [
     price: '$0',
     period: 'forever',
     desc: 'Get started with core features. Perfect for small teams and trials.',
-    features: ['Up to 10 interviews/month', 'Basic AI insights', 'Email support', '1 interview room'],
+    features: [
+      'Up to 10 interviews/month',
+      'Basic AI insights',
+      'Email support',
+      '1 interview room'
+    ],
     cta: 'Start free trial',
     href: '/register',
-    highlighted: false,
+    highlighted: false
   },
   {
     icon: Zap,
@@ -25,10 +30,16 @@ const plans = [
     price: 'Coming soon',
     period: '',
     desc: 'More interviews, advanced analytics, and priority support.',
-    features: ['Unlimited interviews', 'Advanced AI analytics', 'Priority support', 'Custom rubrics', 'ATS integrations'],
+    features: [
+      'Unlimited interviews',
+      'Advanced AI analytics',
+      'Priority support',
+      'Custom rubrics',
+      'ATS integrations'
+    ],
     cta: 'Get notified',
     href: '/landing/contact',
-    highlighted: true,
+    highlighted: true
   },
   {
     icon: Building2,
@@ -37,11 +48,17 @@ const plans = [
     price: 'Custom',
     period: '',
     desc: 'Dedicated support, SSO, custom workflows, and SLA.',
-    features: ['Everything in Pro', 'SSO & SAML', 'Dedicated success manager', 'Custom SLAs', 'On-prem options'],
+    features: [
+      'Everything in Pro',
+      'SSO & SAML',
+      'Dedicated success manager',
+      'Custom SLAs',
+      'On-prem options'
+    ],
     cta: 'Contact sales',
     href: '/landing/contact',
-    highlighted: false,
-  },
+    highlighted: false
+  }
 ];
 
 export default function PricingPage() {
@@ -57,7 +74,10 @@ export default function PricingPage() {
       />
 
       <section className="relative overflow-hidden border-b border-border/50">
-        <div className="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-primary/10 opacity-80" aria-hidden />
+        <div
+          className="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-primary/10 opacity-80"
+          aria-hidden
+        />
         <div className="container relative px-4 pt-24 pb-16 md:pt-32 md:pb-24">
           <motion.div
             className="mx-auto max-w-4xl text-center"
@@ -78,7 +98,11 @@ export default function PricingPage() {
               Start free, upgrade when you’re ready. Enterprise pricing available on request.
             </p>
             <div className="mt-10">
-              <Button asChild size="lg" className="h-12 rounded-xl px-8 shadow-lg shadow-primary/25">
+              <Button
+                asChild
+                size="lg"
+                className="h-12 rounded-xl px-8 shadow-lg shadow-primary/25"
+              >
                 <Link href="/register">Start free trial</Link>
               </Button>
             </div>
@@ -95,50 +119,66 @@ export default function PricingPage() {
             viewport={{ once: true, margin: '-60px' }}
             variants={{
               visible: { transition: { staggerChildren: 0.1 } },
-              hidden: {},
+              hidden: {}
             }}
           >
-            {plans.map(({ icon: Icon, name, tagline, price, period, desc, features, cta, href, highlighted }) => (
-              <motion.div
-                key={name}
-                variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0 } }}
-                className={`relative flex flex-col rounded-2xl border p-6 shadow-lg transition-all duration-300 hover:-translate-y-1 md:p-8 ${
-                  highlighted
-                    ? 'border-primary bg-card ring-2 ring-primary/30'
-                    : 'border-border bg-card hover:border-primary/30 hover:shadow-xl'
-                }`}
-              >
-                {highlighted && (
-                  <div className="absolute inset-x-0 top-0 h-1 rounded-t-2xl bg-linear-to-r from-primary/80 via-primary to-primary/80" aria-hidden />
-                )}
-                <div className="flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <Icon className="size-6" />
-                </div>
-                <h2 className="mt-4 text-xl font-bold">{name}</h2>
-                <p className="mt-1 text-sm text-muted-foreground">{tagline}</p>
-                <div className="mt-6 flex items-baseline gap-1">
-                  <span className="text-3xl font-bold tracking-tight">{price}</span>
-                  {period && <span className="text-muted-foreground">/{period}</span>}
-                </div>
-                <p className="mt-3 text-sm text-muted-foreground">{desc}</p>
-                <ul className="mt-6 flex-1 space-y-3">
-                  {features.map((f) => (
-                    <li key={f} className="flex items-center gap-3 text-sm">
-                      <Check className="size-5 shrink-0 text-primary" />
-                      <span className="text-muted-foreground">{f}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Button
-                  asChild
-                  size="lg"
-                  className="mt-8 h-12 w-full rounded-xl"
-                  variant={highlighted ? 'default' : 'outline'}
+            {plans.map(
+              ({
+                icon: Icon,
+                name,
+                tagline,
+                price,
+                period,
+                desc,
+                features,
+                cta,
+                href,
+                highlighted
+              }) => (
+                <motion.div
+                  key={name}
+                  variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0 } }}
+                  className={`relative flex flex-col rounded-2xl border p-6 shadow-lg transition-all duration-300 hover:-translate-y-1 md:p-8 ${
+                    highlighted
+                      ? 'border-primary bg-card ring-2 ring-primary/30'
+                      : 'border-border bg-card hover:border-primary/30 hover:shadow-xl'
+                  }`}
                 >
-                  <Link href={href}>{cta}</Link>
-                </Button>
-              </motion.div>
-            ))}
+                  {highlighted && (
+                    <div
+                      className="absolute inset-x-0 top-0 h-1 rounded-t-2xl bg-linear-to-r from-primary/80 via-primary to-primary/80"
+                      aria-hidden
+                    />
+                  )}
+                  <div className="flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <Icon className="size-6" />
+                  </div>
+                  <h2 className="mt-4 text-xl font-bold">{name}</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">{tagline}</p>
+                  <div className="mt-6 flex items-baseline gap-1">
+                    <span className="text-3xl font-bold tracking-tight">{price}</span>
+                    {period && <span className="text-muted-foreground">/{period}</span>}
+                  </div>
+                  <p className="mt-3 text-sm text-muted-foreground">{desc}</p>
+                  <ul className="mt-6 flex-1 space-y-3">
+                    {features.map((f) => (
+                      <li key={f} className="flex items-center gap-3 text-sm">
+                        <Check className="size-5 shrink-0 text-primary" />
+                        <span className="text-muted-foreground">{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Button
+                    asChild
+                    size="lg"
+                    className="mt-8 h-12 w-full rounded-xl"
+                    variant={highlighted ? 'default' : 'outline'}
+                  >
+                    <Link href={href}>{cta}</Link>
+                  </Button>
+                </motion.div>
+              )
+            )}
           </motion.div>
         </div>
       </section>
@@ -148,7 +188,8 @@ export default function PricingPage() {
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-2xl font-bold tracking-tight md:text-3xl">Need a custom plan?</h2>
             <p className="mt-3 text-muted-foreground">
-              For high-volume hiring, universities, or enterprise requirements, we’ll tailor pricing and features to your needs.
+              For high-volume hiring, universities, or enterprise requirements, we’ll tailor pricing
+              and features to your needs.
             </p>
             <Button asChild size="lg" className="mt-6 h-12 rounded-xl px-8">
               <Link href="/landing/contact">Contact us</Link>

@@ -10,13 +10,13 @@ const contactOptions = [
     icon: Mail,
     title: 'General & support',
     desc: 'Questions, technical support, or feedback.',
-    value: 'support@aptos.example.com',
+    value: 'support@aptos.example.com'
   },
   {
     icon: Handshake,
     title: 'Partnerships & sales',
     desc: 'Enterprise plans, demos, and custom solutions.',
-    value: 'hello@aptos.example.com',
+    value: 'hello@aptos.example.com'
   },
   {
     icon: MessageSquare,
@@ -24,8 +24,8 @@ const contactOptions = [
     desc: 'Schedule a walkthrough or get help getting started.',
     value: '',
     cta: 'Schedule a demo',
-    ctaHref: '#contact-form',
-  },
+    ctaHref: '#contact-form'
+  }
 ];
 
 export default function ContactPage() {
@@ -41,7 +41,10 @@ export default function ContactPage() {
       />
 
       <section className="relative overflow-hidden border-b border-border/50">
-        <div className="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-primary/10 opacity-80" aria-hidden />
+        <div
+          className="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-primary/10 opacity-80"
+          aria-hidden
+        />
         <div className="container relative px-4 pt-24 pb-16 md:pt-32 md:pb-24">
           <motion.div
             className="mx-auto max-w-4xl text-center"
@@ -60,10 +63,15 @@ export default function ContactPage() {
               </span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
-              Have a question, need a demo, or want to talk partnerships? Reach out and we’ll get back to you soon.
+              Have a question, need a demo, or want to talk partnerships? Reach out and we’ll get
+              back to you soon.
             </p>
             <div className="mt-10">
-              <Button asChild size="lg" className="h-12 rounded-xl px-8 shadow-lg shadow-primary/25">
+              <Button
+                asChild
+                size="lg"
+                className="h-12 rounded-xl px-8 shadow-lg shadow-primary/25"
+              >
                 <Link href="/register">Start free trial</Link>
               </Button>
             </div>
@@ -73,7 +81,9 @@ export default function ContactPage() {
 
       <section className="py-20 md:py-28">
         <div className="container px-4">
-          <p className="text-center text-sm font-medium uppercase tracking-widest text-primary">Contact options</p>
+          <p className="text-center text-sm font-medium uppercase tracking-widest text-primary">
+            Contact options
+          </p>
           <h2 className="mt-2 text-center text-2xl font-bold tracking-tight md:text-3xl">
             How to reach us
           </h2>
@@ -84,7 +94,7 @@ export default function ContactPage() {
             viewport={{ once: true, margin: '-60px' }}
             variants={{
               visible: { transition: { staggerChildren: 0.1 } },
-              hidden: {},
+              hidden: {}
             }}
           >
             {contactOptions.map(({ icon: Icon, title, desc, value, cta, ctaHref }) => (
@@ -93,7 +103,10 @@ export default function ContactPage() {
                 variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
                 className="group relative overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg md:p-8"
               >
-                <div className="absolute inset-x-0 top-0 h-0.5 bg-linear-to-r from-primary/80 via-primary to-primary/80 opacity-80" aria-hidden />
+                <div
+                  className="absolute inset-x-0 top-0 h-0.5 bg-linear-to-r from-primary/80 via-primary to-primary/80 opacity-80"
+                  aria-hidden
+                />
                 <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-2 ring-primary/20 transition-colors group-hover:bg-primary/15">
                   <Icon className="size-6" />
                 </div>
@@ -101,9 +114,13 @@ export default function ContactPage() {
                 <p className="mt-1 text-sm text-muted-foreground">{desc}</p>
                 <p className="mt-4 font-medium text-foreground">
                   {cta && ctaHref ? (
-                    <Link href={ctaHref} className="text-primary hover:underline">{cta}</Link>
+                    <Link href={ctaHref} className="text-primary hover:underline">
+                      {cta}
+                    </Link>
                   ) : value ? (
-                    <a href={`mailto:${value}`} className="text-primary hover:underline">{value}</a>
+                    <a href={`mailto:${value}`} className="text-primary hover:underline">
+                      {value}
+                    </a>
                   ) : null}
                 </p>
               </motion.div>
@@ -114,11 +131,19 @@ export default function ContactPage() {
 
       <section className="border-t border-border/50 bg-muted/15 py-16 md:py-20">
         <div className="container px-4">
-          <div id="contact-form" className="relative mx-auto max-w-xl overflow-hidden rounded-2xl border border-border bg-card p-8 shadow-lg md:p-10">
-            <h2 className="text-xl font-bold tracking-tight md:text-2xl">Contact form (coming soon)</h2>
+          <div
+            id="contact-form"
+            className="relative mx-auto max-w-xl overflow-hidden rounded-2xl border border-border bg-card p-8 shadow-lg md:p-10"
+          >
+            <h2 className="text-xl font-bold tracking-tight md:text-2xl">
+              Contact form (coming soon)
+            </h2>
             <p className="mt-2 text-sm text-muted-foreground">
               We’re building a form for demos and inquiries. Until then, email us at{' '}
-              <a href="mailto:support@aptos.example.com" className="font-medium text-primary hover:underline">
+              <a
+                href="mailto:support@aptos.example.com"
+                className="font-medium text-primary hover:underline"
+              >
                 support@aptos.example.com
               </a>{' '}
               or use the options above.
