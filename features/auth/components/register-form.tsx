@@ -51,7 +51,7 @@ export default function RegisterForm({
         return;
       }
 
-      const response = await axios.post('/api/auth/register', { ...data, accountType: 'company' });
+      const response = await axios.post('/api/auth/register', { ...data, accountType });
       toast.success('register successfully');
 
       console.log(response);

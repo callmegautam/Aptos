@@ -9,6 +9,10 @@ import {
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
+import { loginFormSchema, LoginFormSchema } from '@/types/auth';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import toast from 'react-hot-toast';
 
 type LoginFormProps = {
   className?: string;
@@ -37,8 +41,39 @@ export function LoginForm({
     forgetPasswordRedirection = '/login';
   }
 
+  const [loginForm, setLoginForm] = useState<LoginFormSchema>({
+    email: '',
+    password: ''
+  });
+  const [accountType, setAccountType] = useState('');
+
+  useEffect(() => {
+    setAccountType(user);
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      const { success, data, error } = loginFormSchema.safeParse(loginForm);
+
+      if (!success) {
+        toast.error('login error');
+        return;
+      }
+
+      const response = await axios.post('/api/auth/login', { ...data, accountType });
+      toast.success('login successfully');
+
+      console.log(response);
+    } catch (error) {
+      toast.error('somingthing went wrong');
+      console.log('something went wrong');
+    }
+  };
+
   return (
-    <form className={cn('flex flex-col gap-6 ', className)}>
+    <form className={cn('flex flex-col gap-6 ', className)} onSubmit={handleSubmit}>
       <FieldGroup>
         <div className="flex flex-col items-center gap-1 text-center">
           <h1 className="text-2xl font-bold">{header}</h1>
@@ -48,7 +83,14 @@ export function LoginForm({
         </div>
         <Field>
           <FieldLabel htmlFor="email">Email</FieldLabel>
-          <Input id="email" type="email" placeholder="m@example.com" required />
+          <Input
+            id="email"
+            type="email"
+            placeholder="m@example.com"
+            required
+            value={loginForm.email}
+            onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
+          />
         </Field>
         <Field>
           <div className="flex items-center">
@@ -60,7 +102,13 @@ export function LoginForm({
               Forgot your password?
             </Link>
           </div>
-          <Input id="password" type="password" required />
+          <Input
+            id="password"
+            type="password"
+            required
+            value={loginForm.password}
+            onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
+          />
         </Field>
         <Field>
           <Button type="submit">Login</Button>
