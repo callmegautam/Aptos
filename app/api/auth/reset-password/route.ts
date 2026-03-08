@@ -11,6 +11,7 @@ import { createOtp } from '@/lib/mail/otp';
 import { sendVerificationEmail } from '@/lib/mail/email';
 
 const resetSchema = z.object({
+  email: z.string().email(),
   password: z.string().min(8, 'Password must be at least 8 characters')
 });
 
@@ -19,7 +20,6 @@ export async function POST(req: Request) {
     const body = await req.json();
 
     const parsed = resetSchema.safeParse(body);
-
     if (!parsed.success) {
       return NextResponse.json(
         { error: 'Invalid input', details: parsed.error.flatten() },
@@ -27,44 +27,32 @@ export async function POST(req: Request) {
       );
     }
 
-    const { password } = parsed.data;
+    const { email, password } = parsed.data;
 
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token')?.value ?? '';
+    const [company, candidate] = await Promise.all([
+      db.select().from(companies).where(eq(companies.email, email)).limit(1),
+      db.select().from(candidates).where(eq(candidates.email, email)).limit(1)
+    ]);
 
-    const payload = await verifyToken(token);
+    const user = company[0] ?? candidate[0];
 
-    if (!payload) {
-      return NextResponse.json(
-        { error: 'Invalid or expired token' },
-        { status: HTTP_STATUS.BAD_REQUEST }
-      );
+    if (!user) {
+      return NextResponse.json({ error: 'Email not found' }, { status: HTTP_STATUS.NOT_FOUND });
     }
 
-    const { id, role, email } = payload;
-
-    if (!id || !role || !email) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: HTTP_STATUS.BAD_REQUEST });
-    }
+    const role = company[0] ? 'company' : 'candidate';
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    if (role === 'company') {
-      await db
-        .update(companies)
-        .set({ passwordHash })
-        .where(eq(companies.id, id as number));
-    } else if (role === 'candidate') {
-      await db
-        .update(candidates)
-        .set({ passwordHash })
-        .where(eq(candidates.id, id as number));
-    } else {
-      return NextResponse.json({ error: 'Invalid token' }, { status: HTTP_STATUS.BAD_REQUEST });
-    }
+    const table = role === 'company' ? companies : candidates;
+
+    await db.update(table).set({ passwordHash }).where(eq(table.id, user.id));
 
     return NextResponse.json(
-      { message: 'Password reset successfully', user: { id, email, role } },
+      {
+        message: 'Password reset successfully',
+        user: { id: user.id, email, role }
+      },
       { status: HTTP_STATUS.OK }
     );
   } catch (error) {
