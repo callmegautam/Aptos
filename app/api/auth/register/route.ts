@@ -20,13 +20,6 @@ async function hashPassword(password: string) {
 }
 
 async function registerCompany(email: string, password: string, name: string) {
-  const [existing] = await db.select().from(companies).where(eq(companies.email, email)).limit(1);
-
-  if (existing) {
-    // throw new Error('A company with this email already exists');
-    return { user: existing, otp: null, alreadyExists: true };
-  }
-
   const passwordHash = await hashPassword(password);
 
   const [company] = await db
@@ -47,13 +40,6 @@ async function registerCompany(email: string, password: string, name: string) {
 }
 
 async function registerCandidate(email: string, password: string, name: string) {
-  const [existing] = await db.select().from(candidates).where(eq(candidates.email, email)).limit(1);
-
-  if (existing) {
-    // throw new Error('A candidate with this email already exists');
-    return { user: existing, otp: null, alreadyExists: true };
-  }
-
   const passwordHash = await hashPassword(password);
 
   const [candidate] = await db
@@ -79,6 +65,7 @@ export async function POST(req: Request) {
     const body = await req.json();
 
     const parsed = registerSchema.safeParse(body);
+
     if (!parsed.success) {
       return NextResponse.json(
         { error: 'Invalid input', details: parsed.error.flatten() },
@@ -87,6 +74,27 @@ export async function POST(req: Request) {
     }
 
     const { email, password, name, accountType } = parsed.data;
+
+    const [existingCompany] = await db
+      .select()
+      .from(companies)
+      .where(eq(companies.email, email))
+      .limit(1);
+
+    if (existingCompany) {
+      // throw new Error('A company with this email already exists');
+      return { user: existingCompany, otp: null, alreadyExists: true };
+    }
+
+    const [existingCandidate] = await db
+      .select()
+      .from(candidates)
+      .where(eq(candidates.email, email))
+      .limit(1);
+
+    if (existingCandidate) {
+      return { user: existingCandidate, otp: null, alreadyExists: true };
+    }
 
     const result =
       accountType === 'company'
