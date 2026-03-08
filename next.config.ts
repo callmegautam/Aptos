@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
         pathname: '/**'
       }
     ]
-  }
+  },
   /* config options here */
   images: {
     remotePatterns: [
@@ -18,7 +18,7 @@ const nextConfig: NextConfig = {
         hostname: 'galaxypfp.com'
       }
     ]
-  }
+  },
   images: {
     remotePatterns: [
       {

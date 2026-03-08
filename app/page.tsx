@@ -107,7 +107,7 @@ export default function Home() {
             transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
           >
             {/* Gradient-frame hero: 2px gradient “border” + floating shadow, no animation */}
-            <div className="relative p-[2px] rounded-2xl md:rounded-3xl bg-linear-to-br from-primary/60 via-primary/30 to-primary/50 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.45),0_0_0_1px_rgba(0,0,0,0.06)]">
+            <div className="relative p-0.5 rounded-2xl md:rounded-3xl bg-linear-to-br from-primary/60 via-primary/30 to-primary/50 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.45),0_0_0_1px_rgba(0,0,0,0.06)]">
               <div className="relative aspect-16/10 overflow-hidden rounded-[calc(1rem-2px)] md:rounded-[calc(1.5rem-2px)] bg-black">
                 <Image
                   src={heroSrc}
