@@ -7,3 +7,4 @@ export * from './resume-ai-analysis';
 export * from './questions';
 export * from './interview-reports';
 export * from './verification-tokens';
+export * from './email-otp';

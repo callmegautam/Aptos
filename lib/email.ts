@@ -110,21 +110,84 @@ async function sendEmail(to: string, subject: string, html: string) {
   }
 }
 
-export async function sendVerificationEmail(to: string, token: string) {
-  const url = `${BASE_URL}/api/auth/verify-email?token=${encodeURIComponent(token)}`;
+export async function sendVerificationEmail(to: string, otp: string) {
+  // const url = `${BASE_URL}/api/auth/verify-email?token=${encodeURIComponent(token)}`;
 
-  console.log('Verification email URL:', url);
+  // console.log('Verification email URL:', url);
+
+  // const html = `Your OTP is ${otp}`;
 
   const html = `
-    <p>Please verify your email by clicking the link below:</p>
-    <p><a href="${url}">${url}</a></p>
-    <p>This link expires in 24 hours.</p>
+  <!DOCTYPE html>
+
+<html>
+<body style="margin:0;padding:0;background-color:#f4f6f8;font-family:Arial,Helvetica,sans-serif;">
+
+<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f6f8;padding:40px 0;">
+<tr>
+<td align="center">
+
+<table width="500" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:10px;padding:35px;box-shadow:0 4px 12px rgba(0,0,0,0.08);text-align:center;">
+
+<tr>
+<td style="font-size:22px;font-weight:bold;color:#2d6cdf;padding-bottom:10px;">
+${'Aptos Inc.'}
+</td>
+</tr>
+
+<tr>
+<td style="font-size:22px;font-weight:600;color:#333;padding-bottom:10px;">
+Your Verification Code
+</td>
+</tr>
+
+<tr>
+<td style="font-size:14px;color:#555;line-height:1.6;padding-bottom:20px;">
+Use the following One-Time Password (OTP) to complete your verification.
+</td>
+</tr>
+
+<tr>
+<td align="center">
+<div style="display:inline-block;background:#f1f5ff;border:2px dashed #2d6cdf;padding:18px 28px;border-radius:8px;font-size:32px;font-weight:bold;letter-spacing:6px;color:#2d6cdf;">
+${otp}
+</div>
+</td>
+</tr>
+
+<tr>
+<td style="font-size:14px;color:#555;line-height:1.6;padding-top:20px;">
+This code will expire in <strong>5 minutes</strong>.
+</td>
+</tr>
+
+<tr>
+<td style="font-size:13px;color:#888;line-height:1.6;padding-top:20px;">
+For security reasons, never share this code with anyone.  
+If you did not request this code, please ignore this email.
+</td>
+</tr>
+
+<tr>
+<td style="font-size:12px;color:#aaa;padding-top:25px;">
+© ${new Date().getFullYear()} Aptos Inc. All rights reserved.
+</td>
+</tr>
+
+</table>
+
+</td>
+</tr>
+</table>
+
+</body>
+</html>
   `;
 
-  await sendEmail(to, 'Verify your email', html);
-  console.log('Verification email sent to:', to);
+  await sendEmail(to, 'Your OTP', html);
+  console.log('OTP sent to:', to);
 
-  return { url };
+  return { otp };
 }
 
 export async function sendPasswordResetEmail(to: string, token: string) {
