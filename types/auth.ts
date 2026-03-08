@@ -32,6 +32,10 @@ const forgetPasswordSchema = z.object({
 const forgetPasswordFormSchema = z.object({
   email: z.string().email()
 });
+const verifySchema = z.object({
+  email: z.string().email(),
+  otp: z.string().min(4)
+});
 
 export type RegisterSchemaType = z.infer<typeof registerSchema>;
 export type RegisterFormSchemaType = z.infer<typeof registerFormSchema>;
@@ -39,3 +43,4 @@ export type LoginSchema = z.infer<typeof loginSchema>;
 export type LoginFormSchema = z.infer<typeof loginFormSchema>;
 export type ForgetPasswordSchema = z.infer<typeof forgetPasswordSchema>;
 export type ForgetPasswordFormSchema = z.infer<typeof forgetPasswordFormSchema>;
+export type VerifySchema = z.infer<typeof verifySchema>;
