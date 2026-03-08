@@ -46,7 +46,8 @@ export async function POST(req: Request) {
 
       const token = await signToken({
         id: company.id,
-        email: company.email
+        email: company.email,
+        role: 'company'
       });
 
       const cookieStore = await cookies();
@@ -81,7 +82,8 @@ export async function POST(req: Request) {
 
       const token = await signToken({
         id: candidate.id,
-        email: candidate.email
+        email: candidate.email,
+        role: 'candidate'
       });
 
       const cookieStore = await cookies();
