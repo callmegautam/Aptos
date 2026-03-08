@@ -21,6 +21,7 @@ export async function POST(req: Request) {
     const parsed = verifySchema.safeParse(body);
 
     if (!parsed.success) {
+      console.log('-------', body);
       return NextResponse.json(
         { error: 'Invalid input', details: parsed.error.flatten() },
         { status: HTTP_STATUS.BAD_REQUEST }
@@ -32,6 +33,8 @@ export async function POST(req: Request) {
     const otpResult = await verifyOtp(email, otp);
 
     if (!otpResult) {
+      console.log('-------', body);
+
       return NextResponse.json(
         { error: 'OTP is incorrect or expired' },
         { status: HTTP_STATUS.BAD_REQUEST }
@@ -42,7 +45,9 @@ export async function POST(req: Request) {
     const [company] = await db.select().from(companies).where(eq(companies.email, email)).limit(1);
 
     if (company) {
+      console.log('---- checkpoint 1------');
       await db.update(companies).set({ emailVerified: true }).where(eq(companies.id, company.id));
+      console.log('---- checkpoint 2------');
 
       const token = await signToken({
         id: company.id,
