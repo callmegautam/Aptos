@@ -25,17 +25,11 @@ export async function GET(req: Request) {
       .limit(1);
 
     if (!vt) {
-      return NextResponse.json(
-        { error: 'Invalid or expired verification token' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid or expired verification token' }, { status: 400 });
     }
 
     if (vt.companyId != null) {
-      await db
-        .update(companies)
-        .set({ emailVerified: true })
-        .where(eq(companies.id, vt.companyId));
+      await db.update(companies).set({ emailVerified: true }).where(eq(companies.id, vt.companyId));
     } else if (vt.candidateId != null) {
       await db
         .update(candidates)

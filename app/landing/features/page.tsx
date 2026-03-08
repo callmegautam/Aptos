@@ -15,7 +15,7 @@ import {
   BarChart3,
   Shield,
   Clock,
-  CheckCircle2,
+  CheckCircle2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -24,33 +24,37 @@ const features = [
     icon: Video,
     title: 'Video Interviews',
     desc: 'Structured, async AI video interviews. Assess communication and readiness at scale—fairly and consistently.',
-    highlights: ['Record & submit on your schedule', 'AI analysis & scoring', 'Shareable with hiring teams'],
+    highlights: [
+      'Record & submit on your schedule',
+      'AI analysis & scoring',
+      'Shareable with hiring teams'
+    ]
   },
   {
     icon: MessageSquare,
     title: 'AI Interviewers',
     desc: 'Avatar-led conversational interviews with dynamic follow-up questions. Feels like a live conversation.',
-    highlights: ['Natural dialogue flow', 'Context-aware follow-ups', 'Multi-language support'],
+    highlights: ['Natural dialogue flow', 'Context-aware follow-ups', 'Multi-language support']
   },
   {
     icon: GraduationCap,
     title: 'University Admissions',
     desc: 'Fair, scalable AI video interviews for student admissions. Consistent assessment across applicants.',
-    highlights: ['Admissions workflows', 'Rubric-based evaluation', 'High-volume screening'],
+    highlights: ['Admissions workflows', 'Rubric-based evaluation', 'High-volume screening']
   },
   {
     icon: Users,
     title: 'Mock Interviews',
     desc: 'Practice interviews with instant AI feedback. For students, job seekers, and career switchers.',
-    highlights: ['Real-time feedback', 'Practice until ready', 'Track improvement'],
-  },
+    highlights: ['Real-time feedback', 'Practice until ready', 'Track improvement']
+  }
 ];
 
 const capabilities = [
   { icon: Mic2, label: 'Multi-format interviews' },
   { icon: BarChart3, label: 'AI analytics & insights' },
   { icon: Shield, label: 'Enterprise security' },
-  { icon: Clock, label: 'Async scheduling' },
+  { icon: Clock, label: 'Async scheduling' }
 ];
 
 export default function FeaturesPage() {
@@ -68,7 +72,10 @@ export default function FeaturesPage() {
 
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-border/50">
-        <div className="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-primary/10 opacity-80" aria-hidden />
+        <div
+          className="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-primary/10 opacity-80"
+          aria-hidden
+        />
         <div className="container relative px-4 pt-24 pb-16 md:pt-32 md:pb-24">
           <motion.div
             className="mx-auto max-w-4xl text-center"
@@ -87,11 +94,15 @@ export default function FeaturesPage() {
               </span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
-              From async video interviews to AI-led conversations, Aptos gives you everything to screen candidates
-              fairly, consistently, and at scale.
+              From async video interviews to AI-led conversations, Aptos gives you everything to
+              screen candidates fairly, consistently, and at scale.
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-              <Button asChild size="lg" className="h-12 rounded-xl px-8 shadow-lg shadow-primary/25">
+              <Button
+                asChild
+                size="lg"
+                className="h-12 rounded-xl px-8 shadow-lg shadow-primary/25"
+              >
                 <Link href="/landing/contact">Schedule a demo</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="h-12 rounded-xl border-2 px-8">
@@ -129,7 +140,7 @@ export default function FeaturesPage() {
             viewport={{ once: true, margin: '-80px' }}
             variants={{
               visible: { transition: { staggerChildren: 0.1 } },
-              hidden: {},
+              hidden: {}
             }}
           >
             {features.map(({ icon: Icon, title, desc, highlights }) => (
@@ -138,7 +149,10 @@ export default function FeaturesPage() {
                 variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0 } }}
                 className="group relative overflow-hidden rounded-2xl border border-border bg-card shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10"
               >
-                <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-primary/80 via-primary to-primary/80 opacity-90" aria-hidden />
+                <div
+                  className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-primary/80 via-primary to-primary/80 opacity-90"
+                  aria-hidden
+                />
                 <div className="relative p-6 md:p-8">
                   <div className="relative flex size-14 items-center justify-center rounded-2xl bg-primary/15 text-primary ring-2 ring-primary/20 transition-all duration-300 group-hover:scale-105 group-hover:bg-primary/20 group-hover:ring-primary/40">
                     <Icon className="size-7" />
@@ -179,13 +193,25 @@ export default function FeaturesPage() {
             viewport={{ once: true }}
             variants={{
               visible: { transition: { staggerChildren: 0.08 } },
-              hidden: {},
+              hidden: {}
             }}
           >
             {[
-              { icon: Scale, title: 'Fair & structured', text: 'Same criteria for every candidate. Bias-aware evaluation across geographies.' },
-              { icon: Languages, title: '10+ languages', text: 'Interview across regions and time zones with multilingual support.' },
-              { icon: Zap, title: '80% less effort', text: 'Screen thousands of candidates while cutting manual review time.' },
+              {
+                icon: Scale,
+                title: 'Fair & structured',
+                text: 'Same criteria for every candidate. Bias-aware evaluation across geographies.'
+              },
+              {
+                icon: Languages,
+                title: '10+ languages',
+                text: 'Interview across regions and time zones with multilingual support.'
+              },
+              {
+                icon: Zap,
+                title: '80% less effort',
+                text: 'Screen thousands of candidates while cutting manual review time.'
+              }
             ].map(({ icon: Icon, title, text }) => (
               <motion.div
                 key={title}
