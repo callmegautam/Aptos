@@ -1,10 +1,8 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { companies, candidates, verificationTokens, emailOtps } from '@/lib/db/schema';
+import { companies, candidates, emailOtps } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcrypt';
-import { randomBytes } from 'crypto';
-import { sendVerificationEmail } from '@/lib/email';
 import { z } from 'zod';
 
 const registerSchema = z.object({
@@ -14,7 +12,6 @@ const registerSchema = z.object({
   accountType: z.enum(['candidate', 'company'])
 });
 const OTP_EXPIRY = 5 * 60 * 1000;
-const TOKEN_EXPIRY = 24 * 60 * 60 * 1000;
 
 async function hashPassword(password: string) {
   return bcrypt.hash(password, 10);
@@ -38,23 +35,6 @@ async function createOtp(email: string) {
   return otp;
 }
 
-function generateToken() {
-  return randomBytes(32).toString('hex');
-}
-
-async function createVerificationToken(data: { companyId?: number; candidateId?: number }) {
-  const token = generateToken();
-
-  await db.insert(verificationTokens).values({
-    ...data,
-    token,
-    type: 'email_verification',
-    expiresAt: new Date(Date.now() + TOKEN_EXPIRY)
-  });
-
-  return token;
-}
-
 async function registerCompany(email: string, password: string, name: string) {
   const [existing] = await db.select().from(companies).where(eq(companies.email, email)).limit(1);
 
@@ -76,12 +56,9 @@ async function registerCompany(email: string, password: string, name: string) {
 
   if (!company) throw new Error('Failed to create company');
 
-  const token = await createVerificationToken({ companyId: company.id });
   const otp = await createOtp(email);
 
   return { user: company, otp };
-
-  // return { user: company, token };
 }
 
 async function registerCandidate(email: string, password: string, name: string) {
@@ -107,10 +84,6 @@ async function registerCandidate(email: string, password: string, name: string) 
   const otp = await createOtp(email);
 
   return { user: candidate, otp };
-
-  const token = await createVerificationToken({ candidateId: candidate.id });
-
-  return { user: candidate, token };
 }
 
 export async function POST(req: Request) {
@@ -138,20 +111,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Failed to create OTP' }, { status: 500 });
     }
 
-    await sendVerificationEmail(email, result.otp);
+    // TODO: enable email verification
+    // await sendVerificationEmail(email, result.otp);
 
     return NextResponse.json({
       message: `${accountType} registered. OTP sent to email.`,
       userId: result.user.id
     });
-
-    // const { url } = await sendVerificationEmail(email, result.token);
-    // console.log('Verification email sent to:', email, url);
-    // return NextResponse.json({
-    //   message: `${accountType} registered. Please verify your email.`,
-    //   userId: result.user.id,
-    //   ...(process.env.NODE_ENV === 'development' && { verifyUrl: url })
-    // });
   } catch (error) {
     console.error('Register error:', error);
 
