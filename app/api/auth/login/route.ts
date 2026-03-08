@@ -5,6 +5,9 @@ import { eq } from 'drizzle-orm';
 import bcrypt from 'bcrypt';
 import { z } from 'zod';
 import { HTTP_STATUS } from '@/types/http';
+import { signToken } from '@/lib/auth/jwt';
+import { COOKIE_OPTIONS } from '@/config/cookies';
+import { cookies } from 'next/headers';
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -64,6 +67,15 @@ export async function POST(req: Request) {
     if (!user.emailVerified) {
       return NextResponse.json({ error: 'Email not verified' }, { status: HTTP_STATUS.FORBIDDEN });
     }
+
+    const token = await signToken({
+      id: user.id,
+      email: user.email,
+      role: accountType
+    });
+
+    const cookieStore = await cookies();
+    cookieStore.set('token', token, COOKIE_OPTIONS);
 
     return NextResponse.json(
       {
