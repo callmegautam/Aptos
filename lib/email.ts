@@ -1,30 +1,57 @@
 import nodemailer from 'nodemailer';
 
-const getBaseUrl = () =>
-  process.env.NEXTAUTH_URL ?? process.env.APP_URL ?? 'http://localhost:3000';
+const BASE_URL = process.env.NEXTAUTH_URL ?? process.env.APP_URL ?? 'http://localhost:3000';
+
+const SMTP_HOST = process.env.SMTP_HOST;
+const SMTP_PORT = Number(process.env.SMTP_PORT ?? 587);
+const SMTP_USER = process.env.SMTP_USER;
+const SMTP_PASS = process.env.SMTP_PASS;
+const SMTP_SECURE = process.env.SMTP_SECURE === 'true';
+
+let transporter: nodemailer.Transporter | null = null;
 
 function getTransporter() {
-  const host = process.env.SMTP_HOST;
-  const port = process.env.SMTP_PORT;
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
+  if (transporter) return transporter;
 
-  if (!host || !user || !pass) {
+  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
+    console.warn('SMTP not configured — emails will not be sent');
     return null;
   }
 
-  return nodemailer.createTransport({
-    host,
-    port: port ? Number(port) : 587,
-    secure: process.env.SMTP_SECURE === 'true',
-    auth: { user, pass }
+  transporter = nodemailer.createTransport({
+    host: SMTP_HOST,
+    port: SMTP_PORT,
+    secure: SMTP_SECURE,
+    auth: {
+      user: SMTP_USER,
+      pass: SMTP_PASS
+    }
   });
+
+  return transporter;
 }
 
-export async function sendVerificationEmail(to: string, token: string) {
-  const baseUrl = getBaseUrl();
-  const url = `${baseUrl}/api/auth/verify-email?token=${encodeURIComponent(token)}`;
+async function sendEmail(to: string, subject: string, html: string) {
   const transporter = getTransporter();
+
+  if (!transporter) {
+    console.log('Transporter not available');
+    return;
+  }
+
+  const info = await transporter.sendMail({
+    from: process.env.SMTP_FROM ?? SMTP_USER,
+    to,
+    subject,
+    html
+  });
+
+  console.log('EMAIL SENT:', info);
+}
+export async function sendVerificationEmail(to: string, token: string) {
+  const url = `${BASE_URL}/api/auth/verify-email?token=${encodeURIComponent(token)}`;
+
+  console.log('Verification email URL:', url);
 
   const html = `
     <p>Please verify your email by clicking the link below:</p>
@@ -32,35 +59,22 @@ export async function sendVerificationEmail(to: string, token: string) {
     <p>This link expires in 24 hours.</p>
   `;
 
-  if (transporter) {
-    await transporter.sendMail({
-      from: process.env.SMTP_FROM ?? process.env.SMTP_USER,
-      to,
-      subject: 'Verify your email',
-      html
-    });
-  }
+  await sendEmail(to, 'Verify your email', html);
+  console.log('Verification email sent to:', to);
+
   return { url };
 }
 
 export async function sendPasswordResetEmail(to: string, token: string) {
-  const baseUrl = getBaseUrl();
-  const url = `${baseUrl}/reset-password?token=${encodeURIComponent(token)}`;
-  const transporter = getTransporter();
+  const url = `${BASE_URL}/reset-password?token=${encodeURIComponent(token)}`;
 
   const html = `
-    <p>You requested a password reset. Click the link below to set a new password:</p>
+    <p>You requested a password reset.</p>
     <p><a href="${url}">${url}</a></p>
     <p>This link expires in 1 hour.</p>
   `;
 
-  if (transporter) {
-    await transporter.sendMail({
-      from: process.env.SMTP_FROM ?? process.env.SMTP_USER,
-      to,
-      subject: 'Reset your password',
-      html
-    });
-  }
+  await sendEmail(to, 'Reset your password', html);
+
   return { url };
 }

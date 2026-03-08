@@ -1,22 +1,24 @@
-import NextAuth, { NextAuthOptions } from 'next-auth';
+import NextAuth, { type NextAuthOptions } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
+import bcrypt from 'bcrypt';
+
 import { db } from '../db';
 import { companies, candidates } from '../db/schema';
 import { eq } from 'drizzle-orm';
-import bcrypt from 'bcrypt';
 
 export type AccountType = 'candidate' | 'company';
 
-declare module 'next-auth' {
-  interface User {
-    id: string;
-    email: string;
-    name: string | null;
-    accountType: AccountType;
-  }
+type AuthUser = {
+  id: string;
+  email: string;
+  name: string | null;
+  accountType: AccountType;
+};
 
+declare module 'next-auth' {
+  interface User extends AuthUser {}
   interface Session {
-    user: User;
+    user: AuthUser;
   }
 }
 
@@ -27,68 +29,87 @@ declare module 'next-auth/jwt' {
   }
 }
 
+async function validatePassword(password: string, hash: string) {
+  return bcrypt.compare(password, hash);
+}
+
+async function getCompanyByEmail(email: string) {
+  const [company] = await db.select().from(companies).where(eq(companies.email, email)).limit(1);
+
+  return company ?? null;
+}
+
+async function getCandidateByEmail(email: string) {
+  const [candidate] = await db
+    .select()
+    .from(candidates)
+    .where(eq(candidates.email, email))
+    .limit(1);
+
+  return candidate ?? null;
+}
+
+async function authorizeUser(
+  email: string,
+  password: string,
+  accountType: AccountType
+): Promise<AuthUser | null> {
+  if (accountType === 'company') {
+    const company = await getCompanyByEmail(email);
+    if (!company) return null;
+
+    const valid = await validatePassword(password, company.passwordHash);
+    if (!valid) return null;
+
+    if (!company.emailVerified) {
+      throw new Error('Company email is not verified');
+    }
+
+    return {
+      id: company.id.toString(),
+      email: company.email,
+      name: company.name,
+      accountType: 'company'
+    };
+  }
+
+  const candidate = await getCandidateByEmail(email);
+  if (!candidate) return null;
+
+  const valid = await validatePassword(password, candidate.passwordHash);
+  if (!valid) return null;
+
+  if (!candidate.emailVerified) {
+    throw new Error('Candidate email is not verified');
+  }
+
+  return {
+    id: candidate.id.toString(),
+    email: candidate.email,
+    name: candidate.name,
+    accountType: 'candidate'
+  };
+}
+
 export const authOptions: NextAuthOptions = {
   providers: [
     Credentials({
       name: 'Credentials',
 
       credentials: {
-        email: {},
-        password: {},
-        accountType: {}
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' },
+        accountType: { label: 'Account Type', type: 'text' }
       },
 
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
-
-        const accountType = (credentials.accountType as AccountType) ?? 'company';
-
-        if (accountType === 'company') {
-          const [company] = await db
-            .select()
-            .from(companies)
-            .where(eq(companies.email, credentials.email))
-            .limit(1);
-
-          if (!company) return null;
-
-          const valid = await bcrypt.compare(credentials.password, company.passwordHash);
-          if (!valid) return null;
-
-          if (company.emailVerified === false) {
-            throw new Error('Company email is not verified');
-          }
-
-          return {
-            id: company.id.toString(),
-            email: company.email,
-            name: company.name,
-            accountType: 'company' as const
-          };
+        if (!credentials?.email || !credentials?.password) {
+          return null;
         }
 
-        // accountType === 'candidate'
-        const [candidate] = await db
-          .select()
-          .from(candidates)
-          .where(eq(candidates.email, credentials.email))
-          .limit(1);
+        const accountType: AccountType = (credentials.accountType as AccountType) ?? 'company';
 
-        if (!candidate) return null;
-
-        const valid = await bcrypt.compare(credentials.password, candidate.passwordHash);
-        if (!valid) return null;
-
-        if (candidate.emailVerified === false) {
-          throw new Error('Candidate email is not verified');
-        }
-
-        return {
-          id: candidate.id.toString(),
-          email: candidate.email,
-          name: candidate.name,
-          accountType: 'candidate' as const
-        };
+        return authorizeUser(credentials.email, credentials.password, accountType);
       }
     })
   ],
@@ -111,7 +132,7 @@ export const authOptions: NextAuthOptions = {
     },
 
     async session({ session, token }) {
-      if (token && session.user) {
+      if (session.user) {
         session.user.id = token.id;
         session.user.accountType = token.accountType;
       }
