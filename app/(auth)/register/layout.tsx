@@ -5,14 +5,12 @@ import { usePathname } from 'next/navigation';
 
 export default function RegistrationPage({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  let imageSrc = '/images/placeholder.svg';
+  let imageSrc = '/images/company.png';
 
   if (pathname === '/register') {
-    imageSrc = '/images/placeholder.svg';
-  } else if (pathname === '/register/candidate') {
-    imageSrc = '/images/candidate.jpg';
-  } else if (pathname === '/register/admin') {
-    imageSrc = '/images/admin.jpg';
+    imageSrc = '/images/company.png';
+  } else {
+    imageSrc = 'images/candidate.png';
   }
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
@@ -30,11 +28,7 @@ export default function RegistrationPage({ children }: { children: React.ReactNo
         </div>
       </div>
       <div className="relative hidden bg-muted lg:block">
-        <img
-          src={imageSrc}
-          alt="Image"
-          className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-        />
+        <img src={imageSrc} alt="Image" className="absolute inset-0 h-full w-full object-cover " />
       </div>
     </div>
   );

@@ -5,14 +5,16 @@ import { usePathname } from 'next/navigation';
 
 export default function LoginPage({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  let imageSrc = '/images/placeholder.svg';
+  let imageSrc = '/images/company.png';
 
   if (pathname === '/login') {
-    imageSrc = '/images/placeholder.svg';
+    imageSrc = '/images/company.png';
   } else if (pathname === '/login/candidate') {
-    imageSrc = '/images/candidate.jpg';
+    imageSrc = '/images/candidate.png';
   } else if (pathname === '/login/admin') {
-    imageSrc = '/images/admin.jpg';
+    imageSrc = '/images/admin.png';
+  } else {
+    imageSrc = '/images/interviewer.png';
   }
 
   return (
@@ -31,11 +33,7 @@ export default function LoginPage({ children }: { children: React.ReactNode }) {
         </div>
       </div>
       <div className="relative hidden bg-muted lg:block">
-        <img
-          src={imageSrc}
-          alt="Image"
-          className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-        />
+        <img src={imageSrc} alt="Image" className="absolute inset-0 h-full w-full object-cover " />
       </div>
     </div>
   );
