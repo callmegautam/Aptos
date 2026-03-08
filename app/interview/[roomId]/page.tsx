@@ -20,6 +20,8 @@ import { createChatClient } from '@/lib/stream/chat-client';
 import { createInterviewChannel } from '@/lib/stream/create-channel';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
+import { RoomProvider } from '@liveblocks/react';
+import CollabEditor from '@/components/collab-editor';
 
 function VideoLayout() {
   const { useParticipants } = useCallStateHooks();
@@ -127,12 +129,9 @@ export default function InterviewRoom({ params }: { params: Promise<{ roomId: st
 
 function CodingEditor() {
   return (
-    <Editor
-      height="100%"
-      defaultLanguage="javascript"
-      defaultValue="console.log('Hello, world!');"
-      theme="vs-dark"
-    />
+    <RoomProvider id="my-room">
+      <CollabEditor />
+    </RoomProvider>
   );
 }
 function FloatingSelfView() {

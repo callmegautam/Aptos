@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/ui/theme-provider';
 import '@stream-io/video-react-sdk/dist/css/styles.css';
+import { LiveblocksProvider } from '@liveblocks/react/suspense';
+import { LiveblocksRoot } from '@/lib/liveblocks/liveblocks-provider';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -28,7 +30,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="dark" disableTransitionOnChange enableSystem>
-          {children}
+          <LiveblocksRoot>{children}</LiveblocksRoot>
         </ThemeProvider>
       </body>
     </html>

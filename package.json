@@ -13,6 +13,9 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@liveblocks/client": "^3.15.0",
+    "@liveblocks/react": "^3.15.0",
+    "@liveblocks/yjs": "^3.15.0",
     "@monaco-editor/react": "^4.7.0",
     "@neondatabase/serverless": "^1.0.2",
     "@stream-io/node-sdk": "^0.7.44",
@@ -36,6 +39,9 @@
     "stream-chat": "^9.35.1",
     "stream-chat-react": "^13.14.1",
     "tailwind-merge": "^3.5.0",
+    "y-monaco": "^0.1.6",
+    "y-protocols": "^1.0.7",
+    "yjs": "^13.6.29",
     "zod": "^4.3.6"
   },
   "devDependencies": {
