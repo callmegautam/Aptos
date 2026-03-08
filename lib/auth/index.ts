@@ -5,6 +5,8 @@ import bcrypt from 'bcrypt';
 import { db } from '../db';
 import { companies, candidates } from '../db/schema';
 import { eq } from 'drizzle-orm';
+import { createOtp, verifyOtp } from '../mail/otp';
+import { sendVerificationEmail } from '../mail/email';
 
 export type AccountType = 'candidate' | 'company';
 
@@ -99,17 +101,31 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
-        accountType: { label: 'Account Type', type: 'text' }
+        accountType: { label: 'Account Type', type: 'text' },
+        otp: { label: 'OTP', type: 'text' }
       },
 
       async authorize(credentials) {
+        if (credentials?.otp) {
+          const user = await verifyOtp(credentials.email, credentials.otp);
+          if (!user) throw new Error('Invalid or expired OTP');
+          return {
+            id: user.id.toString(),
+            email: user.email,
+            name: user.name,
+            accountType: user.role as AccountType
+          };
+        }
         if (!credentials?.email || !credentials?.password) {
           return null;
         }
 
-        const accountType: AccountType = (credentials.accountType as AccountType) ?? 'company';
+        const generatedOtp = await createOtp(credentials.email);
+        await sendVerificationEmail(credentials.email, generatedOtp);
 
-        return authorizeUser(credentials.email, credentials.password, accountType);
+        // const accountType: AccountType = (credentials.accountType as AccountType) ?? 'company';
+        throw new Error('OTP_SENT');
+        // return authorizeUser(credentials.email, credentials.password, accountType);
       }
     })
   ],

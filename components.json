@@ -18,7 +18,9 @@
     "ui": "@/components/ui",
     "lib": "@/lib",
     "hooks": "@/hooks",
-    "features": "@/features"
+    "features": "@/features",
+    "types": "@/types",
+    "db": "@/lib/db"
   },
   "registries": {
     "@shadcnblocks": "https://shadcnblocks.com/r/{name}.json"

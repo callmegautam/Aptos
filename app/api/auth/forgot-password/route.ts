@@ -3,7 +3,7 @@ import { db } from '@/lib/db';
 import { companies, candidates, verificationTokens } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { randomBytes } from 'crypto';
-import { sendPasswordResetEmail } from '@/lib/email';
+import { sendPasswordResetEmail } from '@/lib/mail/email';
 import { z } from 'zod';
 
 const schema = z.object({

@@ -1,9 +1,12 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { companies, candidates, emailOtps } from '@/lib/db/schema';
+import { companies, candidates } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcrypt';
 import { z } from 'zod';
+import { HTTP_STATUS } from '@/types/http';
+import { createOtp } from '@/lib/mail/otp';
+import { sendVerificationEmail } from '@/lib/mail/email';
 
 const registerSchema = z.object({
   email: z.string().email(),
@@ -11,35 +14,17 @@ const registerSchema = z.object({
   name: z.string().min(1),
   accountType: z.enum(['candidate', 'company'])
 });
-const OTP_EXPIRY = 5 * 60 * 1000;
 
 async function hashPassword(password: string) {
   return bcrypt.hash(password, 10);
-}
-
-function generateOtp() {
-  return Math.floor(1000 + Math.random() * 9000).toString();
-}
-
-async function createOtp(email: string) {
-  const otp = generateOtp();
-
-  await db.delete(emailOtps).where(eq(emailOtps.email, email));
-
-  await db.insert(emailOtps).values({
-    email,
-    otp,
-    expiresAt: new Date(Date.now() + OTP_EXPIRY)
-  });
-
-  return otp;
 }
 
 async function registerCompany(email: string, password: string, name: string) {
   const [existing] = await db.select().from(companies).where(eq(companies.email, email)).limit(1);
 
   if (existing) {
-    throw new Error('A company with this email already exists');
+    // throw new Error('A company with this email already exists');
+    return { user: existing, otp: null, alreadyExists: true };
   }
 
   const passwordHash = await hashPassword(password);
@@ -58,14 +43,15 @@ async function registerCompany(email: string, password: string, name: string) {
 
   const otp = await createOtp(email);
 
-  return { user: company, otp };
+  return { user: company, otp, alreadyExists: false };
 }
 
 async function registerCandidate(email: string, password: string, name: string) {
   const [existing] = await db.select().from(candidates).where(eq(candidates.email, email)).limit(1);
 
   if (existing) {
-    throw new Error('A candidate with this email already exists');
+    // throw new Error('A candidate with this email already exists');
+    return { user: existing, otp: null, alreadyExists: true };
   }
 
   const passwordHash = await hashPassword(password);
@@ -83,7 +69,7 @@ async function registerCandidate(email: string, password: string, name: string) 
   if (!candidate) throw new Error('Failed to create candidate');
   const otp = await createOtp(email);
 
-  return { user: candidate, otp };
+  return { user: candidate, otp, alreadyExists: false };
 }
 
 export async function POST(req: Request) {
@@ -96,7 +82,7 @@ export async function POST(req: Request) {
     if (!parsed.success) {
       return NextResponse.json(
         { error: 'Invalid input', details: parsed.error.flatten() },
-        { status: 400 }
+        { status: HTTP_STATUS.BAD_REQUEST }
       );
     }
 
@@ -107,24 +93,37 @@ export async function POST(req: Request) {
         ? await registerCompany(email, password, name)
         : await registerCandidate(email, password, name);
 
+    if (result.alreadyExists) {
+      return NextResponse.json({ error: 'User already exists' }, { status: HTTP_STATUS.CONFLICT });
+    }
+
     if (!result.otp) {
-      return NextResponse.json({ error: 'Failed to create OTP' }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Failed to create OTP' },
+        { status: HTTP_STATUS.INTERNAL_SERVER_ERROR }
+      );
     }
 
     // TODO: enable email verification
-    // await sendVerificationEmail(email, result.otp);
+    await sendVerificationEmail(email, result.otp);
 
-    return NextResponse.json({
-      message: `${accountType} registered. OTP sent to email.`,
-      userId: result.user.id
-    });
+    return NextResponse.json(
+      {
+        message: `${accountType} registered. OTP sent to email.`,
+        userId: result.user.id
+      },
+      { status: HTTP_STATUS.CREATED }
+    );
   } catch (error) {
     console.error('Register error:', error);
 
     if (error instanceof Error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      return NextResponse.json({ error: error.message }, { status: HTTP_STATUS.BAD_REQUEST });
     }
 
-    return NextResponse.json({ error: 'Registration failed' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Registration failed' },
+      { status: HTTP_STATUS.INTERNAL_SERVER_ERROR }
+    );
   }
 }

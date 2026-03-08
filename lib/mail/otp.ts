@@ -1,5 +1,5 @@
-import { db } from './db';
-import { emailOtps } from './db/schema';
+import { db } from '@/lib/db';
+import { candidates, companies, emailOtps } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 
 const OTP_EXPIRY = 5 * 60 * 1000;
@@ -31,5 +31,29 @@ export async function verifyOtp(email: string, otp: string) {
 
   await db.delete(emailOtps).where(eq(emailOtps.email, email));
 
-  return true;
+  // return the user corresponding to this OTP
+  const [candidate] = await db
+    .select()
+    .from(candidates)
+    .where(eq(candidates.email, email))
+    .limit(1);
+  const [company] = await db.select().from(companies).where(eq(companies.email, email)).limit(1);
+
+  if (!candidate && !company) return null;
+
+  if (candidate) {
+    return {
+      id: candidate.id,
+      email: candidate.email,
+      name: candidate.name,
+      role: 'candidate'
+    };
+  } else {
+    return {
+      id: company.id,
+      email: company.email,
+      name: company.name,
+      role: 'company'
+    };
+  }
 }
