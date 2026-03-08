@@ -47,16 +47,22 @@ export default function RegisterForm({
       const { success, data, error } = registerFormSchema.safeParse(registerForm);
 
       if (!success) {
-        console.log('Register error: ', error);
+        toast.error('Invalid input');
         return;
       }
 
       const response = await axios.post('/api/auth/register', { ...data, accountType });
-      toast.success('register successfully');
+
+      if (response.status !== 200) {
+        toast.error(response.data.error);
+        return;
+      }
+
+      toast.success(response.data.message);
 
       console.log(response);
     } catch (error) {
-      toast.error('somingthing went wrong');
+      toast.error('Something went wrong');
       console.log('something went wrong');
     }
   };
