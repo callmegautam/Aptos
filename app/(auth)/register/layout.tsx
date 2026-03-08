@@ -1,18 +1,17 @@
 'use client';
-import { GalleryVerticalEnd, GalleryVerticalEndIcon } from 'lucide-react';
+import { GalleryVerticalEndIcon } from 'lucide-react';
 
-import RegisterForm from '@/features/auth/components/register-form';
 import { usePathname } from 'next/navigation';
 
 export default function RegistrationPage({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   let imageSrc = '/images/placeholder.svg';
 
-  if (pathname === '/login') {
+  if (pathname === '/register') {
     imageSrc = '/images/placeholder.svg';
-  } else if (pathname === '/login/candidate') {
+  } else if (pathname === '/register/candidate') {
     imageSrc = '/images/candidate.jpg';
-  } else if (pathname === '/login/admin') {
+  } else if (pathname === '/register/admin') {
     imageSrc = '/images/admin.jpg';
   }
   return (
