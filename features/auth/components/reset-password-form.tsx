@@ -5,8 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Field, FieldGroup, FieldLabel, FieldDescription } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { CheckIcon, LockIcon } from 'lucide-react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useState } from 'react';
+import axios from 'axios';
+import { HTTP_STATUS } from '@/types/http';
+import toast from 'react-hot-toast';
 
 type ResetPasswordFormProps = {
   className?: string;
@@ -14,10 +18,42 @@ type ResetPasswordFormProps = {
 
 export function ResetPasswordForm({ className }: ResetPasswordFormProps) {
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   const redirectBack = searchParams.get('redirect');
+  const email = searchParams.get('email');
+
+  const [password, setPassword] = useState<string>('');
+  const [confirmPassword, setConfirmPassword] = useState<string>('');
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (password !== confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+
+    try {
+      const response = await axios.post('/api/auth/reset-password', {
+        email,
+        password
+      });
+
+      if (response.status === HTTP_STATUS.OK) {
+        toast.success('Password reset successfully');
+        router.push('/login');
+      }
+
+      console.log(response.data);
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'Something went wrong');
+      console.log(error);
+    }
+  };
+
   return (
-    <form className={cn('flex flex-col gap-6', className)}>
+    <form className={cn('flex flex-col gap-6', className)} onSubmit={handleSubmit}>
       <FieldGroup>
         {/* Icon */}
         <div className="flex justify-center">
