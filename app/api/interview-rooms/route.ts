@@ -4,25 +4,30 @@ import { interviewRooms } from '@/lib/db/schema';
 import { eq, desc, and } from 'drizzle-orm';
 import { z } from 'zod';
 import { HTTP_STATUS } from '@/types/http';
+import { verifyToken } from '@/lib/auth/jwt';
+import { cookies } from 'next/headers';
 
 const statusEnum = z.enum(['created', 'started', 'completed']);
 
 const createRoomSchema = z.object({
-  companyId: z.number().int().positive(),
+  // companyId: z.number().int().positive(),
   interviewerId: z.number().int().positive(),
-  candidateId: z.number().int().positive(),
-  roomCode: z.string().min(1).optional(),
-  jobTitle: z.string().min(1),
-  jobDescription: z.string().min(1),
-  requiredSkills: z.string().min(1),
+  // candidateId: z.number().int().positive(),
+  // roomCode: z.string().min(1).optional(),
+  jobTitle: z.string().min(1).optional(),
+  jobDescription: z.string().min(1).optional(),
+  requiredSkills: z.string().min(1).optional(),
   resumeUrl: z.string().url().optional().nullable(),
   status: statusEnum.default('created'),
-  scheduledAt: z.union([z.string(), z.coerce.date()]),
-  durationSeconds: z.number().int().positive()
+  scheduledAt: z.union([z.string(), z.coerce.date()]).optional()
 });
 
 function generateRoomCode(): string {
-  const part = Math.random().toString(36).replace(/[^a-z0-9]/gi, '').toUpperCase().slice(0, 8);
+  const part = Math.random()
+    .toString(36)
+    .replace(/[^a-z0-9]/gi, '')
+    .toUpperCase()
+    .slice(0, 8);
   return `ROOM-${part}`;
 }
 
@@ -40,9 +45,10 @@ export async function GET(req: Request) {
     const candidateId = parseOptionalInt(searchParams.get('candidateId'));
     const statusParam = searchParams.get('status');
 
-    const status = statusParam && statusEnum.safeParse(statusParam).success
-      ? (statusParam as 'created' | 'started' | 'completed')
-      : undefined;
+    const status =
+      statusParam && statusEnum.safeParse(statusParam).success
+        ? (statusParam as 'created' | 'started' | 'completed')
+        : undefined;
 
     const conditions = [
       companyId != null && eq(interviewRooms.companyId, companyId),
@@ -69,6 +75,23 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('token')?.value ?? '';
+    const payload = await verifyToken(token);
+
+    if (!payload) {
+      return NextResponse.json(
+        { error: 'Invalid or expired token' },
+        { status: HTTP_STATUS.BAD_REQUEST }
+      );
+    }
+
+    const { id, role } = payload;
+
+    if (role !== 'company') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: HTTP_STATUS.UNAUTHORIZED });
+    }
+
     const body = await req.json();
     const parsed = createRoomSchema.safeParse(body);
 
@@ -93,8 +116,7 @@ export async function POST(req: Request) {
 
     const roomCode = parsed.data.roomCode ?? generateRoomCode();
     const resumeUrl = parsed.data.resumeUrl ?? null;
-    const scheduledAtDate =
-      typeof scheduledAt === 'string' ? new Date(scheduledAt) : scheduledAt;
+    const scheduledAtDate = typeof scheduledAt === 'string' ? new Date(scheduledAt) : scheduledAt;
 
     const [room] = await db
       .insert(interviewRooms)
