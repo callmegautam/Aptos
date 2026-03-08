@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/components/ui/theme-provider';
 import '@stream-io/video-react-sdk/dist/css/styles.css';
 import { LiveblocksProvider } from '@liveblocks/react/suspense';
 import { LiveblocksRoot } from '@/lib/liveblocks/liveblocks-provider';
+import { Toaster } from 'react-hot-toast';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -31,6 +32,8 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="dark" disableTransitionOnChange enableSystem>
           <LiveblocksRoot>{children}</LiveblocksRoot>
+          {children}
+          <Toaster position="top-center" reverseOrder={false} />
         </ThemeProvider>
       </body>
     </html>

@@ -12,7 +12,8 @@ const nextConfig: NextConfig = {
         hostname: 'images.unsplash.com'
       }
     ]
-  }
+  },
+  reactStrictMode: false
 };
 
 export default nextConfig;
