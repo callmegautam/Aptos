@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, use } from 'react';
+import { useEffect, useState, use, Suspense } from 'react';
 import {
   StreamVideo,
   StreamCall,
@@ -22,6 +22,7 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { RoomProvider } from '@liveblocks/react';
 import CollabEditor from '@/components/collab-editor';
+import { useParams } from 'next/navigation';
 
 function VideoLayout() {
   const { useParticipants } = useCallStateHooks();
@@ -34,6 +35,7 @@ function VideoLayout() {
       <SpeakerLayout
         participantsBarPosition="bottom"
         excludeLocalParticipant={excludeLocalParticipant}
+        mirrorLocalParticipantVideo
       />
 
       {excludeLocalParticipant && <FloatingSelfView />}
@@ -128,10 +130,15 @@ export default function InterviewRoom({ params }: { params: Promise<{ roomId: st
 }
 
 function CodingEditor() {
+  const params = useParams();
+  const roomId = params.roomId as string;
+
   return (
-    <RoomProvider id="my-room">
-      <CollabEditor />
-    </RoomProvider>
+    <Suspense fallback={<div>Loading...</div>}>
+      <RoomProvider id={roomId}>
+        <CollabEditor />
+      </RoomProvider>
+    </Suspense>
   );
 }
 function FloatingSelfView() {

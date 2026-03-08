@@ -4,6 +4,10 @@ import { LiveblocksProvider } from '@liveblocks/react';
 import { liveblocks } from '@/lib/liveblocks/client';
 
 export function LiveblocksRoot({ children }: { children: React.ReactNode }) {
+  console.log(
+    'process.env.NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY:',
+    process.env.NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY
+  );
   return (
     <LiveblocksProvider publicApiKey={process.env.NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY!}>
       {children}
