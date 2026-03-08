@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import Editor from '@monaco-editor/react';
-
 import * as Y from 'yjs';
+import { MonacoBinding } from 'y-monaco';
 import { LiveblocksYjsProvider } from '@liveblocks/yjs';
 import { useRoom } from '@liveblocks/react';
 
@@ -11,35 +11,25 @@ export default function CollabEditor() {
   const room = useRoom();
   const editorRef = useRef<any>(null);
 
-  useEffect(() => {
-    const yDoc = new Y.Doc();
+  const handleMount = (editor: any) => {
+    editorRef.current = editor;
 
-    const provider = new LiveblocksYjsProvider(room, yDoc);
+    const ydoc = new Y.Doc();
+    const provider = new LiveblocksYjsProvider(room, ydoc);
+    const yText = ydoc.getText('monaco');
 
-    const yText = yDoc.getText('monaco');
+    const model = editor.getModel();
 
-    const MonacoBinding = require('y-monaco').MonacoBinding;
-
-    if (editorRef.current) {
-      const model = editorRef.current.getModel();
-
-      new MonacoBinding(yText, model, new Set([editorRef.current]), provider.awareness);
-    }
-
-    return () => {
-      provider.destroy();
-      yDoc.destroy();
-    };
-  }, [room]);
+    new MonacoBinding(yText, model, new Set([editor]), provider.awareness as any);
+  };
 
   return (
     <Editor
-      height="600px"
+      height="100%"
       defaultLanguage="javascript"
+      defaultValue="// Start coding..."
       theme="vs-dark"
-      onMount={(editor) => {
-        editorRef.current = editor;
-      }}
+      onMount={handleMount}
     />
   );
 }
