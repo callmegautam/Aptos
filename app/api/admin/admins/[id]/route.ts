@@ -5,10 +5,7 @@ import { admins } from '@/lib/db/schema/admins';
 import { requireAdmin } from '@/lib/auth/admin';
 import { hashAdminPassword } from '@/lib/auth/admin';
 
-export async function GET(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireAdmin(req);
   if (auth.response) return auth.response;
 
@@ -36,10 +33,7 @@ export async function GET(
   return NextResponse.json(admin);
 }
 
-export async function PATCH(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireAdmin(req);
   if (auth.response) return auth.response;
 
@@ -65,17 +59,13 @@ export async function PATCH(
     return NextResponse.json({ error: 'Only super admin can assign super role' }, { status: 403 });
   }
 
-  const [updated] = await db
-    .update(admins)
-    .set(updates)
-    .where(eq(admins.id, id))
-    .returning({
-      id: admins.id,
-      name: admins.name,
-      email: admins.email,
-      role: admins.role,
-      createdAt: admins.createdAt
-    });
+  const [updated] = await db.update(admins).set(updates).where(eq(admins.id, id)).returning({
+    id: admins.id,
+    name: admins.name,
+    email: admins.email,
+    role: admins.role,
+    createdAt: admins.createdAt
+  });
 
   if (!updated) {
     return NextResponse.json({ error: 'Admin not found' }, { status: 404 });
@@ -84,10 +74,7 @@ export async function PATCH(
   return NextResponse.json(updated);
 }
 
-export async function DELETE(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireAdmin(req);
   if (auth.response) return auth.response;
 
@@ -104,10 +91,7 @@ export async function DELETE(
     return NextResponse.json({ error: 'Cannot delete your own admin account' }, { status: 400 });
   }
 
-  const [deleted] = await db
-    .delete(admins)
-    .where(eq(admins.id, id))
-    .returning({ id: admins.id });
+  const [deleted] = await db.delete(admins).where(eq(admins.id, id)).returning({ id: admins.id });
 
   if (!deleted) {
     return NextResponse.json({ error: 'Admin not found' }, { status: 404 });

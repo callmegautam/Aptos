@@ -6,10 +6,7 @@ import { requireAdmin } from '@/lib/auth/admin';
 
 const ALLOWED_STATUSES = ['created', 'started', 'completed'] as const;
 
-export async function GET(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireAdmin(req);
   if (auth.response) return auth.response;
 
@@ -18,11 +15,7 @@ export async function GET(
     return NextResponse.json({ error: 'Invalid interview id' }, { status: 400 });
   }
 
-  const [room] = await db
-    .select()
-    .from(interviewRooms)
-    .where(eq(interviewRooms.id, id))
-    .limit(1);
+  const [room] = await db.select().from(interviewRooms).where(eq(interviewRooms.id, id)).limit(1);
 
   if (!room) {
     return NextResponse.json({ error: 'Interview not found' }, { status: 404 });
@@ -31,10 +24,7 @@ export async function GET(
   return NextResponse.json(room);
 }
 
-export async function PATCH(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireAdmin(req);
   if (auth.response) return auth.response;
 

@@ -10,17 +10,10 @@ export async function POST(req: Request) {
     const { email, password } = body as { email?: string; password?: string };
 
     if (!email || !password) {
-      return NextResponse.json(
-        { error: 'Email and password required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Email and password required' }, { status: 400 });
     }
 
-    const [admin] = await db
-      .select()
-      .from(admins)
-      .where(eq(admins.email, email))
-      .limit(1);
+    const [admin] = await db.select().from(admins).where(eq(admins.email, email)).limit(1);
 
     if (!admin) {
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });

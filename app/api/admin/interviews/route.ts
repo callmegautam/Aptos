@@ -4,6 +4,13 @@ import { db } from '@/lib/db';
 import { interviewRooms } from '@/lib/db/schema/interview-rooms';
 import { requireAdmin } from '@/lib/auth/admin';
 
+const ALLOWED_STATUSES = ['created', 'started', 'completed'] as const;
+type InterviewStatus = (typeof ALLOWED_STATUSES)[number];
+
+function isInterviewStatus(s: string | null): s is InterviewStatus {
+  return s !== null && ALLOWED_STATUSES.includes(s as InterviewStatus);
+}
+
 export async function GET(req: Request) {
   const auth = await requireAdmin(req);
   if (auth.response) return auth.response;
@@ -13,7 +20,8 @@ export async function GET(req: Request) {
     const page = Math.max(1, parseInt(url.searchParams.get('page') ?? '1', 10));
     const limit = Math.min(50, Math.max(1, parseInt(url.searchParams.get('limit') ?? '20', 10)));
     const offset = (page - 1) * limit;
-    const status = url.searchParams.get('status');
+    const statusParam = url.searchParams.get('status');
+    const status = isInterviewStatus(statusParam) ? statusParam : null;
 
     if (status) {
       const [list, totalResult] = await Promise.all([
@@ -24,10 +32,7 @@ export async function GET(req: Request) {
           .orderBy(desc(interviewRooms.scheduledAt))
           .limit(limit)
           .offset(offset),
-        db
-          .select({ value: count() })
-          .from(interviewRooms)
-          .where(eq(interviewRooms.status, status))
+        db.select({ value: count() }).from(interviewRooms).where(eq(interviewRooms.status, status))
       ]);
       const total = totalResult[0]?.value ?? 0;
       return NextResponse.json({

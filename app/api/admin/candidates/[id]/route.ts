@@ -4,10 +4,7 @@ import { db } from '@/lib/db';
 import { candidates } from '@/lib/db/schema/candidates';
 import { requireAdmin } from '@/lib/auth/admin';
 
-export async function GET(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireAdmin(req);
   if (auth.response) return auth.response;
 
@@ -35,10 +32,7 @@ export async function GET(
   return NextResponse.json(candidate);
 }
 
-export async function PATCH(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireAdmin(req);
   if (auth.response) return auth.response;
 
@@ -48,7 +42,12 @@ export async function PATCH(
   }
 
   const body = await req.json().catch(() => ({}));
-  const updates: { name?: string; email?: string; avatarUrl?: string | null; phone?: string | null } = {};
+  const updates: {
+    name?: string;
+    email?: string;
+    avatarUrl?: string | null;
+    phone?: string | null;
+  } = {};
   if (typeof body.name === 'string') updates.name = body.name;
   if (typeof body.email === 'string') updates.email = body.email;
   if (body.avatarUrl !== undefined) updates.avatarUrl = body.avatarUrl ?? null;

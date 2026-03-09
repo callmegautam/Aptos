@@ -59,17 +59,17 @@ export async function POST(req: Request) {
     };
 
     if (!name || !email || !password) {
-      return NextResponse.json(
-        { error: 'name, email and password required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'name, email and password required' }, { status: 400 });
     }
 
     const adminRole = role === 'super' ? 'super' : 'support';
 
     const [existing] = await db.select().from(admins).where(eq(admins.email, email)).limit(1);
     if (existing) {
-      return NextResponse.json({ error: 'An admin with this email already exists' }, { status: 409 });
+      return NextResponse.json(
+        { error: 'An admin with this email already exists' },
+        { status: 409 }
+      );
     }
 
     const passwordHash = await hashAdminPassword(password);

@@ -4,10 +4,7 @@ import { db } from '@/lib/db';
 import { companies } from '@/lib/db/schema/companies';
 import { requireAdmin } from '@/lib/auth/admin';
 
-export async function GET(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireAdmin(req);
   if (auth.response) return auth.response;
 
@@ -16,11 +13,7 @@ export async function GET(
     return NextResponse.json({ error: 'Invalid company id' }, { status: 400 });
   }
 
-  const [company] = await db
-    .select()
-    .from(companies)
-    .where(eq(companies.id, id))
-    .limit(1);
+  const [company] = await db.select().from(companies).where(eq(companies.id, id)).limit(1);
 
   if (!company) {
     return NextResponse.json({ error: 'Company not found' }, { status: 404 });
@@ -34,10 +27,7 @@ export async function GET(
   });
 }
 
-export async function PATCH(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireAdmin(req);
   if (auth.response) return auth.response;
 
@@ -60,7 +50,12 @@ export async function PATCH(
     .update(companies)
     .set(updates)
     .where(eq(companies.id, id))
-    .returning({ id: companies.id, name: companies.name, email: companies.email, avatarUrl: companies.avatarUrl });
+    .returning({
+      id: companies.id,
+      name: companies.name,
+      email: companies.email,
+      avatarUrl: companies.avatarUrl
+    });
 
   if (!updated) {
     return NextResponse.json({ error: 'Company not found' }, { status: 404 });
