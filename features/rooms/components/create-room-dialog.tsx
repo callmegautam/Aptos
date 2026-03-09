@@ -194,10 +194,10 @@ export function CreateRoomDialog({
 
     try {
       if (isEdit && editingRoom) {
+        console.log('----', editingRoom.id);
         response = await axios.patch(`/api/interview-rooms/${editingRoom.id}`, formData);
         toast.success('Interview room updated', { id: loadingToast });
       } else {
-        console.log('----', formData);
         response = await axios.post('/api/interview-rooms', formData);
         toast.success('Interview room created', { id: loadingToast });
       }

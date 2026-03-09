@@ -11,7 +11,7 @@ function hasResume(resumeUrl: unknown): resumeUrl is string {
 
 export async function GET(_req: Request, { params }: { params: { code: string } }) {
   try {
-    const { code } = params;
+    const { code } = await params;
     const roomCode = (code ?? '').trim();
 
     if (!roomCode) {
@@ -61,13 +61,13 @@ export async function GET(_req: Request, { params }: { params: { code: string } 
 
       const needsCandidateIdUpdate = room.candidateId == null;
       const roomAfterCandidateUpdate = needsCandidateIdUpdate
-        ? (
+        ? ((
             await db
               .update(interviewRooms)
               .set({ candidateId: user.id })
               .where(and(eq(interviewRooms.id, room.id), isNull(interviewRooms.candidateId)))
               .returning()
-          )[0] ?? room
+          )[0] ?? room)
         : room;
 
       const resumePresent = hasResume(roomAfterCandidateUpdate.resumeUrl);
@@ -93,4 +93,3 @@ export async function GET(_req: Request, { params }: { params: { code: string } 
     );
   }
 }
-

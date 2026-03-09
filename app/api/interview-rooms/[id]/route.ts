@@ -10,7 +10,7 @@ import { deletePublicFileByUrl, savePublicFile } from '@/lib/storage/public-file
 
 export async function GET(_req: Request, { params }: { params: { id: string } }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const roomId = parseId(id);
 
     if (roomId == null) {
@@ -68,7 +68,7 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const roomId = parseId(id);
 
     if (roomId == null) {
@@ -231,7 +231,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 
 export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const roomId = parseId(id);
 
     if (roomId == null) {

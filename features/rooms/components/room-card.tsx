@@ -31,6 +31,7 @@ import type {
   InterviewRoomStatus,
   InterviewRoomWithRelations
 } from '@/types/interview-room';
+import { formatDateShort } from '@/utils/date';
 
 const STATUS_CONFIG: Record<InterviewRoomStatus, { label: string; variant: any }> = {
   SCHEDULED: { label: 'Scheduled', variant: 'default' },
@@ -39,40 +40,38 @@ const STATUS_CONFIG: Record<InterviewRoomStatus, { label: string; variant: any }
   CANCELLED: { label: 'Cancelled', variant: 'destructive' }
 };
 
-const FIELD_CONFIG: Record<
-  InterviewField,
-  { label: string; icon: typeof Server; color: string }
-> = {
-  BACKEND: {
-    label: 'Backend',
-    icon: Server,
-    color: 'bg-amber-500/10 text-amber-600'
-  },
-  FRONTEND: {
-    label: 'Frontend',
-    icon: LayoutDashboard,
-    color: 'bg-sky-500/10 text-sky-600'
-  },
-  FULLSTACK: {
-    label: 'Fullstack',
-    icon: Layers,
-    color: 'bg-violet-500/10 text-violet-600'
-  },
-  APPLICATION: {
-    label: 'App',
-    icon: Smartphone,
-    color: 'bg-emerald-500/10 text-emerald-600'
-  }
-};
+const FIELD_CONFIG: Record<InterviewField, { label: string; icon: typeof Server; color: string }> =
+  {
+    BACKEND: {
+      label: 'Backend',
+      icon: Server,
+      color: 'bg-amber-500/10 text-amber-600'
+    },
+    FRONTEND: {
+      label: 'Frontend',
+      icon: LayoutDashboard,
+      color: 'bg-sky-500/10 text-sky-600'
+    },
+    FULLSTACK: {
+      label: 'Fullstack',
+      icon: Layers,
+      color: 'bg-violet-500/10 text-violet-600'
+    },
+    APPLICATION: {
+      label: 'App',
+      icon: Smartphone,
+      color: 'bg-emerald-500/10 text-emerald-600'
+    }
+  };
 
-function formatDateShort(date: Date) {
-  return new Intl.DateTimeFormat(undefined, {
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit'
-  }).format(date);
-}
+// function formatDateShort(date: Date) {
+//   return new Intl.DateTimeFormat(undefined, {
+//     month: 'short',
+//     day: 'numeric',
+//     hour: 'numeric',
+//     minute: '2-digit'
+//   }).format(date);
+// }
 
 function getInviteLink(roomId: number): string {
   if (typeof window !== 'undefined') {
@@ -108,7 +107,9 @@ export function RoomCard({ room, onEdit, onDelete }: RoomCardProps) {
       <CardHeader className="flex flex-row items-start justify-between space-y-0">
         <div className="flex items-start gap-3">
           {/* Field Icon */}
-          <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${fieldConf.color}`}>
+          <div
+            className={`flex h-10 w-10 items-center justify-center rounded-lg ${fieldConf.color}`}
+          >
             <FieldIcon className="h-5 w-5 text-muted-foreground" />
           </div>
 
