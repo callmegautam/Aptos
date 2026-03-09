@@ -8,7 +8,8 @@ import { savePublicFile } from '@/lib/storage/public-files';
 
 export async function POST(req: Request, { params }: { params: { code: string } }) {
   try {
-    const roomCode = (params.code ?? '').trim();
+    const { code } = await params;
+    const roomCode = (code ?? '').trim();
     if (!roomCode) {
       return NextResponse.json({ error: 'Invalid code' }, { status: HTTP_STATUS.BAD_REQUEST });
     }
@@ -90,4 +91,3 @@ export async function POST(req: Request, { params }: { params: { code: string } 
     );
   }
 }
-

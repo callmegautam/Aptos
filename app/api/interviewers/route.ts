@@ -162,6 +162,7 @@ export async function POST(req: Request) {
         passwordHash,
         companyId,
         phone: phone ?? null,
+        emailVerified: true,
         avatarUrl: storedAvatarUrl ?? avatarUrl ?? null
       })
       .returning();

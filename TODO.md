@@ -1,9 +1,3 @@
-## Auth
-
-<!-- - Interviewer login -->
-<!-- - Admin login -->
-<!-- - OTP mail setup (optional) -->
-
 ## Company Dashboard
 
 - Account page
