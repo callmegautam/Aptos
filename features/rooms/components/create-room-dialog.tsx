@@ -126,12 +126,12 @@ export function CreateRoomDialog({
                 />
               </Field>
               <Field>
-                <FieldLabel htmlFor="room-description">Description (optional)</FieldLabel>
+                <FieldLabel htmlFor="room-description">Job Description</FieldLabel>
                 <Input
                   id="room-description"
                   value={form.description ?? ''}
                   onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
-                  placeholder="Brief description or purpose"
+                  placeholder="Breif job description"
                 />
               </Field>
               <div className="grid grid-cols-2 gap-4">
