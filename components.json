@@ -17,12 +17,10 @@
     "utils": "@/lib/utils",
     "ui": "@/components/ui",
     "lib": "@/lib",
-    "hooks": "@/hooks",
-    "features": "@/features",
-    "types": "@/types",
-    "db": "@/lib/db"
+    "hooks": "@/hooks"
   },
   "registries": {
-    "@shadcnblocks": "https://shadcnblocks.com/r/{name}.json"
+    "@shadcnblocks": "https://shadcnblocks.com/r/{name}.json",
+    "@blocks": "https://blocks.so/r/{name}.json"
   }
 }
