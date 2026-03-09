@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { CreateRoomDialog } from '@/features/rooms/components/create-room-dialog';
 import { RoomsList } from '@/features/rooms/components/rooms-list';
-import { PlusIcon, TableIcon } from 'lucide-react';
+import { Link, PlusIcon, TableIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { InterviewRoomWithRelations } from '@/types/interview-room';
 import toast from 'react-hot-toast';
@@ -32,7 +32,7 @@ const RoomsPage = () => {
 
   useEffect(() => {
     const fetchRooms = async () => {
-      const toastId = toast.loading('Loading interview rooms...');
+      setLoading(true);
       try {
         const response = await axios.get('/api/interview-rooms');
         if (response.status === HTTP_STATUS.OK) {
@@ -44,17 +44,17 @@ const RoomsPage = () => {
             }))
           );
         } else {
-          toast.error(response.data?.error ?? 'Failed to load rooms', { id: toastId });
+          toast.error(response.data?.error ?? 'Failed to load rooms');
         }
       } catch (error) {
         if (axios.isAxiosError(error)) {
           const message = error.response?.data?.error || 'Request failed';
-          toast.error(message, { id: toastId });
+          toast.error(message);
         } else {
-          toast.error('Something went wrong while loading rooms', { id: toastId });
+          toast.error('Something went wrong while loading rooms');
         }
       } finally {
-        toast.dismiss(toastId);
+        setLoading(false);
       }
     };
 
@@ -111,10 +111,12 @@ const RoomsPage = () => {
       <div className="flex items-center justify-between mb-10">
         <h1 className="text-2xl font-bold">Interview rooms</h1>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => router.push('/dashboard/rooms/table')}>
-            <TableIcon className="w-4 h-4" />
-            View more
-          </Button>
+          <Link href="/dashboard/rooms/table">
+            <Button variant="outline">
+              <TableIcon className="w-4 h-4" />
+              View more
+            </Button>
+          </Link>
           <Button
             variant="outline"
             onClick={() => {
