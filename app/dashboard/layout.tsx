@@ -277,9 +277,17 @@ const NavUser = ({ user }: { user: UserData }) => {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <User className="mr-2 size-4" />
-              Account
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard/account">
+                <User className="mr-2 size-4" />
+                Account
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard/subscription">
+                <Settings className="mr-2 size-4" />
+                Subscription
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             {/* todo */}
