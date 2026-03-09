@@ -5,7 +5,7 @@ import { eq } from 'drizzle-orm';
 import bcrypt from 'bcrypt';
 import { HTTP_STATUS } from '@/types/http';
 import { setToken, signToken } from '@/lib/auth/jwt';
-import { COOKIE_OPTIONS } from '@/config/cookies';
+import { COOKIE_OPTIONS } from '@/utils/constants/cookies';
 import { cookies } from 'next/headers';
 import { loginSchema, UserRole } from '@/types/auth';
 

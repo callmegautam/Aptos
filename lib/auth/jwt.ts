@@ -1,4 +1,4 @@
-import { COOKIE_OPTIONS } from '@/config/cookies';
+import { COOKIE_OPTIONS } from '@/utils/constants/cookies';
 import { UserRole } from '@/types/auth';
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';

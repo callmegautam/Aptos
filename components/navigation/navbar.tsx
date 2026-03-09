@@ -10,7 +10,8 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle
 } from '@/components/ui/navigation-menu';
-import { cn, NAV_LINKS } from '@/utils';
+import { NAV_LINKS } from '@/utils/constants/nav-links';
+import { cn } from '@/lib/utils';
 // import { useClerk } from "@clerk/nextjs";
 import { LucideIcon, ZapIcon } from 'lucide-react';
 import Link from 'next/link';
@@ -55,7 +56,7 @@ const Navbar = () => {
 
             <NavigationMenu className="hidden lg:flex">
               <NavigationMenuList>
-                {NAV_LINKS.map((link) => (
+                {NAV_LINKS.map((link: any) => (
                   <NavigationMenuItem key={link.title}>
                     {link.menu ? (
                       <>
@@ -85,7 +86,7 @@ const Navbar = () => {
                                 </NavigationMenuLink>
                               </li>
                             )}
-                            {link.menu.map((menuItem) => (
+                            {link.menu.map((menuItem: any) => (
                               <ListItem
                                 key={menuItem.title}
                                 title={menuItem.title}

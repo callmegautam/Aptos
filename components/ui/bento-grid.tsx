@@ -8,7 +8,7 @@ import {
   CommandItem,
   CommandList
 } from '@/components/ui/command';
-import { cn } from '@/utils';
+import { cn } from '@/lib/utils';
 import { ArrowRightIcon, CalendarIcon, Link2Icon, SearchIcon, WaypointsIcon } from 'lucide-react';
 import Link from 'next/link';
 import { ReactNode } from 'react';

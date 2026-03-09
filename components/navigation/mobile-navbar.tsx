@@ -8,7 +8,8 @@ import {
 } from '@/components/ui/accordion';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Sheet, SheetClose, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { cn, NAV_LINKS } from '@/utils';
+import { NAV_LINKS } from '@/utils/constants/nav-links';
+import { cn } from '@/lib/utils';
 // import { useAuth } from '@clerk/nextjs';
 import { LucideIcon, Menu, X } from 'lucide-react';
 import Link from 'next/link';
@@ -66,14 +67,14 @@ const MobileNavbar = () => {
             </div>
             <ul className="flex flex-col items-start w-full mt-6">
               <Accordion type="single" collapsible className="!w-full">
-                {NAV_LINKS.map((link) => (
+                {NAV_LINKS.map((link: any) => (
                   <AccordionItem key={link.title} value={link.title} className="last:border-none">
                     {link.menu ? (
                       <>
                         <AccordionTrigger>{link.title}</AccordionTrigger>
                         <AccordionContent>
                           <ul onClick={handleClose} className={cn('w-full')}>
-                            {link.menu.map((menuItem) => (
+                            {link.menu.map((menuItem: any) => (
                               <ListItem
                                 key={menuItem.title}
                                 title={menuItem.title}

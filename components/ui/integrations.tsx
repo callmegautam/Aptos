@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@/utils';
+import { cn } from '@/lib/utils';
 import { AnimatedBeam } from '@/components/ui/animated-beam';
 import { LucideProps } from 'lucide-react';
 import React, { forwardRef, useRef } from 'react';

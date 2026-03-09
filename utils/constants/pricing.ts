@@ -1,200 +1,103 @@
-// export const PLANS = [
-//     {
-//         name: "Free",
-//         info: "For most individuals",
-//         price: {
-//             monthly: 0,
-//             yearly: 0,
-//         },
-//         features: [
-//             { text: "Shorten links" },
-//             { text: "Up to 100 tags", limit: "100 tags" },
-//             { text: "Customizable branded links" },
-//             { text: "Track clicks", tooltip: "1K clicks/month" },
-//             { text: "Community support", tooltip: "Get answers your questions on discord" },
-//             { text: "AI powered suggestions", tooltip: "Get up to 100 AI powered suggestions" },
-//         ],
-//         btn: {
-//             text: "Start for free",
-//             href: "/auth/sign-up?plan=free",
-//             variant: "default",
-//         }
-//     },
-//     {
-//         name: "Pro",
-//         info: "For small businesses",
-//         price: {
-//             monthly: 9,
-//             yearly: 90,
-//         },
-//         features: [
-//             { text: "Shorten links" },
-//             { text: "Up to 500 tags", limit: "500 tags" },
-//             { text: "Customizable branded links" },
-//             { text: "Track clicks", tooltip: "20K clicks/month" },
-//             { text: "Export click data", tooltip: "Upto 1K links" },
-//             { text: "Priority support", tooltip: "Get 24/7 chat support" },
-//             { text: "AI powered suggestions", tooltip: "Get up to 500 AI powered suggestions" },
-//         ],
-//         btn: {
-//             text: "Get started",
-//             href: "/auth/sign-up?plan=pro",
-//             variant: "purple",
-//         }
-//     },
-//     {
-//         name: "Business",
-//         info: "For large organizations",
-//         price: {
-//             monthly: 49,
-//             yearly: 490,
-//         },
-//         features: [
-//             { text: "Shorten links" },
-//             { text: "Unlimited tags" },
-//             { text: "Customizable branded links"},
-//             { text: "Track clicks", tooltip: "Unlimited clicks" },
-//             { text: "Export click data", tooltip: "Unlimited clicks" },
-//             { text: "Dedicated manager", tooltip: "Get priority support from our team" },
-//             { text: "AI powered suggestions", tooltip: "Get unlimited AI powered suggestions" },
-//         ],
-//         btn: {
-//             text: "Contact team",
-//             href: "/auth/sign-up?plan=business",
-//             variant: "default",
-//         }
-//     }
-// ];
-
-// export const PRICING_FEATURES = [
-//     {
-//         text: "Shorten links",
-//         tooltip: "Create shortened links",
-//     },
-//     {
-//         text: "Track clicks",
-//         tooltip: "Track clicks on your links",
-//     },
-//     {
-//         text: "See top countries",
-//         tooltip: "See top countries where your links are clicked",
-//     },
-//     {
-//         text: "Upto 10 tags",
-//         tooltip: "Add upto 10 tags to your links",
-//     },
-//     {
-//         text: "Community support",
-//         tooltip: "Community support is available for free users",
-//     },
-//     {
-//         text: "Priority support",
-//         tooltip: "Get priority support from our team",
-//     },
-//     {
-//         text: "AI powered suggestions",
-//         tooltip: "Get AI powered suggestions for your links",
-//     },
-// ];
-
-// export const WORKSPACE_LIMIT = 2;
 export const PLANS = [
-    {
-        name: "Free",
-        info: "For most individuals",
-        price: {
-            monthly: 0,
-            yearly: 0,
-        },
-        features: [
-            { text: "Shorten links" },
-            { text: "Up to 100 tags", limit: "100 tags" },
-            { text: "Customizable branded links" },
-            { text: "Track clicks", tooltip: "1K clicks/month" },
-            { text: "Community support", tooltip: "Get answers your questions on discord" },
-            { text: "AI powered suggestions", tooltip: "Get up to 100 AI powered suggestions" },
-        ],
-        btn: {
-            text: "Start for free",
-            href: "/auth/sign-up?plan=free",
-            variant: "default",
-        }
+  {
+    name: 'Free',
+    info: 'For individuals and early hiring',
+    price: {
+      monthly: 0,
+      yearly: 0
     },
-    {
-        name: "Pro",
-        info: "For small businesses",
-        price: {
-            monthly: 9,
-            yearly: Math.round(9 * 12 * (1 - 0.12)),
-        },
-        features: [
-            { text: "Shorten links" },
-            { text: "Up to 500 tags", limit: "500 tags" },
-            { text: "Customizable branded links" },
-            { text: "Track clicks", tooltip: "20K clicks/month" },
-            { text: "Export click data", tooltip: "Upto 1K links" },
-            { text: "Priority support", tooltip: "Get 24/7 chat support" },
-            { text: "AI powered suggestions", tooltip: "Get up to 500 AI powered suggestions" },
-        ],
-        btn: {
-            text: "Get started",
-            href: "/auth/sign-up?plan=pro",
-            variant: "purple",
-        }
-    },
-    {
-        name: "Business",
-        info: "For large organizations",
-        price: {
-            monthly: 49,
-            yearly: Math.round(49 * 12 * (1 - 0.12)),
-        },
-        features: [
-            { text: "Shorten links" },
-            { text: "Unlimited tags" },
-            { text: "Customizable branded links" },
-            { text: "Track clicks", tooltip: "Unlimited clicks" },
-            { text: "Export click data", tooltip: "Unlimited clicks" },
-            { text: "Dedicated manager", tooltip: "Get priority support from our team" },
-            { text: "AI powered suggestions", tooltip: "Get unlimited AI powered suggestions" },
-        ],
-        btn: {
-            text: "Contact team",
-            href: "/auth/sign-up?plan=business",
-            variant: "default",
-        }
+    features: [
+      { text: 'Create interview rooms' },
+      { text: 'Up to 5 interviews/month', limit: '5 interviews' },
+      { text: 'AI interview assistant' },
+      { text: 'Candidate evaluation reports', tooltip: 'Basic AI scoring and feedback' },
+      { text: 'Interview recordings', tooltip: 'Up to 5 recordings' },
+      { text: 'Community support', tooltip: 'Help from our Discord community' }
+    ],
+    btn: {
+      text: 'Start for free',
+      href: '/auth/sign-up?plan=free',
+      variant: 'default'
     }
+  },
+  {
+    name: 'Pro',
+    info: 'For startups and growing teams',
+    price: {
+      monthly: 19,
+      yearly: Math.round(19 * 12 * (1 - 0.12))
+    },
+    features: [
+      { text: 'Create interview rooms' },
+      { text: 'Up to 100 interviews/month', limit: '100 interviews' },
+      { text: 'Advanced AI evaluation', tooltip: 'Detailed candidate scoring & insights' },
+      { text: 'Interview recordings', tooltip: 'Unlimited recordings' },
+      { text: 'Export candidate reports', tooltip: 'Download candidate evaluation reports' },
+      { text: 'Team collaboration', tooltip: 'Invite team members to review interviews' },
+      { text: 'Priority support', tooltip: '24/7 chat support' }
+    ],
+    btn: {
+      text: 'Get started',
+      href: '/auth/sign-up?plan=pro',
+      variant: 'purple'
+    }
+  },
+  {
+    name: 'Business',
+    info: 'For organizations hiring at scale',
+    price: {
+      monthly: 79,
+      yearly: Math.round(79 * 12 * (1 - 0.12))
+    },
+    features: [
+      { text: 'Unlimited interview rooms' },
+      { text: 'Unlimited interviews' },
+      {
+        text: 'Advanced AI evaluation',
+        tooltip: 'Deep candidate insights & hiring recommendations'
+      },
+      { text: 'Unlimited recordings & storage' },
+      { text: 'Custom hiring workflows', tooltip: 'Design your own hiring pipeline' },
+      { text: 'Team collaboration', tooltip: 'Multiple reviewers & hiring managers' },
+      { text: 'Dedicated account manager', tooltip: 'Priority support from our team' }
+    ],
+    btn: {
+      text: 'Contact team',
+      href: '/auth/sign-up?plan=business',
+      variant: 'default'
+    }
+  }
 ];
 
 export const PRICING_FEATURES = [
-    {
-        text: "Shorten links",
-        tooltip: "Create shortened links",
-    },
-    {
-        text: "Track clicks",
-        tooltip: "Track clicks on your links",
-    },
-    {
-        text: "See top countries",
-        tooltip: "See top countries where your links are clicked",
-    },
-    {
-        text: "Upto 10 tags",
-        tooltip: "Add upto 10 tags to your links",
-    },
-    {
-        text: "Community support",
-        tooltip: "Community support is available for free users",
-    },
-    {
-        text: "Priority support",
-        tooltip: "Get priority support from our team",
-    },
-    {
-        text: "AI powered suggestions",
-        tooltip: "Get AI powered suggestions for your links",
-    },
+  {
+    text: 'Interview rooms',
+    tooltip: 'Create dedicated rooms to conduct interviews'
+  },
+  {
+    text: 'AI candidate evaluation',
+    tooltip: 'Automatically analyze candidate responses'
+  },
+  {
+    text: 'Interview recordings',
+    tooltip: 'Record and review interview sessions'
+  },
+  {
+    text: 'Candidate reports',
+    tooltip: 'Generate structured evaluation reports'
+  },
+  {
+    text: 'Team collaboration',
+    tooltip: 'Invite teammates to review candidates'
+  },
+  {
+    text: 'Priority support',
+    tooltip: 'Faster help from our support team'
+  },
+  {
+    text: 'AI interview insights',
+    tooltip: 'AI-generated feedback and hiring recommendations'
+  }
 ];
 
 export const WORKSPACE_LIMIT = 2;

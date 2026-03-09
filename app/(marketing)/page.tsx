@@ -12,7 +12,7 @@ import {
 import { LampContainer } from '@/components/ui/lamp';
 import MagicBadge from '@/components/ui/magic-badge';
 import MagicCard from '@/components/ui/magic-card';
-import { COMPANIES, PROCESS } from '@/utils';
+import { COMPANIES, PROCESS } from '@/utils/constants/misc';
 import { REVIEWS } from '@/utils/constants/misc';
 // import { currentUser } from '@clerk/nextjs/server';
 import { ArrowRightIcon, CreditCardIcon, StarIcon } from 'lucide-react';
