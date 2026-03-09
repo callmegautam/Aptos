@@ -10,16 +10,15 @@ import { cookies } from 'next/headers';
 const statusEnum = z.enum(['created', 'started', 'completed']);
 
 const createRoomSchema = z.object({
-  // companyId: z.number().int().positive(),
   interviewerId: z.number().int().positive(),
-  // candidateId: z.number().int().positive(),
-  // roomCode: z.string().min(1).optional(),
+  candidateId: z.number().int().positive(),
   jobTitle: z.string().min(1).optional(),
   jobDescription: z.string().min(1).optional(),
   requiredSkills: z.string().min(1).optional(),
   resumeUrl: z.string().url().optional().nullable(),
   status: statusEnum.default('created'),
-  scheduledAt: z.union([z.string(), z.coerce.date()]).optional()
+  scheduledAt: z.union([z.string(), z.coerce.date()]).optional(),
+  durationSeconds: z.number().int().positive().optional()
 });
 
 function generateRoomCode(): string {
@@ -57,10 +56,8 @@ export async function GET(req: Request) {
       status != null && eq(interviewRooms.status, status)
     ].filter(Boolean) as ReturnType<typeof eq>[];
 
-    let query = db.select().from(interviewRooms);
-    if (conditions.length > 0) {
-      query = query.where(and(...conditions));
-    }
+    const baseQuery = db.select().from(interviewRooms);
+    const query = conditions.length > 0 ? baseQuery.where(and(...conditions)) : baseQuery;
     const list = await query.orderBy(desc(interviewRooms.id));
 
     return NextResponse.json(list, { status: HTTP_STATUS.OK });
@@ -86,10 +83,24 @@ export async function POST(req: Request) {
       );
     }
 
-    const { id, role } = payload;
+    const { id: companyId, role } = payload;
 
     if (role !== 'company') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: HTTP_STATUS.UNAUTHORIZED });
+    }
+
+    // const companyIdRaw =
+    //   typeof id === 'number' && Number.isInteger(id)
+    //     ? id
+    //     : typeof id === 'string'
+    //       ? parseInt(id, 10)
+    //       : NaN;
+    // const companyId = Number.isInteger(companyIdRaw) && companyIdRaw > 0 ? companyIdRaw : undefined;
+    if (companyId == null) {
+      return NextResponse.json(
+        { error: 'Company ID is required' },
+        { status: HTTP_STATUS.BAD_REQUEST }
+      );
     }
 
     const body = await req.json();
@@ -103,7 +114,6 @@ export async function POST(req: Request) {
     }
 
     const {
-      companyId,
       interviewerId,
       candidateId,
       jobTitle,
@@ -114,9 +124,14 @@ export async function POST(req: Request) {
       durationSeconds
     } = parsed.data;
 
-    const roomCode = parsed.data.roomCode ?? generateRoomCode();
+    const roomCode = generateRoomCode();
     const resumeUrl = parsed.data.resumeUrl ?? null;
-    const scheduledAtDate = typeof scheduledAt === 'string' ? new Date(scheduledAt) : scheduledAt;
+    const scheduledAtDate =
+      scheduledAt != null
+        ? typeof scheduledAt === 'string'
+          ? new Date(scheduledAt)
+          : scheduledAt
+        : new Date();
 
     const [room] = await db
       .insert(interviewRooms)
@@ -125,13 +140,13 @@ export async function POST(req: Request) {
         interviewerId,
         candidateId,
         roomCode,
-        jobTitle,
-        jobDescription,
-        requiredSkills,
+        jobTitle: jobTitle ?? '',
+        jobDescription: jobDescription ?? '',
+        requiredSkills: requiredSkills ?? '',
         resumeUrl,
-        status,
+        status: status ?? 'created',
         scheduledAt: scheduledAtDate,
-        durationSeconds
+        durationSeconds: durationSeconds ?? 3600
       })
       .returning();
 

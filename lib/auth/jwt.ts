@@ -10,10 +10,16 @@ export async function signToken(payload: any) {
     .sign(secret);
 }
 
-export async function verifyToken(token: string) {
+export type Payload = {
+  id: number;
+  email: string;
+  role: 'company' | 'interviewer' | 'candidate';
+};
+
+export async function verifyToken(token: string): Promise<Payload | null> {
   try {
     const { payload } = await jwtVerify(token, secret);
-    return payload;
+    return payload as Payload;
   } catch {
     return null;
   }
