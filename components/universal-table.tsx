@@ -1,5 +1,11 @@
 import { useState } from 'react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import {
   getFilteredRowModel,
   getSortedRowModel,
@@ -10,10 +16,17 @@ import {
   flexRender,
   ColumnDef
 } from '@tanstack/react-table';
-import { Input } from './input';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './table';
+import { Input } from '@/components/ui/input';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from '@/components/ui/table';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Button } from './button';
+import { Button } from '@/components/ui/button';
 
 type UniversalTableProps<TData> = {
   columns: ColumnDef<TData>[];

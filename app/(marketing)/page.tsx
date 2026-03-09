@@ -21,7 +21,6 @@ import AnimationContainer from '@/features/home/components/animation-container';
 import PricingCards from '@/features/home/components/pricing-cards';
 
 const HomePage = async () => {
-  // const user = await currentUser();
   const user = null;
   return (
     <div className="overflow-x-hidden scrollbar-hide size-full">
@@ -47,12 +46,9 @@ const HomePage = async () => {
               </span>
             </h1>
             <p className="mb-12 text-lg tracking-tight text-muted-foreground md:text-xl text-balance">
-              {/* Effortlessly streamline your link management with Linkify. */}
               Run smarter interviews with AI-powered assessments.
               <br className="hidden md:block" />
               <span className="hidden md:block">
-                {/* Shorten, track, and organize all your links in one place. */}
-                {/* Create interview rooms, test candidates automatically */}
                 Create interview rooms, evaluate candidates instantly, hire smarter.
               </span>
             </p>
@@ -124,11 +120,10 @@ const HomePage = async () => {
           <div className="flex flex-col w-full items-center lg:items-center justify-center py-8">
             <MagicBadge title="Features" />
             <h2 className="text-center lg:text-center text-3xl md:text-5xl !leading-[1.1] font-medium font-heading text-foreground mt-6">
-              Manage Links Like a Pro
+              Conduct Interviews Like a Pro
             </h2>
             <p className="mt-4 text-center lg:text-center text-lg text-muted-foreground max-w-lg">
-              Linkify is a powerful link management tool that helps you shorten, track, and organize
-              all your links in one place.
+              Aptos is a platform that helps you conduct interviews with AI-powered assessments.
             </p>
           </div>
         </AnimationContainer>
@@ -147,10 +142,10 @@ const HomePage = async () => {
           <div className="flex flex-col items-center lg:items-center justify-center w-full py-8 max-w-xl mx-auto">
             <MagicBadge title="The Process" />
             <h2 className="text-center lg:text-center text-3xl md:text-5xl !leading-[1.1] font-medium font-heading text-foreground mt-6">
-              Effortless link management in 3 steps
+              Effortless interview scheduling in 3 steps
             </h2>
             <p className="mt-4 text-center lg:text-center text-lg text-muted-foreground max-w-lg">
-              Follow these simple steps to optimize, organize, and share your links with ease.
+              Follow these simple steps to schedule, conduct, and evaluate interviews with ease.
             </p>
           </div>
         </AnimationContainer>
@@ -183,7 +178,7 @@ const HomePage = async () => {
               Choose a plan that works for you
             </h2>
             <p className="mt-4 text-center lg:text-center text-lg text-muted-foreground max-w-lg">
-              Get started with Linkify today and enjoy more features with our pro plans.
+              Get started with Aptos today and enjoy more features with our pro plans.
             </p>
           </div>
         </AnimationContainer>
@@ -209,7 +204,7 @@ const HomePage = async () => {
               What our users are saying
             </h2>
             <p className="mt-4 text-center lg:text-center text-lg text-muted-foreground max-w-lg">
-              Here&apos;s what some of our users have to say about Linkify.
+              Here&apos;s what some of our users have to say about Aptos.
             </p>
           </div>
         </AnimationContainer>

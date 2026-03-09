@@ -1,4 +1,10 @@
-import { BarChart3Icon, FolderOpenIcon, WandSparklesIcon } from 'lucide-react';
+import {
+  ClipboardCheckIcon,
+  LayoutDashboardIcon,
+  PlusIcon,
+  VideoIcon,
+  WandSparklesIcon
+} from 'lucide-react';
 
 export const DEFAULT_AVATAR_URL =
   'https://api.dicebear.com/8.x/initials/svg?backgroundType=gradientLinear&backgroundRotation=0,360&seed=';
@@ -31,51 +37,50 @@ export const COMPANIES = [
     logo: '/assets/company-06.svg'
   }
 ] as const;
-
 export const PROCESS = [
   {
-    title: 'Organize Your Links',
-    description: 'Efficiently categorize and tag your links for quick access and easy management.',
-    icon: FolderOpenIcon
+    title: 'Create Interview Rooms',
+    description: 'Set up structured interview sessions and invite candidates with a single link.',
+    icon: LayoutDashboardIcon
   },
   {
-    title: 'Shorten and Customize',
-    description: 'Create concise, branded links that are easy to share and track.',
-    icon: WandSparklesIcon
+    title: 'Conduct Smart Interviews',
+    description: 'Run interviews with AI-assisted questions, recordings, and real-time insights.',
+    icon: VideoIcon
   },
   {
-    title: 'Analyze and Optimize',
-    description: 'Gain insights into link performance and optimize for better engagement.',
-    icon: BarChart3Icon
+    title: 'Evaluate Candidates Instantly',
+    description: 'Review AI-generated reports, candidate scores, and hiring recommendations.',
+    icon: ClipboardCheckIcon
   }
 ] as const;
 
-export const FEATURES = [
-  {
-    title: 'Link shortening',
-    description: 'Create short links that are easy to remember and share.'
-  },
-  {
-    title: 'Advanced analytics',
-    description: 'Track and measure the performance of your links.'
-  },
-  {
-    title: 'Password protection',
-    description: 'Secure your links with a password.'
-  },
-  {
-    title: 'Custom QR codes',
-    description: 'Generate custom QR codes for your links.'
-  },
-  {
-    title: 'Link expiration',
-    description: 'Set an expiration date for your links.'
-  },
-  {
-    title: 'Team collaboration',
-    description: 'Share links with your team and collaborate in real-time.'
-  }
-] as const;
+// export const FEATURES = [
+//   {
+//     title: 'Interview rooms',
+//     description: 'Create dedicated rooms to conduct structured interviews with candidates.'
+//   },
+//   {
+//     title: 'AI candidate evaluation',
+//     description: 'Automatically analyze candidate responses and generate structured feedback.'
+//   },
+//   {
+//     title: 'Interview recordings',
+//     description: 'Record interviews so hiring teams can review candidates anytime.'
+//   },
+//   {
+//     title: 'Candidate scorecards',
+//     description: 'Get AI-powered scoring based on communication, knowledge, and confidence.'
+//   },
+//   {
+//     title: 'Custom interview workflows',
+//     description: 'Design your own interview stages and evaluation process.'
+//   },
+//   {
+//     title: 'Team collaboration',
+//     description: 'Invite teammates to review interviews and share feedback before making decisions.'
+//   }
+// ] as const;
 
 export const REVIEWS = [
   {
@@ -84,7 +89,7 @@ export const REVIEWS = [
     avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
     rating: 5,
     review:
-      'This tool is a lifesaver! Managing and tracking my links has never been easier. A must-have for anyone dealing with numerous links.'
+      'This platform completely transformed our hiring process. The AI evaluation helps us quickly identify the best candidates.'
   },
   {
     name: 'Emily Johnson',
@@ -92,7 +97,7 @@ export const REVIEWS = [
     avatar: 'https://randomuser.me/api/portraits/women/1.jpg',
     rating: 4,
     review:
-      'Very useful app! It has streamlined my workflow considerably. A few minor bugs, but overall a great experience.'
+      'Scheduling interviews and reviewing candidate recordings has never been easier. A huge time saver for our team.'
   },
   {
     name: 'Daniel Williams',
@@ -100,14 +105,15 @@ export const REVIEWS = [
     avatar: 'https://randomuser.me/api/portraits/men/2.jpg',
     rating: 5,
     review:
-      "I've been using this app daily for months. The insights and analytics it provides are invaluable. Highly recommend it!"
+      'The AI insights are incredibly helpful. We can evaluate candidates objectively and make faster hiring decisions.'
   },
   {
     name: 'Sophia Brown',
     username: '@sophiabrown',
     avatar: 'https://randomuser.me/api/portraits/women/2.jpg',
     rating: 4,
-    review: 'This app is fantastic! It offers everything I need to manage my links efficiently.'
+    review:
+      'A fantastic tool for managing interviews. The recordings and candidate reports are extremely useful.'
   },
   {
     name: 'James Taylor',
@@ -115,7 +121,7 @@ export const REVIEWS = [
     avatar: 'https://randomuser.me/api/portraits/men/3.jpg',
     rating: 5,
     review:
-      "Absolutely love this app! It's intuitive and feature-rich. Has significantly improved how I manage and track links."
+      'We reduced our hiring time significantly after switching to this platform. Highly recommended for growing teams.'
   },
   {
     name: 'Olivia Martinez',
@@ -123,7 +129,7 @@ export const REVIEWS = [
     avatar: 'https://randomuser.me/api/portraits/women/3.jpg',
     rating: 4,
     review:
-      'Great app with a lot of potential. It has already saved me a lot of time. Looking forward to future updates and improvements.'
+      'Very intuitive and powerful. The AI-generated candidate summaries make it easy to compare applicants.'
   },
   {
     name: 'William Garcia',
@@ -131,7 +137,7 @@ export const REVIEWS = [
     avatar: 'https://randomuser.me/api/portraits/men/4.jpg',
     rating: 5,
     review:
-      "This app is a game-changer for link management. It's easy to use, extremely powerful and highly recommended!"
+      'This platform is a game changer for hiring. The evaluation reports help us make confident decisions.'
   },
   {
     name: 'Mia Rodriguez',
@@ -139,7 +145,7 @@ export const REVIEWS = [
     avatar: 'https://randomuser.me/api/portraits/women/4.jpg',
     rating: 4,
     review:
-      "I've tried several link management tools, but this one stands out. It's simple, effective."
+      'A simple yet powerful solution for running structured interviews and collaborating with our hiring team.'
   },
   {
     name: 'Henry Lee',
@@ -147,6 +153,6 @@ export const REVIEWS = [
     avatar: 'https://randomuser.me/api/portraits/men/5.jpg',
     rating: 5,
     review:
-      "This app has transformed my workflow. Managing and analyzing links is now a breeze. I can't imagine working without it."
+      'The best interview platform we’ve used so far. AI insights and recordings make evaluating candidates effortless.'
   }
 ] as const;

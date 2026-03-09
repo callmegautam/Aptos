@@ -13,7 +13,7 @@ import {
 import { NAV_LINKS } from '@/utils/constants/nav-links';
 import { cn } from '@/lib/utils';
 // import { useClerk } from "@clerk/nextjs";
-import { LucideIcon, ZapIcon } from 'lucide-react';
+import { HomeIcon, LucideIcon, ZapIcon } from 'lucide-react';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import MaxWidthWrapper from './max-width-wrapper';
@@ -54,13 +54,21 @@ const Navbar = () => {
               <span className="text-lg font-bold font-heading !leading-none">Aptos</span>
             </Link>
 
-            <NavigationMenu className="hidden lg:flex">
+            <div className="flex items-center gap-x-4">
+              <Link href="/#home">Pricing</Link>
+              <Link href="/#home">About</Link>
+              <Link href="/#home">Terms</Link>
+            </div>
+
+            {/* <NavigationMenu className="hidden lg:flex">
               <NavigationMenuList>
                 {NAV_LINKS.map((link: any) => (
-                  <NavigationMenuItem key={link.title}>
+                  <NavigationMenuItem key={link.title} className="bg-[#0A0A0A]">
                     {link.menu ? (
                       <>
-                        <NavigationMenuTrigger>{link.title}</NavigationMenuTrigger>
+                        <NavigationMenuTrigger className="bg-[#0A0A0A]">
+                          {link.title}
+                        </NavigationMenuTrigger>
                         <NavigationMenuContent>
                           <ul
                             className={cn(
@@ -107,7 +115,7 @@ const Navbar = () => {
                   </NavigationMenuItem>
                 ))}
               </NavigationMenuList>
-            </NavigationMenu>
+            </NavigationMenu> */}
           </div>
 
           <div className="hidden lg:flex items-center">
@@ -119,13 +127,10 @@ const Navbar = () => {
               </div>
             ) : (
               <div className="flex items-center gap-x-4">
-                <Link
-                  href="/auth/sign-in"
-                  className={buttonVariants({ size: 'sm', variant: 'ghost' })}
-                >
+                <Link href="/login" className={buttonVariants({ size: 'sm', variant: 'ghost' })}>
                   Sign In
                 </Link>
-                <Link href="/auth/sign-up" className={buttonVariants({ size: 'sm' })}>
+                <Link href="/register" className={buttonVariants({ size: 'sm' })}>
                   Get Started
                   <ZapIcon className="size-3.5 ml-1.5 text-orange-500 fill-orange-500" />
                 </Link>
