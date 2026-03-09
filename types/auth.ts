@@ -4,7 +4,7 @@ export const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
   name: z.string().min(1),
-  accountType: z.enum(['candidate', 'company'])
+  role: z.enum(['CANDIDATE', 'COMPANY'])
 });
 
 export const registerFormSchema = z.object({
@@ -17,7 +17,7 @@ export const registerFormSchema = z.object({
 export const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
-  accountType: z.enum(['candidate', 'company'])
+  role: z.enum(['CANDIDATE', 'COMPANY', 'INTERVIEWER', 'ADMIN', 'SUPER_ADMIN'])
 });
 
 export const loginFormSchema = z.object({
@@ -27,7 +27,7 @@ export const loginFormSchema = z.object({
 
 const forgetPasswordSchema = z.object({
   email: z.string().email(),
-  accountType: z.enum(['candidate', 'company'])
+  role: z.enum(['CANDIDATE', 'COMPANY', 'SUPER_ADMIN'])
 });
 const forgetPasswordFormSchema = z.object({
   email: z.string().email()

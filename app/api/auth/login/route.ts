@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { companies, candidates } from '@/lib/db/schema';
+import { admins, companies, candidates, interviewers } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcrypt';
 import { z } from 'zod';
@@ -12,23 +12,39 @@ import { cookies } from 'next/headers';
 const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
-  accountType: z.enum(['candidate', 'company'])
+  role: z.enum(['CANDIDATE', 'COMPANY', 'INTERVIEWER', 'ADMIN', 'SUPER_ADMIN'])
 });
 
-async function findUser(email: string, accountType: 'candidate' | 'company') {
-  if (accountType === 'company') {
-    const [company] = await db.select().from(companies).where(eq(companies.email, email)).limit(1);
+type DbLoginRole = 'CANDIDATE' | 'COMPANY' | 'INTERVIEWER' | 'ADMIN' | 'SUPER_ADMIN';
 
+async function findDbUser(email: string, role: DbLoginRole) {
+  if (role === 'COMPANY') {
+    const [company] = await db.select().from(companies).where(eq(companies.email, email)).limit(1);
     return company ?? null;
   }
 
-  const [candidate] = await db
-    .select()
-    .from(candidates)
-    .where(eq(candidates.email, email))
-    .limit(1);
+  if (role === 'CANDIDATE') {
+    const [candidate] = await db
+      .select()
+      .from(candidates)
+      .where(eq(candidates.email, email))
+      .limit(1);
 
-  return candidate ?? null;
+    return candidate ?? null;
+  }
+
+  if (role === 'INTERVIEWER') {
+    const [interviewer] = await db
+      .select()
+      .from(interviewers)
+      .where(eq(interviewers.email, email))
+      .limit(1);
+
+    return interviewer ?? null;
+  }
+
+  const [admin] = await db.select().from(admins).where(eq(admins.email, email)).limit(1);
+  return admin ?? null;
 }
 
 export async function POST(req: Request) {
@@ -44,9 +60,9 @@ export async function POST(req: Request) {
       );
     }
 
-    const { email, password, accountType } = parsed.data;
+    const { email, password, role } = parsed.data;
 
-    const user = await findUser(email, accountType);
+    const user = await findDbUser(email, role);
 
     if (!user) {
       return NextResponse.json(
@@ -64,14 +80,17 @@ export async function POST(req: Request) {
       );
     }
 
-    if (!user.emailVerified) {
-      return NextResponse.json({ error: 'Email not verified' }, { status: HTTP_STATUS.FORBIDDEN });
+    if ('emailVerified' in user && !user.emailVerified) {
+      return NextResponse.json(
+        { error: 'Email not verified' },
+        { status: HTTP_STATUS.FORBIDDEN }
+      );
     }
 
     const token = await signToken({
       id: user.id,
       email: user.email,
-      role: accountType === 'company' ? 'COMPANY' : 'CANDIDATE'
+      role
     });
 
     const cookieStore = await cookies();
@@ -82,7 +101,7 @@ export async function POST(req: Request) {
         message: 'Login successful',
         userId: user.id,
         email: user.email,
-        accountType
+          role
       },
       { status: HTTP_STATUS.OK }
     );

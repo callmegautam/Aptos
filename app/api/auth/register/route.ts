@@ -12,7 +12,7 @@ const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
   name: z.string().min(1),
-  accountType: z.enum(['candidate', 'company'])
+  role: z.enum(['CANDIDATE', 'COMPANY'])
 });
 
 async function hashPassword(password: string) {
@@ -73,7 +73,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const { email, password, name, accountType } = parsed.data;
+    const { email, password, name, role } = parsed.data;
 
     const [existingCompany] = await db
       .select()
@@ -97,7 +97,7 @@ export async function POST(req: Request) {
     }
 
     const result =
-      accountType === 'company'
+      role === 'COMPANY'
         ? await registerCompany(email, password, name)
         : await registerCandidate(email, password, name);
 
@@ -120,7 +120,7 @@ export async function POST(req: Request) {
         message: `OTP sent to email.`,
         userId: result.user.id,
         email: email,
-        accountType: accountType
+          role
       },
       { status: HTTP_STATUS.CREATED }
     );
