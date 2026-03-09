@@ -10,12 +10,23 @@ import { InterviewRoomWithRelations } from '@/types/interview-room';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import { HTTP_STATUS } from '@/types/http';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog';
 
 const RoomsPage = () => {
   const [rooms, setRooms] = useState<InterviewRoomWithRelations[]>([]);
   const [createOpen, setCreateOpen] = useState(false);
   const [editingRoom, setEditingRoom] = useState<InterviewRoomWithRelations | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [roomToDelete, setRoomToDelete] = useState<InterviewRoomWithRelations | null>(null);
 
   const router = useRouter();
 
@@ -71,9 +82,6 @@ const RoomsPage = () => {
 
   const handleDelete = useCallback(
     async (room: InterviewRoomWithRelations) => {
-      const confirm = window.confirm(`Are you sure you want to delete room "${room.jobTitle}"?`);
-      if (!confirm) return;
-
       try {
         const response = await axios.delete(`/api/interview-rooms/${room.id}`);
         if (response.status === HTTP_STATUS.NO_CONTENT) {
@@ -119,13 +127,49 @@ const RoomsPage = () => {
           </Button>
         </div>
       </div>
-      <RoomsList rooms={rooms} onEdit={handleEdit} onDelete={handleDelete} />
+
+      <RoomsList
+        rooms={rooms}
+        onEdit={handleEdit}
+        onDelete={(room) => {
+          setRoomToDelete(room);
+          setDeleteDialogOpen(true);
+        }}
+      />
       <CreateRoomDialog
         open={createOpen}
         onOpenChange={setCreateOpen}
         editingRoom={editingRoom}
         onSubmit={handleSubmit}
       />
+
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Are you sure</DialogTitle>
+            <DialogDescription>
+              Do you really want to delete this room "{roomToDelete?.jobTitle}"? This action cannot
+              be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={async () => {
+                if (!roomToDelete) return;
+                await handleDelete(roomToDelete);
+                setDeleteDialogOpen(false);
+                setRoomToDelete(null);
+              }}
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
