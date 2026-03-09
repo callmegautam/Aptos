@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-import { CreateInterviewRoom } from '@/types/interview-room';
+import { CreateInterviewRoom, interviewStatusEnum } from '@/types/interview-room';
 
 type RoomFormData = CreateInterviewRoom;
 
@@ -34,10 +34,10 @@ const defaultFormState = (): RoomFormData => ({
   jobTitle: '',
   jobDescription: '',
   status: 'SCHEDULED',
-  : 'fullstack',
+  field: 'FULLSTACK',
   candidateName: '',
-  interviewerName: '',
-  scheduledAt: undefined
+  interviewerId: 0,
+  scheduledAt: new Date()
 });
 
 function toDatetimeLocal(d: Date | undefined): string {
@@ -142,7 +142,7 @@ export function CreateRoomDialog({
                       <SelectValue placeholder="Status" />
                     </SelectTrigger>
                     <SelectContent>
-                      {ROOM_STATUS.map((s) => (
+                      {interviewStatusEnum.map((s) => (
                         <SelectItem key={s} value={s}>
                           {s.charAt(0).toUpperCase() + s.slice(1)}
                         </SelectItem>
@@ -160,7 +160,7 @@ export function CreateRoomDialog({
                       <SelectValue placeholder="Field" />
                     </SelectTrigger>
                     <SelectContent>
-                      {INTERVIEW_FIELD.map((f) => (
+                      {interviewFieldEnum.map((f) => (
                         <SelectItem key={f} value={f}>
                           {f.charAt(0).toUpperCase() + f.slice(1)}
                         </SelectItem>
