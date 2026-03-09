@@ -61,10 +61,9 @@ function toDatetimeLocal(d: Date | undefined): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-function fromDatetimeLocal(s: string): Date | undefined {
-  if (!s) return undefined;
+function fromDatetimeLocal(s: string): Date {
   const date = new Date(s);
-  return isNaN(date.getTime()) ? undefined : date;
+  return isNaN(date.getTime()) ? new Date() : date;
 }
 
 export function CreateRoomDialog({
