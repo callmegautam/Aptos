@@ -24,8 +24,10 @@ import {
   createRoomSchema,
   InterviewField,
   interviewFieldEnum,
+  InterviewRoom,
   InterviewRoomStatus,
-  interviewStatusEnum
+  interviewStatusEnum,
+  updateInterviewRoomSchema
 } from '@/types/interview-room';
 import toast from 'react-hot-toast';
 import { FileText, Loader2Icon, Trash2Icon, Upload } from 'lucide-react';
@@ -81,6 +83,7 @@ export function CreateRoomDialog({
   const [form, setForm] = React.useState<RoomFormData>(defaultFormState());
   const [resume, setResume] = React.useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [interviewRoom, setInterviewRoom] = useState<InterviewRoom | {}>({});
 
   React.useEffect(() => {
     if (editingRoom) {
@@ -167,7 +170,7 @@ export function CreateRoomDialog({
       return;
     }
 
-    const loadingToast = toast.loading('Creating interview room...');
+    const loadingToast = toast.loading(`${isEdit ? 'Editing' : 'Creating'} Interview Room...`);
     setIsLoading(true);
 
     const formData = new FormData();
@@ -184,8 +187,14 @@ export function CreateRoomDialog({
       formData.append('resume', resume);
     }
 
+    let response;
+
     try {
-      const response = await axios.post('/api/interview-room', formData);
+      if (isEdit) {
+        response = await axios.patch('/api/interview-room', formData);
+      } else {
+        response = await axios.post('/api/interview-room', formData);
+      }
 
       toast.success('Interview room created', { id: loadingToast });
 
@@ -193,6 +202,7 @@ export function CreateRoomDialog({
       setUploadedFiles([]);
       setFileProgresses({});
       setResume(null);
+      onSubmit();
 
       onOpenChange(false);
     } catch (error) {
