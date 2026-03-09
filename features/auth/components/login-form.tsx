@@ -19,6 +19,13 @@ import { HTTP_STATUS } from '@/types/http';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import { Loader2 } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 
 type LoginFormProps = {
   className?: string;
@@ -35,7 +42,7 @@ export function LoginForm({
 }: LoginFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [loginForm, setLoginForm] = useState<LoginFormSchema>({
     email: '',
     password: ''
@@ -73,7 +80,7 @@ export function LoginForm({
 
       const response = await axios.post('/api/auth/login', {
         ...data,
-        role: user
+        role: isSuperAdmin ? 'SUPER_ADMIN' : user
       });
 
       if (response.status !== HTTP_STATUS.OK) {
@@ -115,6 +122,23 @@ export function LoginForm({
             Enter your email below to login to your account
           </p>
         </div>
+        {user === 'ADMIN' && (
+          <Field>
+            <FieldLabel htmlFor="role">Login as</FieldLabel>
+            <Select
+              value={isSuperAdmin ? 'SUPER_ADMIN' : 'ADMIN'}
+              onValueChange={(v) => setIsSuperAdmin(v === 'SUPER_ADMIN')}
+            >
+              <SelectTrigger id="role" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ADMIN">Admin</SelectItem>
+                <SelectItem value="SUPER_ADMIN">Super Admin</SelectItem>
+              </SelectContent>
+            </Select>
+          </Field>
+        )}
 
         <Field>
           <FieldLabel htmlFor="email">Email</FieldLabel>
