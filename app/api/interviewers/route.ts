@@ -3,55 +3,38 @@ import { db } from '@/lib/db';
 import { interviewers, interviewRooms } from '@/lib/db/schema';
 import { eq, count, desc } from 'drizzle-orm';
 import bcrypt from 'bcrypt';
-import { z } from 'zod';
 import { HTTP_STATUS } from '@/types/http';
-import { cookies } from 'next/headers';
-import { verifyToken } from '@/lib/auth/jwt';
-
-const createInterviewerSchema = z.object({
-  name: z.string().min(1),
-  email: z.string().email(),
-  password: z.string().min(8),
-  phone: z.string().max(20).optional(),
-  avatarUrl: z.string().url().optional().nullable()
-});
+import { getCurrentCompany, getCurrentUser } from '@/lib/auth/auth';
+import { createInterviewerSchema } from '@/types/interviewer';
+import { savePublicFile } from '@/lib/storage/public-files';
 
 async function hashPassword(password: string) {
   return bcrypt.hash(password, 10);
 }
 
-export async function GET(req: Request) {
+export async function GET(_req: Request) {
   try {
-    // const { searchParams } = new URL(req.url);
-    // const companyIdParam = searchParams.get('companyId');
-
-    // const companyId = companyIdParam ? parseInt(companyIdParam, 10) : undefined;
-
-    // if (companyIdParam && (Number.isNaN(companyId) || companyId <= 0)) {
-    //   return NextResponse.json({ error: 'Invalid companyId' }, { status: HTTP_STATUS.BAD_REQUEST });
-    // }
-
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token')?.value ?? '';
-    const payload = await verifyToken(token);
-
-    if (!payload) {
+    const user = await getCurrentUser();
+    if (!user) {
       return NextResponse.json(
         { error: 'Invalid or expired token' },
         { status: HTTP_STATUS.BAD_REQUEST }
       );
     }
 
-    const { id, role } = payload;
+    if (user.role !== 'COMPANY') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: HTTP_STATUS.UNAUTHORIZED });
+    }
 
-    if (role !== 'company') {
+    const companyId = await getCurrentCompany(user);
+    if (!companyId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: HTTP_STATUS.UNAUTHORIZED });
     }
 
     const list = await db
       .select()
       .from(interviewers)
-      .where(eq(interviewers.companyId, id as number))
+      .where(eq(interviewers.companyId, companyId))
       .orderBy(desc(interviewers.id));
 
     const counts = await db
@@ -60,12 +43,14 @@ export async function GET(req: Request) {
         total: count()
       })
       .from(interviewRooms)
+      .where(eq(interviewRooms.companyId, companyId))
       .groupBy(interviewRooms.interviewerId);
 
     const countMap = new Map(counts.map((c) => [c.interviewerId, c.total]));
 
     const data = list.map((i) => {
-      const { passwordHash: _, ...rest } = i;
+      const { passwordHash, ...rest } = i;
+      void passwordHash;
       return {
         ...rest,
         totalInterviews: countMap.get(i.id) ?? 0
@@ -84,24 +69,52 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token')?.value ?? '';
-    const payload = await verifyToken(token);
-
-    if (!payload) {
+    const user = await getCurrentUser();
+    if (!user) {
       return NextResponse.json(
         { error: 'Invalid or expired token' },
         { status: HTTP_STATUS.BAD_REQUEST }
       );
     }
 
-    const { id: companyId, role } = payload;
-
-    if (role !== 'company') {
+    if (user.role !== 'COMPANY') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: HTTP_STATUS.UNAUTHORIZED });
     }
-    const body = await req.json();
-    const parsed = createInterviewerSchema.safeParse(body);
+
+    const companyId = await getCurrentCompany(user);
+    if (!companyId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: HTTP_STATUS.UNAUTHORIZED });
+    }
+
+    const contentType = req.headers.get('content-type') ?? '';
+
+    const parseFromJson = async () => {
+      const body = await req.json();
+      return { parsed: createInterviewerSchema.safeParse(body), avatar: null as File | null };
+    };
+
+    const parseFromFormData = async () => {
+      const formData = await req.formData();
+      const phoneRaw = formData.get('phone');
+      const avatarUrlRaw = formData.get('avatarUrl');
+
+      const parsed = createInterviewerSchema.safeParse({
+        name: formData.get('name'),
+        email: formData.get('email'),
+        password: formData.get('password'),
+        phone: phoneRaw == null || phoneRaw === '' ? undefined : String(phoneRaw),
+        avatarUrl:
+          avatarUrlRaw == null || avatarUrlRaw === '' ? undefined : String(avatarUrlRaw)
+      });
+
+      const avatarValue = formData.get('avatar');
+      const avatar = avatarValue instanceof File ? avatarValue : null;
+      return { parsed, avatar };
+    };
+
+    const { parsed, avatar } = contentType.includes('application/json')
+      ? await parseFromJson()
+      : await parseFromFormData();
 
     if (!parsed.success) {
       return NextResponse.json(
@@ -126,15 +139,18 @@ export async function POST(req: Request) {
 
     const passwordHash = await hashPassword(password);
 
+    const storedAvatarUrl =
+      avatar != null ? await savePublicFile({ file: avatar, publicSubdir: 'avatars' }) : null;
+
     const [interviewer] = await db
       .insert(interviewers)
       .values({
         name,
         email,
         passwordHash,
-        companyId: companyId as number,
+        companyId,
         phone: phone ?? null,
-        avatarUrl: avatarUrl ?? null
+        avatarUrl: storedAvatarUrl ?? avatarUrl ?? null
       })
       .returning();
 
@@ -145,7 +161,8 @@ export async function POST(req: Request) {
       );
     }
 
-    const { passwordHash: _, ...rest } = interviewer;
+    const { passwordHash: createdPasswordHash, ...rest } = interviewer;
+    void createdPasswordHash;
     return NextResponse.json(rest, { status: HTTP_STATUS.CREATED });
   } catch (error) {
     console.error('Create interviewer error:', error);

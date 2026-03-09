@@ -4,10 +4,9 @@ import { interviewRooms } from '@/lib/db/schema';
 import { and, eq } from 'drizzle-orm';
 import { HTTP_STATUS } from '@/types/http';
 import { parseId } from '@/utils/parse';
-import fs from 'fs/promises';
-import path from 'path';
 import { getCurrentCompany, getCurrentUser } from '@/lib/auth/auth';
 import { updateInterviewRoomSchema } from '@/types/interview-room';
+import { deletePublicFileByUrl, savePublicFile } from '@/lib/storage/public-files';
 
 export async function GET(_req: Request, { params }: { params: { id: string } }) {
   try {
@@ -187,17 +186,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     if (parsed.data.durationSeconds != null) updates.durationSeconds = parsed.data.durationSeconds;
 
     if (resume) {
-      const bytes = await resume.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-
-      const fileName = `${Date.now()}-${resume.name}`;
-      const resumesDir = path.join(process.cwd(), 'public/resumes');
-      const filePath = path.join(resumesDir, fileName);
-
-      await fs.mkdir(resumesDir, { recursive: true });
-      await fs.writeFile(filePath, buffer);
-
-      updates.resumeUrl = `/resumes/${fileName}`;
+      updates.resumeUrl = await savePublicFile({ file: resume, publicSubdir: 'resumes' });
     }
 
     if (Object.keys(updates).length === 0) {
@@ -287,15 +276,7 @@ export async function DELETE(_req: Request, { params }: { params: { id: string }
 
     const resumeUrl = existing.resumeUrl;
     if (resumeUrl && typeof resumeUrl === 'string' && resumeUrl.startsWith('/resumes/')) {
-      const diskPath = path.join(process.cwd(), 'public', resumeUrl.replace(/^\/+/, ''));
-      try {
-        await fs.unlink(diskPath);
-      } catch (err) {
-        // Best-effort cleanup: ignore missing/unremovable file
-        if (!(err instanceof Error) || !('code' in err) || (err as any).code !== 'ENOENT') {
-          console.warn('Failed to delete resume file:', err);
-        }
-      }
+      await deletePublicFileByUrl(resumeUrl);
     }
 
     return new NextResponse(null, { status: HTTP_STATUS.NO_CONTENT });

@@ -3,13 +3,12 @@ import { db } from '@/lib/db';
 import { interviewRooms } from '@/lib/db/schema';
 import { eq, desc, and } from 'drizzle-orm';
 import { HTTP_STATUS } from '@/types/http';
-import fs from 'fs/promises';
-import path from 'path';
 import { getCurrentCompany, getCurrentUser } from '@/lib/auth/auth';
 import { createRoomSchema, InterviewField, InterviewRoomStatus } from '@/types/interview-room';
 import { generateRoomCode } from '@/utils/room-code';
+import { savePublicFile } from '@/lib/storage/public-files';
 
-export async function GET(req: Request) {
+export async function GET(_req: Request) {
   try {
     const user = await getCurrentUser();
 
@@ -77,7 +76,8 @@ export async function POST(req: Request) {
 
     const formData = await req.formData();
 
-    const resume = formData.get('resume') as File | null;
+    const resumeValue = formData.get('resume');
+    const resume = resumeValue instanceof File ? resumeValue : null;
 
     const parsed = createRoomSchema.safeParse({
       interviewerId: formData.get('interviewerId'),
@@ -99,15 +99,7 @@ export async function POST(req: Request) {
     let resumePath: string | null = null;
 
     if (resume) {
-      const bytes = await resume.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-
-      const fileName = `${Date.now()}-${resume.name}`;
-      const filePath = path.join(process.cwd(), 'public/resumes', fileName);
-
-      await fs.writeFile(filePath, buffer);
-
-      resumePath = `/resumes/${fileName}`;
+      resumePath = await savePublicFile({ file: resume, publicSubdir: 'resumes' });
     }
 
     const roomCode = generateRoomCode();

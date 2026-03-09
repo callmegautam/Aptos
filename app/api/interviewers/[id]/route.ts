@@ -1,44 +1,32 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { interviewers, interviewRooms } from '@/lib/db/schema';
-import { eq, count } from 'drizzle-orm';
+import { eq, count, and } from 'drizzle-orm';
 import bcrypt from 'bcrypt';
-import { z } from 'zod';
 import { HTTP_STATUS } from '@/types/http';
-import { verifyToken } from '@/lib/auth/jwt';
-import { cookies } from 'next/headers';
-
-const updateInterviewerSchema = z.object({
-  name: z.string().min(1).optional(),
-  email: z.string().email().optional(),
-  password: z.string().min(8).optional(),
-  phone: z.string().max(20).optional().nullable(),
-  avatarUrl: z.string().url().optional().nullable()
-});
-
-function parseId(id: string): number | null {
-  const n = parseInt(id, 10);
-  return Number.isNaN(n) || n <= 0 ? null : n;
-}
+import { parseId } from '@/utils/parse';
+import { getCurrentCompany, getCurrentUser } from '@/lib/auth/auth';
+import { updateInterviewerSchema } from '@/types/interviewer';
+import { deletePublicFileByUrl, savePublicFile } from '@/lib/storage/public-files';
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    // const cookieStore = await cookies();
-    // const token = cookieStore.get('token')?.value ?? '';
-    // const payload = await verifyToken(token);
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Invalid or expired token' },
+        { status: HTTP_STATUS.UNAUTHORIZED }
+      );
+    }
 
-    // if (!payload) {
-    //   return NextResponse.json(
-    //     { error: 'Invalid or expired token' },
-    //     { status: HTTP_STATUS.BAD_REQUEST }
-    //   );
-    // }
+    if (user.role !== 'COMPANY') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: HTTP_STATUS.UNAUTHORIZED });
+    }
 
-    // const { id: companyId, role } = payload;
-
-    // if (role !== 'company') {
-    //   return NextResponse.json({ error: 'Unauthorized' }, { status: HTTP_STATUS.UNAUTHORIZED });
-    // }
+    const companyId = await getCurrentCompany(user);
+    if (!companyId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: HTTP_STATUS.UNAUTHORIZED });
+    }
 
     const { id } = await params;
     const interviewerId = parseId(id);
@@ -50,7 +38,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     const [interviewer] = await db
       .select()
       .from(interviewers)
-      .where(eq(interviewers.id, interviewerId))
+      .where(and(eq(interviewers.id, interviewerId), eq(interviewers.companyId, companyId)))
       .limit(1);
 
     if (!interviewer) {
@@ -63,9 +51,12 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     const [row] = await db
       .select({ total: count() })
       .from(interviewRooms)
-      .where(eq(interviewRooms.interviewerId, interviewerId));
+      .where(
+        and(eq(interviewRooms.interviewerId, interviewerId), eq(interviewRooms.companyId, companyId))
+      );
 
-    const { passwordHash: _, ...rest } = interviewer;
+    const { passwordHash, ...rest } = interviewer;
+    void passwordHash;
     return NextResponse.json(
       { ...rest, totalInterviews: row?.total ?? 0 },
       { status: HTTP_STATUS.OK }
@@ -81,20 +72,20 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token')?.value ?? '';
-    const payload = await verifyToken(token);
-
-    if (!payload) {
+    const user = await getCurrentUser();
+    if (!user) {
       return NextResponse.json(
         { error: 'Invalid or expired token' },
         { status: HTTP_STATUS.BAD_REQUEST }
       );
     }
 
-    const { id: companyId, role } = payload;
+    if (user.role !== 'COMPANY') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: HTTP_STATUS.UNAUTHORIZED });
+    }
 
-    if (role !== 'company') {
+    const companyId = await getCurrentCompany(user);
+    if (!companyId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: HTTP_STATUS.UNAUTHORIZED });
     }
 
@@ -105,8 +96,37 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       return NextResponse.json({ error: 'Invalid id' }, { status: HTTP_STATUS.BAD_REQUEST });
     }
 
-    const body = await req.json();
-    const parsed = updateInterviewerSchema.safeParse(body);
+    const contentType = req.headers.get('content-type') ?? '';
+
+    const parseFromJson = async () => {
+      const body = await req.json();
+      return { parsed: updateInterviewerSchema.safeParse(body), avatar: null as File | null };
+    };
+
+    const parseFromFormData = async () => {
+      const formData = await req.formData();
+      const phoneRaw = formData.get('phone');
+      const avatarUrlRaw = formData.get('avatarUrl');
+
+      const parsed = updateInterviewerSchema.safeParse({
+        name: (formData.get('name') as string | null) ?? undefined,
+        email: (formData.get('email') as string | null) ?? undefined,
+        password: (formData.get('password') as string | null) ?? undefined,
+        phone: phoneRaw == null || phoneRaw === '' ? undefined : String(phoneRaw),
+        avatarUrl:
+          avatarUrlRaw == null || avatarUrlRaw === ''
+            ? undefined
+            : String(avatarUrlRaw)
+      });
+
+      const avatarValue = formData.get('avatar');
+      const avatar = avatarValue instanceof File ? avatarValue : null;
+      return { parsed, avatar };
+    };
+
+    const { parsed, avatar } = contentType.includes('application/json')
+      ? await parseFromJson()
+      : await parseFromFormData();
 
     if (!parsed.success) {
       return NextResponse.json(
@@ -118,7 +138,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     const [existing] = await db
       .select()
       .from(interviewers)
-      .where(eq(interviewers.id, interviewerId))
+      .where(and(eq(interviewers.id, interviewerId), eq(interviewers.companyId, companyId)))
       .limit(1);
 
     if (!existing) {
@@ -151,15 +171,20 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     if (parsed.data.phone !== undefined) updates.phone = parsed.data.phone;
     if (parsed.data.avatarUrl !== undefined) updates.avatarUrl = parsed.data.avatarUrl;
 
+    if (avatar) {
+      updates.avatarUrl = await savePublicFile({ file: avatar, publicSubdir: 'avatars' });
+    }
+
     if (Object.keys(updates).length === 0) {
-      const { passwordHash: _, ...rest } = existing;
+      const { passwordHash, ...rest } = existing;
+      void passwordHash;
       return NextResponse.json(rest, { status: HTTP_STATUS.OK });
     }
 
     const [updated] = await db
       .update(interviewers)
       .set(updates)
-      .where(eq(interviewers.id, interviewerId))
+      .where(and(eq(interviewers.id, interviewerId), eq(interviewers.companyId, companyId)))
       .returning();
 
     if (!updated) {
@@ -169,7 +194,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       );
     }
 
-    const { passwordHash: _, ...rest } = updated;
+    const { passwordHash, ...rest } = updated;
+    void passwordHash;
     return NextResponse.json(rest, { status: HTTP_STATUS.OK });
   } catch (error) {
     console.error('Update interviewer error:', error);
@@ -182,20 +208,20 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token')?.value ?? '';
-    const payload = await verifyToken(token);
-
-    if (!payload) {
+    const user = await getCurrentUser();
+    if (!user) {
       return NextResponse.json(
         { error: 'Invalid or expired token' },
         { status: HTTP_STATUS.BAD_REQUEST }
       );
     }
 
-    const { id: companyId, role } = payload;
+    if (user.role !== 'COMPANY') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: HTTP_STATUS.UNAUTHORIZED });
+    }
 
-    if (role !== 'company') {
+    const companyId = await getCurrentCompany(user);
+    if (!companyId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: HTTP_STATUS.UNAUTHORIZED });
     }
 
@@ -206,9 +232,22 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: 'Invalid id' }, { status: HTTP_STATUS.BAD_REQUEST });
     }
 
+    const [existing] = await db
+      .select({ avatarUrl: interviewers.avatarUrl })
+      .from(interviewers)
+      .where(and(eq(interviewers.id, interviewerId), eq(interviewers.companyId, companyId)))
+      .limit(1);
+
+    if (!existing) {
+      return NextResponse.json(
+        { error: 'Interviewer not found' },
+        { status: HTTP_STATUS.NOT_FOUND }
+      );
+    }
+
     const [deleted] = await db
       .delete(interviewers)
-      .where(eq(interviewers.id, interviewerId))
+      .where(and(eq(interviewers.id, interviewerId), eq(interviewers.companyId, companyId)))
       .returning({ id: interviewers.id });
 
     if (!deleted) {
@@ -216,6 +255,11 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
         { error: 'Interviewer not found' },
         { status: HTTP_STATUS.NOT_FOUND }
       );
+    }
+
+    const avatarUrl = existing.avatarUrl;
+    if (avatarUrl && typeof avatarUrl === 'string' && avatarUrl.startsWith('/avatars/')) {
+      await deletePublicFileByUrl(avatarUrl);
     }
 
     return new NextResponse(null, { status: HTTP_STATUS.NO_CONTENT });
