@@ -1,6 +1,12 @@
 import { pgEnum } from 'drizzle-orm/pg-core';
+import {
+  interviewStatusEnum as interviewStatusEnumValues,
+  interviewFieldEnum as interviewFieldEnumValues
+} from '@/types/interview-room';
 
-export const interviewStatusEnum = pgEnum('interview_status', ['created', 'started', 'completed']);
+export const interviewStatusEnum = pgEnum('interview_status', interviewStatusEnumValues);
+
+export const interviewFieldEnum = pgEnum('interview_field', interviewFieldEnumValues);
 
 export const questionTypeEnum = pgEnum('question_type', ['theoretical', 'coding', 'mcq']);
 

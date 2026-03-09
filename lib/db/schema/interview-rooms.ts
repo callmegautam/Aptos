@@ -2,7 +2,8 @@ import { bigserial, pgTable, text, bigint, timestamp, integer } from 'drizzle-or
 import { companies } from './companies';
 import { interviewers } from './interviewers';
 import { candidates } from './candidates';
-import { interviewStatusEnum } from './enums';
+import { interviewFieldEnum, interviewStatusEnum } from './enums';
+import { sql } from 'drizzle-orm';
 
 export const interviewRooms = pgTable('interview_rooms', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),
@@ -15,23 +16,27 @@ export const interviewRooms = pgTable('interview_rooms', {
     .references(() => interviewers.id, { onDelete: 'cascade' })
     .notNull(),
 
-  candidateId: bigint('candidate_id', { mode: 'number' })
-    .references(() => candidates.id, { onDelete: 'cascade' })
-    .notNull(),
+  candidateId: bigint('candidate_id', { mode: 'number' }).references(() => candidates.id, {
+    onDelete: 'cascade'
+  }),
+
+  candidateName: text('candidate_name'),
 
   roomCode: text('room_code').notNull(),
 
   jobTitle: text('job_title').notNull(),
 
-  jobDescription: text('job_description').notNull(),
-
-  requiredSkills: text('required_skills').notNull(),
+  jobDescription: text('job_description'),
 
   resumeUrl: text('resume_url'),
 
-  status: interviewStatusEnum('status').notNull(),
+  status: interviewStatusEnum('status').notNull().default('SCHEDULED'),
+
+  field: interviewFieldEnum('field').notNull(),
 
   scheduledAt: timestamp('scheduled_at').notNull(),
 
-  durationSeconds: integer('duration_seconds').notNull()
+  completedAt: timestamp('completed_at'),
+
+  durationSeconds: integer('duration_seconds')
 });

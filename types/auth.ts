@@ -37,6 +37,14 @@ const verifySchema = z.object({
   otp: z.string().min(4)
 });
 
+export const userRoleEnum = [
+  'COMPANY',
+  'INTERVIEWER',
+  'CANDIDATE',
+  'ADMIN',
+  'SUPER_ADMIN'
+] as const;
+
 export type RegisterSchemaType = z.infer<typeof registerSchema>;
 export type RegisterFormSchemaType = z.infer<typeof registerFormSchema>;
 export type LoginSchema = z.infer<typeof loginSchema>;
@@ -44,3 +52,4 @@ export type LoginFormSchema = z.infer<typeof loginFormSchema>;
 export type ForgetPasswordSchema = z.infer<typeof forgetPasswordSchema>;
 export type ForgetPasswordFormSchema = z.infer<typeof forgetPasswordFormSchema>;
 export type VerifySchema = z.infer<typeof verifySchema>;
+export type UserRole = (typeof userRoleEnum)[number];

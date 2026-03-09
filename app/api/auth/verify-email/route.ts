@@ -52,7 +52,7 @@ export async function POST(req: Request) {
       const token = await signToken({
         id: company.id,
         email: company.email,
-        role: 'company'
+        role: 'COMPANY'
       });
 
       const cookieStore = await cookies();
@@ -88,7 +88,7 @@ export async function POST(req: Request) {
       const token = await signToken({
         id: candidate.id,
         email: candidate.email,
-        role: 'candidate'
+        role: 'CANDIDATE'
       });
 
       const cookieStore = await cookies();

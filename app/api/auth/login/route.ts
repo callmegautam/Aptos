@@ -71,7 +71,7 @@ export async function POST(req: Request) {
     const token = await signToken({
       id: user.id,
       email: user.email,
-      role: accountType
+      role: accountType === 'company' ? 'COMPANY' : 'CANDIDATE'
     });
 
     const cookieStore = await cookies();

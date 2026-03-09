@@ -1,50 +1,51 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { interviewRooms } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
-import { z } from 'zod';
+import { and, eq } from 'drizzle-orm';
 import { HTTP_STATUS } from '@/types/http';
+import { parseId } from '@/utils/parse';
+import fs from 'fs/promises';
+import path from 'path';
+import { getCurrentCompany, getCurrentUser } from '@/lib/auth/auth';
+import { updateInterviewRoomSchema } from '@/types/interview-room';
 
-const statusEnum = z.enum(['created', 'started', 'completed']);
-
-const updateRoomSchema = z.object({
-  companyId: z.number().int().positive().optional(),
-  interviewerId: z.number().int().positive().optional(),
-  candidateId: z.number().int().positive().optional(),
-  roomCode: z.string().min(1).optional(),
-  jobTitle: z.string().min(1).optional(),
-  jobDescription: z.string().min(1).optional(),
-  requiredSkills: z.string().min(1).optional(),
-  resumeUrl: z.string().url().optional().nullable(),
-  status: statusEnum.optional(),
-  scheduledAt: z.union([z.string(), z.coerce.date()]).optional(),
-  durationSeconds: z.number().int().positive().optional()
-});
-
-function parseId(id: string): number | null {
-  const n = parseInt(id, 10);
-  return Number.isNaN(n) || n <= 0 ? null : n;
-}
-
-export async function GET(
-  _req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(_req: Request, { params }: { params: { id: string } }) {
   try {
-    const { id } = await params;
+    const { id } = params;
     const roomId = parseId(id);
 
     if (roomId == null) {
+      return NextResponse.json({ error: 'Invalid id' }, { status: HTTP_STATUS.BAD_REQUEST });
+    }
+
+    const user = await getCurrentUser();
+    if (!user) {
       return NextResponse.json(
-        { error: 'Invalid id' },
-        { status: HTTP_STATUS.BAD_REQUEST }
+        { error: 'Invalid or expired token' },
+        { status: HTTP_STATUS.UNAUTHORIZED }
       );
+    }
+
+    const companyId = await getCurrentCompany(user);
+    if (!companyId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: HTTP_STATUS.UNAUTHORIZED });
+    }
+
+    const whereCondition =
+      user.role === 'COMPANY'
+        ? and(eq(interviewRooms.id, roomId), eq(interviewRooms.companyId, companyId))
+        : user.role === 'INTERVIEWER'
+          ? and(eq(interviewRooms.id, roomId), eq(interviewRooms.interviewerId, user.id))
+          : null;
+
+    if (!whereCondition) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: HTTP_STATUS.UNAUTHORIZED });
     }
 
     const [room] = await db
       .select()
       .from(interviewRooms)
-      .where(eq(interviewRooms.id, roomId))
+      .where(whereCondition)
       .limit(1);
 
     if (!room) {
@@ -64,23 +65,83 @@ export async function GET(
   }
 }
 
-export async function PATCH(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   try {
-    const { id } = await params;
+    const { id } = params;
     const roomId = parseId(id);
 
     if (roomId == null) {
+      return NextResponse.json({ error: 'Invalid id' }, { status: HTTP_STATUS.BAD_REQUEST });
+    }
+
+    const user = await getCurrentUser();
+    if (!user) {
       return NextResponse.json(
-        { error: 'Invalid id' },
-        { status: HTTP_STATUS.BAD_REQUEST }
+        { error: 'Invalid or expired token' },
+        { status: HTTP_STATUS.UNAUTHORIZED }
       );
     }
 
-    const body = await req.json();
-    const parsed = updateRoomSchema.safeParse(body);
+    const companyId = await getCurrentCompany(user);
+    if (!companyId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: HTTP_STATUS.UNAUTHORIZED });
+    }
+
+    const whereCondition =
+      user.role === 'COMPANY'
+        ? and(eq(interviewRooms.id, roomId), eq(interviewRooms.companyId, companyId))
+        : user.role === 'INTERVIEWER'
+          ? and(eq(interviewRooms.id, roomId), eq(interviewRooms.interviewerId, user.id))
+          : null;
+
+    if (!whereCondition) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: HTTP_STATUS.UNAUTHORIZED });
+    }
+
+    const contentType = req.headers.get('content-type') ?? '';
+
+    const parseFromJson = async () => {
+      const body = await req.json();
+      return updateInterviewRoomSchema.safeParse(body);
+    };
+
+    const parseFromFormData = async () => {
+      const formData = await req.formData();
+
+      const interviewerIdRaw = formData.get('interviewerId');
+      const durationSecondsRaw = formData.get('durationSeconds');
+
+      const parsed = updateInterviewRoomSchema.safeParse({
+        interviewerId:
+          interviewerIdRaw == null || interviewerIdRaw === ''
+            ? undefined
+            : Number(interviewerIdRaw),
+        candidateName: (formData.get('candidateName') as string | null) ?? undefined,
+        jobTitle: (formData.get('jobTitle') as string | null) ?? undefined,
+        jobDescription: (formData.get('jobDescription') as string | null) ?? undefined,
+        resumeUrl: (formData.get('resumeUrl') as string | null) ?? undefined,
+        status: (formData.get('status') as string | null) ?? undefined,
+        field: (formData.get('field') as string | null) ?? undefined,
+        scheduledAt: (formData.get('scheduledAt') as string | null) ?? undefined,
+        completedAt: (formData.get('completedAt') as string | null) ?? undefined,
+        durationSeconds:
+          durationSecondsRaw == null || durationSecondsRaw === ''
+            ? undefined
+            : Number(durationSecondsRaw)
+      });
+
+      const resumeValue = formData.get('resume');
+      const resume = resumeValue instanceof File ? resumeValue : null;
+
+      return { parsed, resume };
+    };
+
+    const isJson = contentType.includes('application/json');
+
+    const jsonParsed = isJson ? await parseFromJson() : null;
+    const { parsed, resume } = isJson
+      ? { parsed: jsonParsed!, resume: null as File | null }
+      : await parseFromFormData();
 
     if (!parsed.success) {
       return NextResponse.json(
@@ -92,7 +153,7 @@ export async function PATCH(
     const [existing] = await db
       .select()
       .from(interviewRooms)
-      .where(eq(interviewRooms.id, roomId))
+      .where(whereCondition)
       .limit(1);
 
     if (!existing) {
@@ -104,19 +165,12 @@ export async function PATCH(
 
     const updates: Partial<typeof interviewRooms.$inferInsert> = {};
 
-    if (parsed.data.companyId != null) updates.companyId = parsed.data.companyId;
-    if (parsed.data.interviewerId != null)
-      updates.interviewerId = parsed.data.interviewerId;
-    if (parsed.data.candidateId != null)
-      updates.candidateId = parsed.data.candidateId;
-    if (parsed.data.roomCode != null) updates.roomCode = parsed.data.roomCode;
+    if (parsed.data.interviewerId != null) updates.interviewerId = parsed.data.interviewerId;
+    if (parsed.data.candidateName != null) updates.candidateName = parsed.data.candidateName;
     if (parsed.data.jobTitle != null) updates.jobTitle = parsed.data.jobTitle;
-    if (parsed.data.jobDescription != null)
-      updates.jobDescription = parsed.data.jobDescription;
-    if (parsed.data.requiredSkills != null)
-      updates.requiredSkills = parsed.data.requiredSkills;
-    if (parsed.data.resumeUrl !== undefined)
-      updates.resumeUrl = parsed.data.resumeUrl;
+    if (parsed.data.jobDescription != null) updates.jobDescription = parsed.data.jobDescription;
+    if (parsed.data.field != null) updates.field = parsed.data.field;
+    if (parsed.data.resumeUrl !== undefined) updates.resumeUrl = parsed.data.resumeUrl;
     if (parsed.data.status != null) updates.status = parsed.data.status;
     if (parsed.data.scheduledAt != null) {
       updates.scheduledAt =
@@ -124,8 +178,27 @@ export async function PATCH(
           ? new Date(parsed.data.scheduledAt)
           : parsed.data.scheduledAt;
     }
-    if (parsed.data.durationSeconds != null)
-      updates.durationSeconds = parsed.data.durationSeconds;
+    if (parsed.data.completedAt != null) {
+      updates.completedAt =
+        typeof parsed.data.completedAt === 'string'
+          ? new Date(parsed.data.completedAt)
+          : parsed.data.completedAt;
+    }
+    if (parsed.data.durationSeconds != null) updates.durationSeconds = parsed.data.durationSeconds;
+
+    if (resume) {
+      const bytes = await resume.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+
+      const fileName = `${Date.now()}-${resume.name}`;
+      const resumesDir = path.join(process.cwd(), 'public/resumes');
+      const filePath = path.join(resumesDir, fileName);
+
+      await fs.mkdir(resumesDir, { recursive: true });
+      await fs.writeFile(filePath, buffer);
+
+      updates.resumeUrl = `/resumes/${fileName}`;
+    }
 
     if (Object.keys(updates).length === 0) {
       return NextResponse.json(existing, { status: HTTP_STATUS.OK });
@@ -134,7 +207,7 @@ export async function PATCH(
     const [updated] = await db
       .update(interviewRooms)
       .set(updates)
-      .where(eq(interviewRooms.id, roomId))
+      .where(whereCondition)
       .returning();
 
     if (!updated) {
@@ -154,24 +227,55 @@ export async function PATCH(
   }
 }
 
-export async function DELETE(
-  _req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
   try {
-    const { id } = await params;
+    const { id } = params;
     const roomId = parseId(id);
 
     if (roomId == null) {
+      return NextResponse.json({ error: 'Invalid id' }, { status: HTTP_STATUS.BAD_REQUEST });
+    }
+
+    const user = await getCurrentUser();
+    if (!user) {
       return NextResponse.json(
-        { error: 'Invalid id' },
-        { status: HTTP_STATUS.BAD_REQUEST }
+        { error: 'Invalid or expired token' },
+        { status: HTTP_STATUS.UNAUTHORIZED }
+      );
+    }
+
+    const companyId = await getCurrentCompany(user);
+    if (!companyId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: HTTP_STATUS.UNAUTHORIZED });
+    }
+
+    const whereCondition =
+      user.role === 'COMPANY'
+        ? and(eq(interviewRooms.id, roomId), eq(interviewRooms.companyId, companyId))
+        : user.role === 'INTERVIEWER'
+          ? and(eq(interviewRooms.id, roomId), eq(interviewRooms.interviewerId, user.id))
+          : null;
+
+    if (!whereCondition) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: HTTP_STATUS.UNAUTHORIZED });
+    }
+
+    const [existing] = await db
+      .select({ resumeUrl: interviewRooms.resumeUrl })
+      .from(interviewRooms)
+      .where(whereCondition)
+      .limit(1);
+
+    if (!existing) {
+      return NextResponse.json(
+        { error: 'Interview room not found' },
+        { status: HTTP_STATUS.NOT_FOUND }
       );
     }
 
     const [deleted] = await db
       .delete(interviewRooms)
-      .where(eq(interviewRooms.id, roomId))
+      .where(whereCondition)
       .returning({ id: interviewRooms.id });
 
     if (!deleted) {
@@ -179,6 +283,19 @@ export async function DELETE(
         { error: 'Interview room not found' },
         { status: HTTP_STATUS.NOT_FOUND }
       );
+    }
+
+    const resumeUrl = existing.resumeUrl;
+    if (resumeUrl && typeof resumeUrl === 'string' && resumeUrl.startsWith('/resumes/')) {
+      const diskPath = path.join(process.cwd(), 'public', resumeUrl.replace(/^\/+/, ''));
+      try {
+        await fs.unlink(diskPath);
+      } catch (err) {
+        // Best-effort cleanup: ignore missing/unremovable file
+        if (!(err instanceof Error) || !('code' in err) || (err as any).code !== 'ENOENT') {
+          console.warn('Failed to delete resume file:', err);
+        }
+      }
     }
 
     return new NextResponse(null, { status: HTTP_STATUS.NO_CONTENT });
