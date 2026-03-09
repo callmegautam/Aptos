@@ -10,6 +10,14 @@ import { InterviewRoomWithRelations } from '@/types/interview-room';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import { HTTP_STATUS } from '@/types/http';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog';
 
 const RoomsPage = () => {
   const [rooms, setRooms] = useState<InterviewRoomWithRelations[]>([]);
@@ -17,11 +25,14 @@ const RoomsPage = () => {
   const [editingRoom, setEditingRoom] = useState<InterviewRoomWithRelations | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [roomToDelete, setRoomToDelete] = useState<InterviewRoomWithRelations | null>(null);
+
   const router = useRouter();
 
   useEffect(() => {
     const fetchRooms = async () => {
-      setLoading(true);
+      const toastId = toast.loading('Loading interview rooms...');
       try {
         const response = await axios.get('/api/interview-rooms');
         if (response.status === HTTP_STATUS.OK) {
@@ -33,17 +44,17 @@ const RoomsPage = () => {
             }))
           );
         } else {
-          toast.error(response.data?.error ?? 'Failed to load rooms');
+          toast.error(response.data?.error ?? 'Failed to load rooms', { id: toastId });
         }
       } catch (error) {
         if (axios.isAxiosError(error)) {
           const message = error.response?.data?.error || 'Request failed';
-          toast.error(message);
+          toast.error(message, { id: toastId });
         } else {
-          toast.error('Something went wrong while loading rooms');
+          toast.error('Something went wrong while loading rooms', { id: toastId });
         }
       } finally {
-        setLoading(false);
+        toast.dismiss(toastId);
       }
     };
 
@@ -71,9 +82,6 @@ const RoomsPage = () => {
 
   const handleDelete = useCallback(
     async (room: InterviewRoomWithRelations) => {
-      const confirm = window.confirm(`Are you sure you want to delete room "${room.jobTitle}"?`);
-      if (!confirm) return;
-
       try {
         const response = await axios.delete(`/api/interview-rooms/${room.id}`);
         if (response.status === HTTP_STATUS.NO_CONTENT) {
@@ -119,13 +127,49 @@ const RoomsPage = () => {
           </Button>
         </div>
       </div>
-      <RoomsList rooms={rooms} onEdit={handleEdit} onDelete={handleDelete} />
+
+      <RoomsList
+        rooms={rooms}
+        onEdit={handleEdit}
+        onDelete={(room) => {
+          setRoomToDelete(room);
+          setDeleteDialogOpen(true);
+        }}
+      />
       <CreateRoomDialog
         open={createOpen}
         onOpenChange={setCreateOpen}
         editingRoom={editingRoom}
         onSubmit={handleSubmit}
       />
+
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Are you sure</DialogTitle>
+            <DialogDescription>
+              Do you really want to delete this room "{roomToDelete?.jobTitle}"? This action cannot
+              be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={async () => {
+                if (!roomToDelete) return;
+                await handleDelete(roomToDelete);
+                setDeleteDialogOpen(false);
+                setRoomToDelete(null);
+              }}
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
