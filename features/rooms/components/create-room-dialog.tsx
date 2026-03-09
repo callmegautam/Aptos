@@ -19,25 +19,22 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-import type { InterviewRoom, InterviewField, RoomStatus } from '@/features/rooms/types/room';
-import { INTERVIEW_FIELD, ROOM_STATUS } from '@/features/rooms/types/room';
+import { CreateInterviewRoom } from '@/types/interview-room';
 
-type RoomFormData = Omit<InterviewRoom, 'id' | 'createdAt'> & {
-  createdAt?: Date;
-};
+type RoomFormData = CreateInterviewRoom;
 
 type CreateRoomDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  editingRoom: InterviewRoom | null;
+  editingRoom: CreateInterviewRoom | null;
   onSubmit: (data: RoomFormData, isEdit: boolean) => void;
 };
 
 const defaultFormState = (): RoomFormData => ({
-  name: '',
-  description: '',
-  status: 'draft',
-  field: 'fullstack',
+  jobTitle: '',
+  jobDescription: '',
+  status: 'SCHEDULED',
+  : 'fullstack',
   candidateName: '',
   interviewerName: '',
   scheduledAt: undefined
