@@ -1,7 +1,7 @@
 import z from 'zod';
 
 export const interviewStatusEnum = ['SCHEDULED', 'LIVE', 'COMPLETED', 'CANCELLED'] as const;
-const interviewFieldEnum = ['BACKEND', 'FRONTEND', 'FULLSTACK', 'APPLICATION'] as const;
+export const interviewFieldEnum = ['BACKEND', 'FRONTEND', 'FULLSTACK', 'APPLICATION'] as const;
 
 export const interviewRoomSchema = z.object({
   id: z.number().int().positive(),
@@ -14,7 +14,7 @@ export const interviewRoomSchema = z.object({
   jobDescription: z.string().min(1).optional(),
   resumeUrl: z.string(),
   status: z.enum(interviewStatusEnum).default('SCHEDULED'),
-  field: z.enum(interviewFieldEnum).default('BACKEND'),
+  field: z.enum(interviewFieldEnum),
   scheduledAt: z.coerce.date().optional(),
   completedAt: z.coerce.date().optional(),
   durationSeconds: z.number().int().positive().optional()
