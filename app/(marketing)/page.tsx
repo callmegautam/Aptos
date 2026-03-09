@@ -295,7 +295,7 @@ const HomePage = async () => {
       <MaxWidthWrapper className="mt-20 max-w-[100vw] overflow-x-hidden scrollbar-hide">
         <AnimationContainer delay={0.1}>
           <LampContainer>
-            <div className="flex flex-col items-center justify-center relative w-full text-center">
+            <div className="flex flex-col items-center justify-center relative w-full text-center ">
               <h2 className="bg-gradient-to-b from-neutral-200 to-neutral-400 py-4 bg-clip-text text-center text-4xl md:text-7xl !leading-[1.15] font-medium font-heading tracking-tight text-transparent mt-8">
                 Step into the future of link management
               </h2>
