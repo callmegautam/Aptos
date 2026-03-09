@@ -6,6 +6,7 @@ import {
   FileCheck,
   HelpCircle,
   LayoutDashboard,
+  Loader,
   LogOut,
   Settings,
   User,
@@ -16,7 +17,7 @@ import * as React from 'react';
 
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Breadcrumb,
@@ -56,6 +57,12 @@ import {
   SidebarRail,
   SidebarTrigger
 } from '@/components/ui/sidebar';
+import axios from 'axios';
+import { HTTP_STATUS } from '@/types/http';
+import toast from 'react-hot-toast';
+import { useEffect, useState } from 'react';
+import { useUserStore } from '@/lib/store/user-store';
+import { Spinner } from '@/components/ui/spinner';
 
 const logout = () => {
   document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
@@ -311,6 +318,15 @@ function isActivePath(pathname: string, href: string): boolean {
 const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
   const pathname = usePathname();
 
+  // const user = useUserStore((state) => state.user);
+  // if (!user) return null;
+
+  // sidebarData.user = {
+  //   name: user.name,
+  //   email: user.email,
+  //   avatar: user.avatar || 'https://deifkwefumgah.cloudfront.net/shadcnblocks/block/avatar-1.webp'
+  // };
+
   return (
     <Sidebar {...props}>
       <SidebarHeader>
@@ -366,7 +382,34 @@ function getPageTitle(pathname: string): string {
 }
 
 export function DashboardLayout({ children, className }: DashboardLayoutProps) {
+  const [isLoading, setIsLoading] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+
+  useEffect(() => {
+    setIsLoading(true);
+    const fetchMe = async () => {
+      try {
+        const response = await axios.get('/api/auth/me');
+        const data = response.data;
+        if (response.status === HTTP_STATUS.OK) {
+          sidebarData.user = {
+            name: data.name,
+            email: data.email,
+            avatar: data.avatarUrl
+          };
+          useUserStore.getState().setUser(data);
+        }
+      } catch (error) {
+        console.error('Error fetching me:', error);
+        toast.error('Failed to fetch user data');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMe();
+  }, [router]);
 
   return (
     <SidebarProvider className={cn(className)}>

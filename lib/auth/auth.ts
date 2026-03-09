@@ -4,7 +4,7 @@ import { eq } from 'drizzle-orm';
 import { db } from '../db';
 import { companies, admins, candidates, interviewers } from '../db/schema';
 
-export async function getCurrentUser() {
+export async function getCurrentUser(): Promise<Payload | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get('token')?.value;
 

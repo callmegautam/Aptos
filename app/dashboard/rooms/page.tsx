@@ -32,7 +32,7 @@ const RoomsPage = () => {
 
   useEffect(() => {
     const fetchRooms = async () => {
-      const toastId = toast.loading('Loading interview rooms...');
+      // const toastId = toast.loading('Loading interview rooms...');
       try {
         const response = await axios.get('/api/interview-rooms');
         if (response.status === HTTP_STATUS.OK) {
@@ -44,17 +44,17 @@ const RoomsPage = () => {
             }))
           );
         } else {
-          toast.error(response.data?.error ?? 'Failed to load rooms', { id: toastId });
+          toast.error(response.data?.error ?? 'Failed to load rooms');
         }
       } catch (error) {
         if (axios.isAxiosError(error)) {
           const message = error.response?.data?.error || 'Request failed';
-          toast.error(message, { id: toastId });
+          toast.error(message);
         } else {
-          toast.error('Something went wrong while loading rooms', { id: toastId });
+          toast.error('Something went wrong while loading rooms');
         }
       } finally {
-        toast.dismiss(toastId);
+        // toast.dismiss(toastId);
       }
     };
 

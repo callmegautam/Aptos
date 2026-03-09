@@ -32,6 +32,7 @@ import type {
   InterviewRoomWithRelations
 } from '@/types/interview-room';
 import { formatDateShort } from '@/utils/date';
+import { APP_DOMAIN } from '@/utils/constants/site';
 
 const STATUS_CONFIG: Record<InterviewRoomStatus, { label: string; variant: any }> = {
   SCHEDULED: { label: 'Scheduled', variant: 'default' },
@@ -73,12 +74,12 @@ const FIELD_CONFIG: Record<InterviewField, { label: string; icon: typeof Server;
 //   }).format(date);
 // }
 
-function getInviteLink(roomId: number): string {
-  if (typeof window !== 'undefined') {
-    return `${window.location.origin}/join/${roomId}`;
-  }
-  return '';
-}
+// function getInviteLink(roomId: number): string {
+//   if (typeof window !== 'undefined') {
+//     return `${window.location.origin}/join/${roomId}`;
+//   }
+//   return '';
+// }
 
 type RoomCardProps = {
   room: InterviewRoomWithRelations;
@@ -92,8 +93,9 @@ export function RoomCard({ room, onEdit, onDelete }: RoomCardProps) {
   const statusConf = STATUS_CONFIG[room.status];
   const fieldConf = FIELD_CONFIG[room.field];
   const FieldIcon = fieldConf.icon;
+  const inviteLink = `${APP_DOMAIN}/interview/${room.roomCode}`;
 
-  const inviteLink = getInviteLink(room.id);
+  // const inviteLink = getInviteLink(room.id);
 
   const copyInviteLink = useCallback(async () => {
     await navigator.clipboard.writeText(inviteLink);

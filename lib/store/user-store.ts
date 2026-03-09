@@ -2,11 +2,14 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 type UserState = {
-  email: string | null;
-  name: string | null;
-  role: string | null;
+  user: {
+    email: string;
+    name: string;
+    role: string;
+    avatar?: string;
+  } | null;
 
-  setUser: (user: { email: string; name: string; role: string }) => void;
+  setUser: (user: UserState['user']) => void;
 
   clearUser: () => void;
 };
@@ -14,22 +17,16 @@ type UserState = {
 export const useUserStore = create<UserState>()(
   persist(
     (set) => ({
-      email: null,
-      name: null,
-      role: null,
+      user: null,
 
       setUser: (user) =>
         set({
-          email: user.email,
-          name: user.name,
-          role: user.role
+          user: user
         }),
 
       clearUser: () =>
         set({
-          email: null,
-          name: null,
-          role: null
+          user: null
         })
     }),
     {
