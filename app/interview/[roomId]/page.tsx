@@ -76,9 +76,7 @@ export default function InterviewRoom({ params }: { params: Promise<{ roomId: st
   const localParticipant = useLocalParticipant();
 
   const [joinState, setJoinState] = useState<
-    | { kind: 'loading' }
-    | { kind: 'error'; message: string }
-    | { kind: 'ok'; join: JoinResponse }
+    { kind: 'loading' } | { kind: 'error'; message: string } | { kind: 'ok'; join: JoinResponse }
   >({ kind: 'loading' });
 
   const joinUrl = useMemo(
@@ -130,11 +128,12 @@ export default function InterviewRoom({ params }: { params: Promise<{ roomId: st
 
     async function init(join: JoinResponse) {
       const streamUserId =
-        join.role === 'INTERVIEWER'
-          ? `interviewer-${join.viewerId}`
-          : `candidate-${join.viewerId}`;
+        join.role === 'INTERVIEWER' ? `interviewer-${join.viewerId}` : `candidate-${join.viewerId}`;
 
-      const videoClient = await createVideoClient(streamUserId);
+      const videoClient = await createVideoClient(
+        streamUserId,
+        join.role === 'INTERVIEWER' ? 'Interviewer' : 'Candidate'
+      );
       const callInstance = await joinInterviewCall(videoClient, join.interviewRoom.roomCode);
 
       if (cancelled) return;
@@ -152,7 +151,8 @@ export default function InterviewRoom({ params }: { params: Promise<{ roomId: st
   }, [joinState]);
 
   if (joinState.kind === 'loading') return <div>Checking access...</div>;
-  if (joinState.kind === 'error') return <div className="p-6 text-red-600">{joinState.message}</div>;
+  if (joinState.kind === 'error')
+    return <div className="p-6 text-red-600">{joinState.message}</div>;
   if (!videoClient || !call) return <div>Connecting...</div>;
   // if (!videoClient || !call || !chatClient || !channel) {
   //   return <div>Connecting...</div>;

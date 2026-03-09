@@ -7,11 +7,18 @@ const client = new StreamClient(
 );
 
 export async function POST(req: Request) {
-  const { userId } = await req.json();
+  const { userId, name } = await req.json();
 
   if (!userId) {
     return NextResponse.json({ error: 'userId required' }, { status: 400 });
   }
+
+  await client.upsertUsers([
+    {
+      id: userId,
+      name: name
+    }
+  ]);
 
   const token = client.createToken(userId);
 
