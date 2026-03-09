@@ -180,10 +180,10 @@ const createColumns = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem disabled>
+              {/* <DropdownMenuItem disabled>
                 <Eye className="mr-2 h-4 w-4" />
                 View details
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
               {onEdit && (
                 <DropdownMenuItem onClick={() => onEdit(id)}>
                   <Pencil className="mr-2 h-4 w-4" />
@@ -192,10 +192,7 @@ const createColumns = ({
               )}
               <DropdownMenuSeparator />
               {onDelete && (
-                <DropdownMenuItem
-                  className="text-destructive"
-                  onClick={() => onDelete(id)}
-                >
+                <DropdownMenuItem className="text-destructive" onClick={() => onDelete(id)}>
                   <Trash2 className="mr-2 h-4 w-4" />
                   Delete
                 </DropdownMenuItem>
@@ -210,11 +207,7 @@ const createColumns = ({
 
 export type InterviewersTableItem = Item;
 
-export default function InterviewersTable({
-  items,
-  onEdit,
-  onDelete
-}: InterviewersTableProps) {
+export default function InterviewersTable({ items, onEdit, onDelete }: InterviewersTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState({});
   const [globalFilter, setGlobalFilter] = useState('');

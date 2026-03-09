@@ -11,12 +11,23 @@ import toast from 'react-hot-toast';
 import axios from 'axios';
 import { HTTP_STATUS } from '@/types/http';
 import { Interviewer } from '@/types/interviewer';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog';
 
 const InterviewersPage = () => {
   const [createOpen, setCreateOpen] = useState(false);
   const [editingInterviewer, setEditingInterviewer] = useState<Interviewer | null>(null);
   const [interviewers, setInterviewers] = useState<Interviewer[]>([]);
   const [loading, setLoading] = useState(false);
+
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [interviewerToDelete, setInterviewerToDelete] = useState<Interviewer | null>(null);
 
   useEffect(() => {
     const fetchInterviewers = async () => {
@@ -74,33 +85,10 @@ const InterviewersPage = () => {
       const interviewer = interviewers.find((i) => i.id === id);
       if (!interviewer) return;
 
-      const confirm = window.confirm(
-        `Are you sure you want to delete interviewer "${interviewer.name}"?`
-      );
-      if (!confirm) return;
-
-      try {
-        const response = await axios.delete(`/api/interviewers/${id}`);
-        if (response.status === HTTP_STATUS.NO_CONTENT) {
-          setInterviewers((prev) => prev.filter((i) => i.id !== id));
-          if (editingInterviewer?.id === id) {
-            setEditingInterviewer(null);
-            setCreateOpen(false);
-          }
-          toast.success('Interviewer deleted successfully');
-        } else {
-          toast.error('Failed to delete interviewer');
-        }
-      } catch (error) {
-        if (axios.isAxiosError(error)) {
-          const message = error.response?.data?.error || 'Request failed';
-          toast.error(message);
-        } else {
-          toast.error('Something went wrong while deleting interviewer');
-        }
-      }
+      setInterviewerToDelete(interviewer);
+      setDeleteDialogOpen(true);
     },
-    [editingInterviewer, interviewers]
+    [interviewers]
   );
 
   const tableItems: InterviewersTableItem[] = useMemo(
@@ -141,6 +129,57 @@ const InterviewersPage = () => {
         editingInterviewer={editingInterviewer}
         onSubmit={handleSubmit}
       />
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Interviewer</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{interviewerToDelete?.name}"? This action cannot be
+              undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={async () => {
+                if (!interviewerToDelete) return;
+
+                try {
+                  const response = await axios.delete(
+                    `/api/interviewers/${interviewerToDelete.id}`
+                  );
+                  if (response.status === HTTP_STATUS.NO_CONTENT) {
+                    setInterviewers((prev) => prev.filter((i) => i.id !== interviewerToDelete.id));
+                    if (editingInterviewer?.id === interviewerToDelete.id) {
+                      setEditingInterviewer(null);
+                      setCreateOpen(false);
+                    }
+                    toast.success('Interviewer deleted successfully');
+                  } else {
+                    toast.error('Failed to delete interviewer');
+                  }
+                } catch (error) {
+                  if (axios.isAxiosError(error)) {
+                    const message = error.response?.data?.error || 'Request failed';
+                    toast.error(message);
+                  } else {
+                    toast.error('Something went wrong while deleting interviewer');
+                  }
+                } finally {
+                  setDeleteDialogOpen(false);
+                  setInterviewerToDelete(null);
+                }
+              }}
+            >
+              Confirm
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <div className="flex justify-center">{/* <InterviewTable /> */}</div>
       <div className="flex justify-center">{/* <DemoTable /> */}</div>
     </div>
