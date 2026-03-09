@@ -6,3 +6,4 @@ export * from './resumes';
 export * from './resume-ai-analysis';
 export * from './questions';
 export * from './interview-reports';
+export * from './admins';
