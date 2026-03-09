@@ -10,7 +10,7 @@ import {
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { registerFormSchema, RegisterFormSchemaType } from '@/types/auth';
+import { registerFormSchema, RegisterFormSchemaType, UserRole } from '@/types/auth';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
@@ -21,12 +21,12 @@ type RegisterFormProps = {
   header?: string;
   name?: string;
   LoginRedirection?: string;
-  user?: string;
+  user: UserRole;
 };
 
 export default function RegisterForm({
   className,
-  user = 'company',
+  user = 'COMPANY',
   header = 'Create your account',
   name = 'Company name',
   LoginRedirection = '/login'
@@ -101,12 +101,12 @@ export default function RegisterForm({
     try {
       const { data } = await axios.post('/api/auth/register', {
         ...parsed.data,
-        accountType: user
+        role: user
       });
 
       toast.success(data.message, { id: loadingToast });
 
-      router.push(`/verify-email?email=${data.email}&redirect=/dashboard`);
+      router.push(`/verify-email?email=${data.user.email}&redirect=/dashboard`);
     } catch (error: any) {
       const message = error?.response?.data?.error || 'Something went wrong';
 

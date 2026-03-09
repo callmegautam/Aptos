@@ -57,6 +57,10 @@ import {
   SidebarTrigger
 } from '@/components/ui/sidebar';
 
+const logout = () => {
+  document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
+};
+
 // Base nav item - used by simple sidebars
 type NavItem = {
   label: string;
@@ -278,7 +282,8 @@ const NavUser = ({ user }: { user: UserData }) => {
               Account
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            {/* todo */}
+            <DropdownMenuItem onClick={logout}>
               <LogOut className="mr-2 size-4" />
               Log out
             </DropdownMenuItem>
