@@ -5,7 +5,7 @@ import { type ColumnDef } from '@tanstack/react-table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import UniversalTable from '@/components/ui/universal-table';
+import UniversalTable from '@/components/universal-table';
 import Actions from '@/components/ui/actions';
 import TableAvatar from '@/components/ui/table-avatar';
 

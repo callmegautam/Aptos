@@ -1,7 +1,7 @@
 import Link from 'next/link';
-import { Icons } from '@/components/global/icons';
+import { Icons } from '@/features/home/components/icons';
 import { TextHoverEffect } from '@/components/ui/text-hover-effect';
-import AnimationContainer from '@/components/global/animation-container';
+import AnimationContainer from '@/features/home/components/animation-container';
 
 const Footer = () => {
   return (

@@ -9,18 +9,16 @@ import {
   CardHeader,
   CardTitle
 } from '@/components/ui/card';
-import { LampContainer } from '@/components/ui/lamp';
 import MagicBadge from '@/components/ui/magic-badge';
 import MagicCard from '@/components/ui/magic-card';
 import { COMPANIES, PROCESS } from '@/utils/constants/misc';
 import { REVIEWS } from '@/utils/constants/misc';
-// import { currentUser } from '@clerk/nextjs/server';
 import { ArrowRightIcon, CreditCardIcon, StarIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import MaxWidthWrapper from '@/components/global/max-width-wrapper';
-import AnimationContainer from '@/components/global/animation-container';
-import PricingCards from '@/components/pricing-cards';
+import MaxWidthWrapper from '@/features/home/components/max-width-wrapper';
+import AnimationContainer from '@/features/home/components/animation-container';
+import PricingCards from '@/features/home/components/pricing-cards';
 
 const HomePage = async () => {
   // const user = await currentUser();

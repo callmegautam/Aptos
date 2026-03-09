@@ -16,9 +16,9 @@ import { cn } from '@/lib/utils';
 import { LucideIcon, ZapIcon } from 'lucide-react';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
-import MaxWidthWrapper from '../global/max-width-wrapper';
+import MaxWidthWrapper from './max-width-wrapper';
 import MobileNavbar from './mobile-navbar';
-import AnimationContainer from '../global/animation-container';
+import AnimationContainer from './animation-container';
 
 const Navbar = () => {
   //   const { user } = useClerk();

@@ -1,4 +1,4 @@
-import { ReportList } from '@/features/reports/report-list';
+import { ReportList } from '@/features/reports/components/report-list';
 
 const ReportPage = () => {
   return (

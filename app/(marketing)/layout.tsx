@@ -1,7 +1,7 @@
 import React from 'react';
 // import { Footer, Navbar } from '@/components
-import Navbar from '@/components/navigation/navbar';
-import Footer from '@/components/navigation/footer';
+import Navbar from '@/features/home/components/navbar';
+import Footer from '@/features/home/components/footer';
 
 interface Props {
   children: React.ReactNode;

@@ -8,20 +8,15 @@ import {
   CallControls,
   StreamTheme,
   ParticipantView,
-  DefaultParticipantViewUI,
   useCallStateHooks
 } from '@stream-io/video-react-sdk';
 
-import Editor from '@monaco-editor/react';
 import { createVideoClient } from '@/lib/stream/video-client';
 import { joinInterviewCall } from '@/lib/stream/create-call';
-import InterviewChat from '@/components/interview-chat';
-import { createChatClient } from '@/lib/stream/chat-client';
-import { createInterviewChannel } from '@/lib/stream/create-channel';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
+import InterviewChat from '@/features/interview/components/interview-chat';
+import { ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { RoomProvider } from '@liveblocks/react';
-import CollabEditor from '@/components/collab-editor';
+import CollabEditor from '@/features/interview/components/collab-editor';
 import { useParams, useRouter } from 'next/navigation';
 
 type JoinResponse =
