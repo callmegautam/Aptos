@@ -1,6 +1,7 @@
 import z from 'zod';
 
 export const interviewStatusEnum = ['SCHEDULED', 'LIVE', 'COMPLETED', 'CANCELLED'] as const;
+const interviewFieldEnum = ['BACKEND', 'FRONTEND', 'FULLSTACK', 'APPLICATION'] as const;
 
 export const interviewRoomSchema = z.object({
   id: z.number().int().positive(),
@@ -13,6 +14,7 @@ export const interviewRoomSchema = z.object({
   jobDescription: z.string().min(1).optional(),
   resumeUrl: z.string(),
   status: z.enum(interviewStatusEnum).default('SCHEDULED'),
+  field: z.enum(interviewFieldEnum).default('BACKEND'),
   scheduledAt: z.coerce.date().optional(),
   completedAt: z.coerce.date().optional(),
   durationSeconds: z.number().int().positive().optional()
@@ -24,6 +26,7 @@ export const createRoomSchema = interviewRoomSchema.pick({
   jobTitle: true,
   jobDescription: true,
   status: true,
+  field: true,
   scheduledAt: true
 });
 
@@ -33,10 +36,9 @@ export const updateInterviewRoomSchema = interviewRoomSchema.pick({
   jobTitle: true,
   jobDescription: true,
   status: true,
+  field: true,
   scheduledAt: true
 });
-
-const interviewFieldEnum = ['BACKEND', 'FRONTEND', 'FULLSTACK', 'APPLICATION'] as const;
 
 export type InterviewRoom = z.infer<typeof interviewRoomSchema>;
 export type CreateInterviewRoom = z.infer<typeof createRoomSchema>;
