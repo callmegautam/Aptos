@@ -1,18 +1,11 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { companies, candidates, interviewers } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
-import { z } from 'zod';
 import { HTTP_STATUS } from '@/types/http';
 import { verifyOtp } from '@/lib/mail/otp';
-import { signToken } from '@/lib/auth/jwt';
-import { COOKIE_OPTIONS } from '@/config/cookies';
-import { cookies } from 'next/headers';
-
-const verifySchema = z.object({
-  email: z.string().email(),
-  otp: z.string().min(4)
-});
+import { setToken } from '@/lib/auth/jwt';
+import { verifySchema } from '@/types/auth';
+import { getUserTable } from '@/utils/db';
 
 export async function POST(req: Request) {
   try {
@@ -21,124 +14,34 @@ export async function POST(req: Request) {
     const parsed = verifySchema.safeParse(body);
 
     if (!parsed.success) {
-      console.log('-------', body);
       return NextResponse.json(
         { error: 'Invalid input', details: parsed.error.flatten() },
         { status: HTTP_STATUS.BAD_REQUEST }
       );
     }
 
-    const { email, otp } = parsed.data;
+    const payload = await verifyOtp({ email: parsed.data.email, otp: parsed.data.otp });
 
-    const otpResult = await verifyOtp(email, otp);
-
-    if (!otpResult) {
-      console.log('-------', body);
-
+    if (!payload) {
       return NextResponse.json(
         { error: 'OTP is incorrect or expired' },
         { status: HTTP_STATUS.BAD_REQUEST }
       );
     }
 
-    // check company first
-    const [company] = await db.select().from(companies).where(eq(companies.email, email)).limit(1);
+    const table = getUserTable(payload.role);
 
-    if (company) {
-      console.log('---- checkpoint 1------');
-      await db.update(companies).set({ emailVerified: true }).where(eq(companies.id, company.id));
-      console.log('---- checkpoint 2------');
+    await db.update(table).set({ emailVerified: true }).where(eq(table.id, payload.id));
 
-      const token = await signToken({
-        id: company.id,
-        email: company.email,
-        role: 'COMPANY'
-      });
+    await setToken(payload);
 
-      const cookieStore = await cookies();
-      cookieStore.set('token', token, COOKIE_OPTIONS);
-
-      return NextResponse.json(
-        {
-          message: 'Email verified successfully',
-          user: {
-            id: company.id,
-            email: company.email,
-            role: 'company',
-            name: company.name
-          }
-        },
-        { status: HTTP_STATUS.OK }
-      );
-    }
-
-    // check candidate
-    const [candidate] = await db
-      .select()
-      .from(candidates)
-      .where(eq(candidates.email, email))
-      .limit(1);
-
-    if (candidate) {
-      await db
-        .update(candidates)
-        .set({ emailVerified: true })
-        .where(eq(candidates.id, candidate.id));
-
-      const token = await signToken({
-        id: candidate.id,
-        email: candidate.email,
-        role: 'CANDIDATE'
-      });
-
-      const cookieStore = await cookies();
-      cookieStore.set('token', token, COOKIE_OPTIONS);
-
-      return NextResponse.json(
-        {
-          message: 'Email verified successfully',
-          user: {
-            id: candidate.id,
-            email: candidate.email,
-            role: 'candidate',
-            name: candidate.name
-          }
-        },
-        { status: HTTP_STATUS.OK }
-      );
-    }
-    // check interviewer (email-based, no emailVerified flag today)
-    const [interviewer] = await db
-      .select()
-      .from(interviewers)
-      .where(eq(interviewers.email, email))
-      .limit(1);
-
-    if (interviewer) {
-      const token = await signToken({
-        id: interviewer.id,
-        email: interviewer.email,
-        role: 'INTERVIEWER'
-      });
-
-      const cookieStore = await cookies();
-      cookieStore.set('token', token, COOKIE_OPTIONS);
-
-      return NextResponse.json(
-        {
-          message: 'Email verified successfully',
-          user: {
-            id: interviewer.id,
-            email: interviewer.email,
-            role: 'interviewer',
-            name: interviewer.name
-          }
-        },
-        { status: HTTP_STATUS.OK }
-      );
-    }
-
-    return NextResponse.json({ error: 'User not found' }, { status: HTTP_STATUS.NOT_FOUND });
+    return NextResponse.json(
+      {
+        message: 'Email verified successfully',
+        user: payload
+      },
+      { status: HTTP_STATUS.OK }
+    );
   } catch (error) {
     console.error('Verify email error:', error);
 

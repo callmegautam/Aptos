@@ -2,7 +2,7 @@ import { cookies } from 'next/headers';
 import { Payload, verifyToken } from '@/lib/auth/jwt';
 import { eq } from 'drizzle-orm';
 import { db } from '../db';
-import { interviewers } from '../db/schema';
+import { companies, admins, candidates, interviewers } from '../db/schema';
 
 export async function getCurrentUser() {
   const cookieStore = await cookies();
@@ -28,5 +28,25 @@ export async function getCurrentCompany(payload: Payload): Promise<number | null
       .limit(1);
     return interviewer?.companyId ?? null;
   }
+  return null;
+}
+
+export async function getCurrentUserByEmail(email: string): Promise<Payload | null> {
+  const [company] = await db.select().from(companies).where(eq(companies.email, email)).limit(1);
+  if (company) return { id: company.id, email, role: 'COMPANY' };
+  const [candidate] = await db
+    .select()
+    .from(candidates)
+    .where(eq(candidates.email, email))
+    .limit(1);
+  if (candidate) return { id: candidate.id, email, role: 'CANDIDATE' };
+  const [interviewer] = await db
+    .select()
+    .from(interviewers)
+    .where(eq(interviewers.email, email))
+    .limit(1);
+  if (interviewer) return { id: interviewer.id, email, role: 'INTERVIEWER' };
+  const [admin] = await db.select().from(admins).where(eq(admins.email, email)).limit(1);
+  if (admin) return { id: admin.id, email, role: 'ADMIN' };
   return null;
 }

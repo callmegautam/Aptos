@@ -1,25 +1,19 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { companies, candidates } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcrypt';
-import { z } from 'zod';
 import { HTTP_STATUS } from '@/types/http';
-import { verifyToken } from '@/lib/auth/jwt';
-import { cookies } from 'next/headers';
 import { createOtp } from '@/lib/mail/otp';
 import { sendVerificationEmail } from '@/lib/mail/email';
-
-const resetSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8, 'Password must be at least 8 characters')
-});
+import { resetPasswordSchema } from '@/types/auth';
+import { getCurrentUserByEmail } from '@/lib/auth/auth';
+import { getUserTable } from '@/utils/db';
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    const parsed = resetSchema.safeParse(body);
+    const parsed = resetPasswordSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
         { error: 'Invalid input', details: parsed.error.flatten() },
@@ -27,30 +21,22 @@ export async function POST(req: Request) {
       );
     }
 
-    const { email, password } = parsed.data;
-    const [company, candidate] = await Promise.all([
-      db.select().from(companies).where(eq(companies.email, email)).limit(1),
-      db.select().from(candidates).where(eq(candidates.email, email)).limit(1)
-    ]);
+    const payload = await getCurrentUserByEmail(parsed.data.email);
 
-    const user = company[0] ?? candidate[0];
-
-    if (!user) {
+    if (!payload) {
       return NextResponse.json({ error: 'Email not found' }, { status: HTTP_STATUS.NOT_FOUND });
     }
 
-    const role = company[0] ? 'company' : 'candidate';
+    const passwordHash = await bcrypt.hash(parsed.data.password, 10);
 
-    const passwordHash = await bcrypt.hash(password, 10);
+    const table = getUserTable(payload.role);
 
-    const table = role === 'company' ? companies : candidates;
-
-    await db.update(table).set({ passwordHash }).where(eq(table.id, user.id));
+    await db.update(table).set({ passwordHash }).where(eq(table.id, payload.id));
 
     return NextResponse.json(
       {
         message: 'Password reset successfully',
-        user: { id: user.id, email, role }
+        user: payload
       },
       { status: HTTP_STATUS.OK }
     );
@@ -73,23 +59,14 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'Email is required' }, { status: HTTP_STATUS.BAD_REQUEST });
     }
 
-    if (process.env.SUPER_ADMIN_EMAIL && email === process.env.SUPER_ADMIN_EMAIL) {
-      // Allow OTP-based reset flow for the configured super admin email.
-    } else {
-      const [company] = await db.select().from(companies).where(eq(companies.email, email)).limit(1);
-      const [candidate] = await db
-        .select()
-        .from(candidates)
-        .where(eq(candidates.email, email))
-        .limit(1);
+    const payload = await getCurrentUserByEmail(email);
 
-      if (!company && !candidate) {
-        return NextResponse.json({ error: 'Email not found' }, { status: HTTP_STATUS.NOT_FOUND });
-      }
+    if (!payload) {
+      return NextResponse.json({ error: 'Email not found' }, { status: HTTP_STATUS.NOT_FOUND });
     }
 
-    const otp = await createOtp(email);
-    await sendVerificationEmail(email, otp);
+    const otp = await createOtp(payload.email);
+    await sendVerificationEmail(payload.email, otp);
 
     return NextResponse.json({ message: 'OTP sent to email' }, { status: HTTP_STATUS.OK });
   } catch (error) {

@@ -3,17 +3,12 @@ import { db } from '@/lib/db';
 import { companies, candidates } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcrypt';
-import { z } from 'zod';
 import { HTTP_STATUS } from '@/types/http';
 import { createOtp } from '@/lib/mail/otp';
 import { sendVerificationEmail } from '@/lib/mail/email';
-
-const registerSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8),
-  name: z.string().min(1),
-  role: z.enum(['CANDIDATE', 'COMPANY'])
-});
+import { registerSchema } from '@/types/auth';
+import { getCurrentUserByEmail } from '@/lib/auth/auth';
+import { getUserTable } from '@/utils/db';
 
 async function hashPassword(password: string) {
   return bcrypt.hash(password, 10);
@@ -60,8 +55,6 @@ async function registerCandidate(email: string, password: string, name: string) 
 
 export async function POST(req: Request) {
   try {
-    console.log('Register request received');
-
     const body = await req.json();
 
     const parsed = registerSchema.safeParse(body);
@@ -73,54 +66,38 @@ export async function POST(req: Request) {
       );
     }
 
-    const { email, password, name, role } = parsed.data;
+    const user = await getCurrentUserByEmail(parsed.data.email);
 
-    const [existingCompany] = await db
-      .select()
-      .from(companies)
-      .where(eq(companies.email, email))
-      .limit(1);
-
-    if (existingCompany) {
-      // throw new Error('A company with this email already exists');
+    if (user) {
       return NextResponse.json({ error: 'Email already exists' }, { status: HTTP_STATUS.CONFLICT });
     }
 
-    const [existingCandidate] = await db
-      .select()
-      .from(candidates)
-      .where(eq(candidates.email, email))
-      .limit(1);
+    const passwordHash = await hashPassword(parsed.data.password);
 
-    if (existingCandidate) {
-      return NextResponse.json({ error: 'Email already exists' }, { status: HTTP_STATUS.CONFLICT });
-    }
+    const table = getUserTable(parsed.data.role);
 
-    const result =
-      role === 'COMPANY'
-        ? await registerCompany(email, password, name)
-        : await registerCandidate(email, password, name);
+    const [result] = await db
+      .insert(table)
+      .values({
+        email: parsed.data.email,
+        name: parsed.data.name,
+        emailVerified: false,
+        passwordHash: await hashPassword(parsed.data.password)
+      })
+      .returning();
 
-    if (result.alreadyExists) {
-      return NextResponse.json({ error: 'User already exists' }, { status: HTTP_STATUS.CONFLICT });
-    }
-
-    if (!result.otp) {
-      return NextResponse.json(
-        { error: 'Failed to create OTP' },
-        { status: HTTP_STATUS.INTERNAL_SERVER_ERROR }
-      );
-    }
-
-    // TODO: enable email verification
-    await sendVerificationEmail(email, result.otp);
+    const otp = await createOtp(parsed.data.email);
+    await sendVerificationEmail(parsed.data.email, otp);
 
     return NextResponse.json(
       {
         message: `OTP sent to email.`,
-        userId: result.user.id,
-        email: email,
-          role
+        user: {
+          id: result.id,
+          email: result.email,
+          role: parsed.data.role
+        },
+        otp
       },
       { status: HTTP_STATUS.CREATED }
     );

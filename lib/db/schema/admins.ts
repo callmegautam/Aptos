@@ -13,6 +13,7 @@ export const admins = pgTable('admins', {
 
   role: adminRoleEnum('role').notNull().default('ADMIN'),
 
+  avatarUrl: text('avatar_url'),
+
   emailVerified: boolean('email_verified').default(false)
 });
-

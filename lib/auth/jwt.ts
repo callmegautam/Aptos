@@ -1,5 +1,7 @@
+import { COOKIE_OPTIONS } from '@/config/cookies';
 import { UserRole } from '@/types/auth';
 import { SignJWT, jwtVerify } from 'jose';
+import { cookies } from 'next/headers';
 
 const secret = new TextEncoder().encode(process.env.JWT_SECRET);
 
@@ -24,4 +26,10 @@ export async function verifyToken(token: string): Promise<Payload | null> {
   } catch {
     return null;
   }
+}
+
+export async function setToken(payload: Payload): Promise<void> {
+  const token = await signToken(payload);
+  const cookieStore = await cookies();
+  cookieStore.set('token', token, COOKIE_OPTIONS);
 }

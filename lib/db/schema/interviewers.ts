@@ -1,5 +1,6 @@
 import { bigserial, pgTable, text, varchar, bigint } from 'drizzle-orm/pg-core';
 import { companies } from './companies';
+import { boolean } from 'drizzle-orm/pg-core';
 
 export const interviewers = pgTable('interviewers', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),
@@ -16,5 +17,7 @@ export const interviewers = pgTable('interviewers', {
 
   companyId: bigint('company_id', { mode: 'number' })
     .references(() => companies.id, { onDelete: 'cascade' })
-    .notNull()
+    .notNull(),
+
+  emailVerified: boolean('email_verified').default(false)
 });

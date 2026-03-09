@@ -11,7 +11,11 @@ export const registerFormSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
   name: z.string().min(1)
-  //   accountType: z.enum(['candidate', 'company'])
+});
+
+export const resetPasswordSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8)
 });
 
 export const loginSchema = z.object({
@@ -25,14 +29,7 @@ export const loginFormSchema = z.object({
   password: z.string().min(8)
 });
 
-const forgetPasswordSchema = z.object({
-  email: z.string().email(),
-  role: z.enum(['CANDIDATE', 'COMPANY', 'SUPER_ADMIN'])
-});
-const forgetPasswordFormSchema = z.object({
-  email: z.string().email()
-});
-const verifySchema = z.object({
+export const verifySchema = z.object({
   email: z.string().email(),
   otp: z.string().min(4)
 });
@@ -49,7 +46,6 @@ export type RegisterSchemaType = z.infer<typeof registerSchema>;
 export type RegisterFormSchemaType = z.infer<typeof registerFormSchema>;
 export type LoginSchema = z.infer<typeof loginSchema>;
 export type LoginFormSchema = z.infer<typeof loginFormSchema>;
-export type ForgetPasswordSchema = z.infer<typeof forgetPasswordSchema>;
-export type ForgetPasswordFormSchema = z.infer<typeof forgetPasswordFormSchema>;
 export type VerifySchema = z.infer<typeof verifySchema>;
+export type ResetPasswordSchema = z.infer<typeof resetPasswordSchema>;
 export type UserRole = (typeof userRoleEnum)[number];

@@ -81,7 +81,7 @@ export async function POST(req: Request) {
 
     const parsed = createRoomSchema.safeParse({
       interviewerId: formData.get('interviewerId'),
-      candidateId: formData.get('candidateId'),
+      candidateName: formData.get('candidateName'),
       jobTitle: formData.get('jobTitle'),
       jobDescription: formData.get('jobDescription'),
       status: formData.get('status') as InterviewRoomStatus,
