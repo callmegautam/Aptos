@@ -3,7 +3,7 @@
 import { LoginForm } from '@/features/auth/components/login-form';
 
 const CompanyLoginPage = () => {
-  return <LoginForm header="Login to company account" user="company" />;
+  return <LoginForm header="Login to company account" user="COMPANY" />;
 };
 
 export default CompanyLoginPage;

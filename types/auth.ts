@@ -31,7 +31,7 @@ export const loginFormSchema = z.object({
 
 export const verifySchema = z.object({
   email: z.string().email(),
-  otp: z.string().min(4)
+  otp: z.string()
 });
 
 export const userRoleEnum = [

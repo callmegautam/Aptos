@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
-import { loginFormSchema, LoginFormSchema } from '@/types/auth';
+import { loginFormSchema, LoginFormSchema, UserRole } from '@/types/auth';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -24,12 +24,12 @@ type LoginFormProps = {
   className?: string;
   header?: string;
   registerRedirection?: string;
-  user?: string;
+  user: UserRole;
 };
 
 export function LoginForm({
   className,
-  user = 'company',
+  user = 'COMPANY',
   header = 'Login to your account',
   registerRedirection = '/register'
 }: LoginFormProps) {
@@ -48,13 +48,13 @@ export function LoginForm({
   }, [user]);
 
   // show extra options only for company and candidate
-  const showExtraOptions = user === 'company' || user === 'candidate';
+  const showExtraOptions = user === 'COMPANY' || user === 'CANDIDATE';
 
   let forgetPasswordRedirection = '/login';
 
-  if (user === 'candidate') forgetPasswordRedirection = '/login/candidate';
-  else if (user === 'interviewer') forgetPasswordRedirection = '/login/interviewer';
-  else if (user === 'admin') forgetPasswordRedirection = '/login/admin';
+  if (user === 'CANDIDATE') forgetPasswordRedirection = '/login/candidate';
+  else if (user === 'INTERVIEWER') forgetPasswordRedirection = '/login/interviewer';
+  else if (user === 'ADMIN') forgetPasswordRedirection = '/login/admin';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,7 +73,7 @@ export function LoginForm({
 
       const response = await axios.post('/api/auth/login', {
         ...data,
-        accountType
+        role: user
       });
 
       if (response.status !== HTTP_STATUS.OK) {

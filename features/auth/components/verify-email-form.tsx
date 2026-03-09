@@ -52,6 +52,8 @@ export function VerifyEmailForm({ className }: VerifyEmailFormProps) {
     const otpValue = otp.join('');
 
     try {
+      console.log('Email: ', email, '--', otpValue);
+
       const response = await axios.post('/api/auth/verify-email', {
         email,
         otp: otpValue
