@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { companies, candidates } from '@/lib/db/schema';
+import { companies, candidates, interviewers } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { HTTP_STATUS } from '@/types/http';
@@ -102,6 +102,36 @@ export async function POST(req: Request) {
             email: candidate.email,
             role: 'candidate',
             name: candidate.name
+          }
+        },
+        { status: HTTP_STATUS.OK }
+      );
+    }
+    // check interviewer (email-based, no emailVerified flag today)
+    const [interviewer] = await db
+      .select()
+      .from(interviewers)
+      .where(eq(interviewers.email, email))
+      .limit(1);
+
+    if (interviewer) {
+      const token = await signToken({
+        id: interviewer.id,
+        email: interviewer.email,
+        role: 'INTERVIEWER'
+      });
+
+      const cookieStore = await cookies();
+      cookieStore.set('token', token, COOKIE_OPTIONS);
+
+      return NextResponse.json(
+        {
+          message: 'Email verified successfully',
+          user: {
+            id: interviewer.id,
+            email: interviewer.email,
+            role: 'interviewer',
+            name: interviewer.name
           }
         },
         { status: HTTP_STATUS.OK }

@@ -28,7 +28,6 @@ export async function POST(req: Request) {
     }
 
     const { email, password } = parsed.data;
-
     const [company, candidate] = await Promise.all([
       db.select().from(companies).where(eq(companies.email, email)).limit(1),
       db.select().from(candidates).where(eq(candidates.email, email)).limit(1)
@@ -74,15 +73,19 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'Email is required' }, { status: HTTP_STATUS.BAD_REQUEST });
     }
 
-    const [company] = await db.select().from(companies).where(eq(companies.email, email)).limit(1);
-    const [candidate] = await db
-      .select()
-      .from(candidates)
-      .where(eq(candidates.email, email))
-      .limit(1);
+    if (process.env.SUPER_ADMIN_EMAIL && email === process.env.SUPER_ADMIN_EMAIL) {
+      // Allow OTP-based reset flow for the configured super admin email.
+    } else {
+      const [company] = await db.select().from(companies).where(eq(companies.email, email)).limit(1);
+      const [candidate] = await db
+        .select()
+        .from(candidates)
+        .where(eq(candidates.email, email))
+        .limit(1);
 
-    if (!company && !candidate) {
-      return NextResponse.json({ error: 'Email not found' }, { status: HTTP_STATUS.NOT_FOUND });
+      if (!company && !candidate) {
+        return NextResponse.json({ error: 'Email not found' }, { status: HTTP_STATUS.NOT_FOUND });
+      }
     }
 
     const otp = await createOtp(email);
