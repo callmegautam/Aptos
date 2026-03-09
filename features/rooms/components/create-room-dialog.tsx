@@ -21,15 +21,17 @@ import {
 } from '@/components/ui/select';
 import {
   CreateInterviewRoom,
+  createRoomSchema,
   InterviewField,
   interviewFieldEnum,
   InterviewRoomStatus,
   interviewStatusEnum
 } from '@/types/interview-room';
 import toast from 'react-hot-toast';
-import { FileText, Trash2Icon, Upload } from 'lucide-react';
+import { FileText, Loader2Icon, Trash2Icon, Upload } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
+import axios from 'axios';
 const interviewers = [
   { id: 1, name: 'John' },
   { id: 2, name: 'Sarah' },
@@ -78,6 +80,7 @@ export function CreateRoomDialog({
   const isEdit = !!editingRoom;
   const [form, setForm] = React.useState<RoomFormData>(defaultFormState());
   const [resume, setResume] = React.useState<File | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   React.useEffect(() => {
     if (editingRoom) {
@@ -154,23 +157,54 @@ export function CreateRoomDialog({
     setResume(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.jobTitle.trim()) return;
-    const payload: RoomFormData = {
-      ...form,
-      jobTitle: form.jobTitle.trim(),
-      jobDescription: form.jobDescription?.trim() || undefined,
-      candidateName: form.candidateName?.trim() || undefined,
-      interviewerId: form.interviewerId,
-      scheduledAt: form.scheduledAt
-    };
-    onSubmit(payload, isEdit);
-    setForm(defaultFormState());
-    setUploadedFiles([]);
-    setFileProgresses({});
-    setResume(null);
-    onOpenChange(false);
+
+    const parsed = createRoomSchema.safeParse(form);
+
+    if (!parsed.success) {
+      toast.error('Invalid form data');
+      return;
+    }
+
+    const loadingToast = toast.loading('Creating interview room...');
+    setIsLoading(true);
+
+    const formData = new FormData();
+
+    formData.append('jobTitle', parsed.data.jobTitle);
+    formData.append('jobDescription', parsed.data.jobDescription ?? '');
+    formData.append('status', parsed.data.status);
+    formData.append('field', parsed.data.field);
+    formData.append('candidateName', parsed.data.candidateName ?? '');
+    formData.append('interviewerId', String(parsed.data.interviewerId));
+    formData.append('scheduledAt', parsed.data.scheduledAt.toISOString());
+
+    if (resume) {
+      formData.append('resume', resume);
+    }
+
+    try {
+      const response = await axios.post('/api/interview-room', formData);
+
+      toast.success('Interview room created', { id: loadingToast });
+
+      setForm(defaultFormState());
+      setUploadedFiles([]);
+      setFileProgresses({});
+      setResume(null);
+
+      onOpenChange(false);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const message = error.response?.data?.error || 'Request failed';
+        toast.error(message, { id: loadingToast });
+      } else {
+        toast.error('Something went wrong', { id: loadingToast });
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleOpenChange = (next: boolean) => {
@@ -323,6 +357,7 @@ export function CreateRoomDialog({
                                 </span>
                               </div>
                               <Button
+                                type="button"
                                 variant="ghost"
                                 size="icon-sm"
                                 className="bg-transparent! hover:text-red-500"
@@ -390,8 +425,14 @@ export function CreateRoomDialog({
             <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={!form.jobTitle.trim()}>
-              {isEdit ? 'Save changes' : 'Create room'}
+            <Button type="submit" disabled={isLoading || !form.jobTitle.trim()}>
+              {isLoading ? (
+                <Loader2Icon className="size-4 animate-spin" />
+              ) : isEdit ? (
+                'Save changes'
+              ) : (
+                'Create room'
+              )}
             </Button>
           </DialogFooter>
         </form>
