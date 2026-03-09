@@ -22,6 +22,19 @@ export async function GET(_req: Request) {
       );
     }
 
+    if (user.role === 'INTERVIEWER') {
+      const interviewer = await db.query.interviewers.findFirst({
+        where: eq(interviewers.id, user.id)
+      });
+      if (!interviewer) {
+        return NextResponse.json(
+          { error: 'Interviewer not found' },
+          { status: HTTP_STATUS.NOT_FOUND }
+        );
+      }
+      return NextResponse.json({ interviewers: interviewer }, { status: HTTP_STATUS.OK });
+    }
+
     if (user.role !== 'COMPANY') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: HTTP_STATUS.UNAUTHORIZED });
     }
@@ -57,7 +70,7 @@ export async function GET(_req: Request) {
       };
     });
 
-    return NextResponse.json(data, { status: HTTP_STATUS.OK });
+    return NextResponse.json({ interviewers: data }, { status: HTTP_STATUS.OK });
   } catch (error) {
     console.error('List interviewers error:', error);
     return NextResponse.json(
@@ -103,8 +116,7 @@ export async function POST(req: Request) {
         email: formData.get('email'),
         password: formData.get('password'),
         phone: phoneRaw == null || phoneRaw === '' ? undefined : String(phoneRaw),
-        avatarUrl:
-          avatarUrlRaw == null || avatarUrlRaw === '' ? undefined : String(avatarUrlRaw)
+        avatarUrl: avatarUrlRaw == null || avatarUrlRaw === '' ? undefined : String(avatarUrlRaw)
       });
 
       const avatarValue = formData.get('avatar');

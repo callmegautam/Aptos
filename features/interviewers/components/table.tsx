@@ -44,17 +44,21 @@ import Image from 'next/image';
 
 type Status = 'active' | 'inactive';
 
-const tempImage = 'https://galaxypfp.com/wp-content/uploads/2025/10/aesthetic-cute-cat-pfp.webp';
-
 interface Item {
-  id: string;
-  avatar: string;
+  id: number;
+  avatar: string | null;
   name: string;
   email: string;
   phone: string;
   total_interviews: number;
   status: Status;
 }
+
+type InterviewersTableProps = {
+  items: Item[];
+  onEdit?: (id: number) => void;
+  onDelete?: (id: number) => void;
+};
 
 const statusConfig: Record<Status, { label: string; className: string }> = {
   active: {
@@ -76,7 +80,13 @@ function StatusBadge({ status }: { status: Status }) {
   );
 }
 
-const columns: ColumnDef<Item>[] = [
+const createColumns = ({
+  onEdit,
+  onDelete
+}: {
+  onEdit?: (id: number) => void;
+  onDelete?: (id: number) => void;
+}): ColumnDef<Item>[] => [
   {
     id: 'select',
     header: ({ table }) => (
@@ -102,7 +112,17 @@ const columns: ColumnDef<Item>[] = [
     accessorKey: 'avatar',
     header: 'Avatar',
     cell: ({ row }) => {
-      const avatar = row.getValue('avatar') as string;
+      const avatar = row.getValue('avatar') as string | null;
+
+      if (!avatar) {
+        return (
+          <div className="flex h-[30px] w-[30px] items-center justify-center rounded-full bg-muted">
+            <span className="text-xs font-medium">
+              {String(row.getValue('name')).charAt(0).toUpperCase()}
+            </span>
+          </div>
+        );
+      }
 
       return (
         <div className="flex items-center">
@@ -147,73 +167,62 @@ const columns: ColumnDef<Item>[] = [
   // },
   {
     id: 'actions',
-    cell: () => (
-      <div className="text-right">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreHorizontal className="h-4 w-4" />
-              <span className="sr-only">Open menu</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem>
-              <Eye className="mr-2 h-4 w-4" />
-              View details
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Pencil className="mr-2 h-4 w-4" />
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    )
+    cell: ({ row }) => {
+      const id = row.original.id;
+
+      return (
+        <div className="text-right">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <MoreHorizontal className="h-4 w-4" />
+                <span className="sr-only">Open menu</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem disabled>
+                <Eye className="mr-2 h-4 w-4" />
+                View details
+              </DropdownMenuItem>
+              {onEdit && (
+                <DropdownMenuItem onClick={() => onEdit(id)}>
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Edit
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuSeparator />
+              {onDelete && (
+                <DropdownMenuItem
+                  className="text-destructive"
+                  onClick={() => onDelete(id)}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      );
+    }
   }
 ];
 
-const data: Item[] = [
-  {
-    id: '1',
-    avatar: tempImage,
-    name: 'Project Alpha',
-    email: 'abc@gmail.com',
-    phone: '9929929929',
-    total_interviews: 23,
-    status: 'active'
-  },
-  {
-    id: '2',
-    avatar: tempImage,
-    name: 'Website Redesign',
-    email: 'abc@gmail.com',
-    phone: '9929929929',
-    total_interviews: 23,
-    status: 'inactive'
-  },
-  {
-    id: '3',
-    avatar: tempImage,
-    name: 'Mobile App MVP',
-    email: 'abc@gmail.com',
-    phone: '9929929929',
-    total_interviews: 23,
-    status: 'active'
-  }
-];
+export type InterviewersTableItem = Item;
 
-export default function InterviewersTable() {
+export default function InterviewersTable({
+  items,
+  onEdit,
+  onDelete
+}: InterviewersTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState({});
   const [globalFilter, setGlobalFilter] = useState('');
 
+  const columns = createColumns({ onEdit, onDelete });
+
   const table = useReactTable({
-    data,
+    data: items,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),

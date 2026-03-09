@@ -41,11 +41,13 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
       return NextResponse.json({ error: 'Unauthorized' }, { status: HTTP_STATUS.UNAUTHORIZED });
     }
 
-    const [room] = await db
-      .select()
-      .from(interviewRooms)
-      .where(whereCondition)
-      .limit(1);
+    const room = await db.query.interviewRooms.findFirst({
+      where: whereCondition,
+      with: {
+        interviewer: true,
+        candidate: true
+      }
+    });
 
     if (!room) {
       return NextResponse.json(
@@ -149,11 +151,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
       );
     }
 
-    const [existing] = await db
-      .select()
-      .from(interviewRooms)
-      .where(whereCondition)
-      .limit(1);
+    const [existing] = await db.select().from(interviewRooms).where(whereCondition).limit(1);
 
     if (!existing) {
       return NextResponse.json(
@@ -177,13 +175,13 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
           ? new Date(parsed.data.scheduledAt)
           : parsed.data.scheduledAt;
     }
-    if (parsed.data.completedAt != null) {
-      updates.completedAt =
-        typeof parsed.data.completedAt === 'string'
-          ? new Date(parsed.data.completedAt)
-          : parsed.data.completedAt;
-    }
-    if (parsed.data.durationSeconds != null) updates.durationSeconds = parsed.data.durationSeconds;
+    // if (parsed.data.completedAt != null) {
+    //   updates.completedAt =
+    //     typeof parsed.data.completedAt === 'string'
+    //       ? new Date(parsed.data.completedAt)
+    //       : parsed.data.completedAt;
+    // }
+    // if (parsed.data.durationSeconds != null) updates.durationSeconds = parsed.data.durationSeconds;
 
     if (resume) {
       updates.resumeUrl = await savePublicFile({ file: resume, publicSubdir: 'resumes' });
@@ -206,7 +204,22 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
       );
     }
 
-    return NextResponse.json(updated, { status: HTTP_STATUS.OK });
+    const room = await db.query.interviewRooms.findFirst({
+      where: whereCondition,
+      with: {
+        interviewer: true,
+        candidate: true
+      }
+    });
+
+    if (!room) {
+      return NextResponse.json(
+        { error: 'Failed to update interview room' },
+        { status: HTTP_STATUS.INTERNAL_SERVER_ERROR }
+      );
+    }
+
+    return NextResponse.json(room, { status: HTTP_STATUS.OK });
   } catch (error) {
     console.error('Update interview room error:', error);
     return NextResponse.json(

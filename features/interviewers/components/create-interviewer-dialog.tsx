@@ -12,45 +12,37 @@ import { Input } from '@/components/ui/input';
 import { FieldGroup } from '@/components/ui/field';
 import { Field } from '@/components/ui/field';
 import { FieldLabel } from '@/components/ui/field';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useState } from 'react';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import {
+  createInterviewerSchema,
+  updateInterviewerSchema,
+  type Interviewer
+} from '@/types/interviewer';
+import toast from 'react-hot-toast';
+import { HTTP_STATUS } from '@/types/http';
+import axios from 'axios';
 
-type Interviewer = {
-  id: string;
+type FormState = {
   name: string;
   email: string;
   phone: string;
-  avatarUrl: string;
-  total_interviews: number;
-  status: 'active' | 'inactive';
-};
-
-type InterviewerFormData = Omit<Interviewer, 'id' | 'createdAt'> & {
-  createdAt?: Date;
+  password: string;
 };
 
 type CreateInterviewerDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   editingInterviewer: Interviewer | null;
-  onSubmit: (data: InterviewerFormData, isEdit: boolean) => void;
+  onSubmit: (data: Interviewer, isEdit: boolean) => void;
 };
 
-const defaultFormState = (): InterviewerFormData => ({
+const defaultFormState = (): FormState => ({
   name: '',
   email: '',
   phone: '',
-  avatarUrl: '',
-  total_interviews: 0,
-  status: 'inactive'
+  password: ''
 });
 
 export function CreateInterviewerDialog({
@@ -60,39 +52,93 @@ export function CreateInterviewerDialog({
   onSubmit
 }: CreateInterviewerDialogProps) {
   const isEdit = !!editingInterviewer;
-  const [form, setForm] = useState<InterviewerFormData>(defaultFormState());
+  const [form, setForm] = useState<FormState>(defaultFormState());
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (editingInterviewer) {
       setForm({
         name: editingInterviewer.name,
         email: editingInterviewer.email,
-        phone: editingInterviewer.phone,
-        avatarUrl: editingInterviewer.avatarUrl,
-        total_interviews: editingInterviewer.total_interviews,
-        status: editingInterviewer.status,
-        createdAt: new Date()
+        phone: (editingInterviewer as any).phone ?? '',
+        password: ''
       });
     } else {
       setForm(defaultFormState());
     }
   }, [editingInterviewer, open]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name.trim()) return;
-    const payload: InterviewerFormData = {
-      ...form,
-      name: form.name.trim(),
-      email: form.email.trim(),
-      phone: form.phone.trim(),
-      avatarUrl: form.avatarUrl.trim(),
-      total_interviews: form.total_interviews,
-      status: form.status
-    };
-    onSubmit(payload, isEdit);
-    setForm(defaultFormState());
-    onOpenChange(false);
+
+    const loadingToast = toast.loading(`${isEdit ? 'Editing' : 'Creating'} interviewer...`);
+
+    try {
+      let response;
+
+      if (isEdit && editingInterviewer) {
+        const payload: Partial<FormState> = {
+          name: form.name.trim(),
+          email: form.email.trim(),
+          phone: form.phone.trim()
+        };
+        if (form.password.trim()) {
+          payload.password = form.password.trim();
+        }
+
+        const parsed = updateInterviewerSchema.safeParse(payload);
+        if (!parsed.success) {
+          toast.error('Invalid form data', { id: loadingToast });
+          return;
+        }
+
+        response = await axios.patch(`/api/interviewers/${editingInterviewer.id}`, parsed.data);
+
+        if (response.status === HTTP_STATUS.OK) {
+          toast.success('Interviewer updated', { id: loadingToast });
+          onSubmit(response.data as Interviewer, true);
+        } else {
+          toast.error(response.data.error ?? 'Failed to update interviewer', {
+            id: loadingToast
+          });
+          return;
+        }
+      } else {
+        const parsed = createInterviewerSchema.safeParse({
+          name: form.name.trim(),
+          email: form.email.trim(),
+          phone: form.phone.trim(),
+          password: form.password.trim()
+        });
+        if (!parsed.success) {
+          toast.error('Invalid form data', { id: loadingToast });
+          return;
+        }
+
+        response = await axios.post('/api/interviewers', parsed.data);
+        if (response.status === HTTP_STATUS.CREATED) {
+          toast.success('Interviewer created', { id: loadingToast });
+          onSubmit(response.data as Interviewer, false);
+        } else {
+          toast.error(response.data.error ?? 'Failed to create interviewer', {
+            id: loadingToast
+          });
+          return;
+        }
+      }
+
+      setForm(defaultFormState());
+      onOpenChange(false);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const message = error.response?.data?.error || 'Request failed';
+        toast.error(message, { id: loadingToast });
+      } else {
+        toast.error('Something went wrong', { id: loadingToast });
+      }
+
+      setForm(defaultFormState());
+      onOpenChange(false);
+    }
   };
 
   const handleOpenChange = (next: boolean) => {
@@ -135,16 +181,26 @@ export function CreateInterviewerDialog({
                 />
               </Field>
               <Field>
+                <FieldLabel htmlFor="interviewer-password">Interviewer password</FieldLabel>
+                <Input
+                  id="interviewer-password"
+                  value={form.password}
+                  onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
+                  placeholder="e.g. password"
+                  required
+                />
+              </Field>
+              <Field>
                 <FieldLabel htmlFor="interviewer-phone">Interviewer phone</FieldLabel>
                 <Input
                   id="interviewer-phone"
-                  value={form.phone}
+                  value={form.phone ?? ''}
                   onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
                   placeholder="e.g. +1234567890"
                   required
                 />
               </Field>
-              <Field>
+              {/* <Field>
                 <FieldLabel htmlFor="interviewer-avatar-url">Interviewer avatar URL</FieldLabel>
                 <Input
                   id="interviewer-avatar-url"
@@ -152,7 +208,7 @@ export function CreateInterviewerDialog({
                   onChange={(e) => setForm((p) => ({ ...p, avatarUrl: e.target.value }))}
                   placeholder="e.g. https://example.com/avatar.png"
                 />
-              </Field>
+              </Field> */}
             </FieldGroup>
           </div>
           <DialogFooter className="px-6 py-4 border-t border-border bg-muted/30">

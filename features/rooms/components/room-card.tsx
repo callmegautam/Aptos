@@ -26,38 +26,44 @@ import {
   Smartphone
 } from 'lucide-react';
 
-import type { InterviewRoom, RoomStatus } from '@/features/rooms/types/room';
+import type {
+  InterviewField,
+  InterviewRoomStatus,
+  InterviewRoomWithRelations
+} from '@/types/interview-room';
 
-const STATUS_CONFIG: Record<RoomStatus, { label: string; variant: any }> = {
-  draft: { label: 'Draft', variant: 'secondary' },
-  scheduled: { label: 'Scheduled', variant: 'default' },
-  live: { label: 'Live', variant: 'default' },
-  completed: { label: 'Completed', variant: 'outline' },
-  cancelled: { label: 'Cancelled', variant: 'destructive' }
+const STATUS_CONFIG: Record<InterviewRoomStatus, { label: string; variant: any }> = {
+  SCHEDULED: { label: 'Scheduled', variant: 'default' },
+  LIVE: { label: 'Live', variant: 'default' },
+  COMPLETED: { label: 'Completed', variant: 'outline' },
+  CANCELLED: { label: 'Cancelled', variant: 'destructive' }
 };
 
-const FIELD_CONFIG = {
-  backend: {
+const FIELD_CONFIG: Record<
+  InterviewField,
+  { label: string; icon: typeof Server; color: string }
+> = {
+  BACKEND: {
     label: 'Backend',
     icon: Server,
     color: 'bg-amber-500/10 text-amber-600'
   },
-  frontend: {
+  FRONTEND: {
     label: 'Frontend',
     icon: LayoutDashboard,
     color: 'bg-sky-500/10 text-sky-600'
   },
-  fullstack: {
+  FULLSTACK: {
     label: 'Fullstack',
     icon: Layers,
     color: 'bg-violet-500/10 text-violet-600'
   },
-  app: {
+  APPLICATION: {
     label: 'App',
     icon: Smartphone,
     color: 'bg-emerald-500/10 text-emerald-600'
   }
-} as const;
+};
 
 function formatDateShort(date: Date) {
   return new Intl.DateTimeFormat(undefined, {
@@ -68,7 +74,7 @@ function formatDateShort(date: Date) {
   }).format(date);
 }
 
-function getInviteLink(roomId: string): string {
+function getInviteLink(roomId: number): string {
   if (typeof window !== 'undefined') {
     return `${window.location.origin}/join/${roomId}`;
   }
@@ -76,9 +82,9 @@ function getInviteLink(roomId: string): string {
 }
 
 type RoomCardProps = {
-  room: InterviewRoom;
-  onEdit: (room: InterviewRoom) => void;
-  onDelete: (room: InterviewRoom) => void;
+  room: InterviewRoomWithRelations;
+  onEdit: (room: InterviewRoomWithRelations) => void;
+  onDelete: (room: InterviewRoomWithRelations) => void;
 };
 
 export function RoomCard({ room, onEdit, onDelete }: RoomCardProps) {
@@ -102,14 +108,12 @@ export function RoomCard({ room, onEdit, onDelete }: RoomCardProps) {
       <CardHeader className="flex flex-row items-start justify-between space-y-0">
         <div className="flex items-start gap-3">
           {/* Field Icon */}
-          <div
-            className={`flex h-10 w-10 items-center justify-center rounded-lg ${fieldConf.color}`}
-          >
+          <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${fieldConf.color}`}>
             <FieldIcon className="h-5 w-5 text-muted-foreground" />
           </div>
 
           <div>
-            <CardTitle className="text-base font-semibold">{room.name}</CardTitle>
+            <CardTitle className="text-base font-semibold">{room.jobTitle}</CardTitle>
 
             <div className="flex gap-2 mt-2">
               <Badge variant={statusConf.variant}>{statusConf.label}</Badge>
@@ -149,7 +153,7 @@ export function RoomCard({ room, onEdit, onDelete }: RoomCardProps) {
         <div className="flex items-center gap-2 text-sm">
           <Users className="h-4 w-4 text-muted-foreground" />
           <span className="text-muted-foreground">Interviewer:</span>
-          <span className="font-medium">{room.interviewerName || 'Not assigned'}</span>
+          <span className="font-medium">{room.interviewer?.name ?? 'Not assigned'}</span>
         </div>
 
         {/* Dates */}
@@ -160,11 +164,6 @@ export function RoomCard({ room, onEdit, onDelete }: RoomCardProps) {
               {formatDateShort(room.scheduledAt)}
             </span>
           )}
-
-          <span className="flex items-center gap-1">
-            <Clock className="h-3 w-3" />
-            Created {formatDateShort(room.createdAt)}
-          </span>
         </div>
       </CardContent>
 

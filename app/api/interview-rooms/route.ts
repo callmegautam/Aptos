@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { interviewRooms } from '@/lib/db/schema';
+import { interviewers, interviewRooms } from '@/lib/db/schema';
 import { eq, desc, and } from 'drizzle-orm';
 import { HTTP_STATUS } from '@/types/http';
 import { getCurrentCompany, getCurrentUser } from '@/lib/auth/auth';
@@ -35,15 +35,20 @@ export async function GET(_req: Request) {
       conditions.push(eq(interviewRooms.companyId, companyId));
     }
 
-    const rooms = await db
-      .select()
-      .from(interviewRooms)
-      .where(and(...conditions))
-      .orderBy(desc(interviewRooms.id));
+    const rooms = await db.query.interviewRooms.findMany({
+      where: conditions.length ? and(...conditions) : undefined,
+
+      with: {
+        interviewer: true,
+        candidate: true
+      },
+
+      orderBy: (rooms, { desc }) => [desc(rooms.id)]
+    });
 
     return NextResponse.json(
       {
-        interviewRooms: rooms,
+        rooms,
         total: rooms.length
       },
       { status: HTTP_STATUS.OK }
@@ -79,8 +84,18 @@ export async function POST(req: Request) {
     const resumeValue = formData.get('resume');
     const resume = resumeValue instanceof File ? resumeValue : null;
 
+    console.log('----', formData.get('interviewerId'));
+    console.log('----', formData.get('candidateName'));
+    console.log('----', formData.get('jobTitle'));
+    console.log('----', formData.get('jobDescription'));
+    console.log('----', formData.get('status'));
+    console.log('----', formData.get('field'));
+    console.log('----', formData.get('scheduledAt'));
+
     const parsed = createRoomSchema.safeParse({
-      interviewerId: formData.get('interviewerId'),
+      interviewerId: formData.get('interviewerId')
+        ? Number(formData.get('interviewerId'))
+        : undefined,
       candidateName: formData.get('candidateName'),
       jobTitle: formData.get('jobTitle'),
       jobDescription: formData.get('jobDescription'),
@@ -90,6 +105,7 @@ export async function POST(req: Request) {
     });
 
     if (!parsed.success) {
+      console.log('----', parsed.error.flatten());
       return NextResponse.json(
         { error: 'Invalid input', details: parsed.error.flatten() },
         { status: HTTP_STATUS.BAD_REQUEST }
@@ -120,7 +136,15 @@ export async function POST(req: Request) {
       })
       .returning();
 
-    if (!room) {
+    const roomWithInterviewer = await db.query.interviewRooms.findFirst({
+      where: eq(interviewRooms.id, room.id),
+      with: {
+        interviewer: true,
+        candidate: true
+      }
+    });
+
+    if (!roomWithInterviewer) {
       return NextResponse.json(
         { error: 'Failed to create interview room' },
         { status: HTTP_STATUS.INTERNAL_SERVER_ERROR }
@@ -129,7 +153,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(
       {
-        interviewRoom: room
+        room: roomWithInterviewer
       },
       { status: HTTP_STATUS.CREATED }
     );

@@ -1,38 +1,98 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { CreateRoomDialog } from '@/features/rooms/components/create-room-dialog';
 import { RoomsList } from '@/features/rooms/components/rooms-list';
 import { PlusIcon, TableIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { InterviewRoom } from '@/types/interview-room';
+import { InterviewRoomWithRelations } from '@/types/interview-room';
+import toast from 'react-hot-toast';
+import axios from 'axios';
+import { HTTP_STATUS } from '@/types/http';
 
 const RoomsPage = () => {
-  const [rooms, setRooms] = useState<InterviewRoom[]>([]);
+  const [rooms, setRooms] = useState<InterviewRoomWithRelations[]>([]);
   const [createOpen, setCreateOpen] = useState(false);
-  const [editingRoom, setEditingRoom] = useState<InterviewRoom | null>(null);
-  const [trigger, setTrigger] = useState(0);
+  const [editingRoom, setEditingRoom] = useState<InterviewRoomWithRelations | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const router = useRouter();
 
-  useEffect(() => {}, [trigger]);
+  useEffect(() => {
+    const fetchRooms = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get('/api/interview-rooms');
+        if (response.status === HTTP_STATUS.OK) {
+          // setRooms(response.data.rooms as InterviewRoomWithRelations[]);
+          setRooms(
+            response.data.rooms.map((room: any) => ({
+              ...room,
+              scheduledAt: new Date(room.scheduledAt)
+            }))
+          );
+        } else {
+          toast.error(response.data?.error ?? 'Failed to load rooms');
+        }
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          const message = error.response?.data?.error || 'Request failed';
+          toast.error(message);
+        } else {
+          toast.error('Something went wrong while loading rooms');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const handleSubmit = useCallback(() => {
-    setTrigger(Math.random());
-  }, [editingRoom]);
+    fetchRooms();
+  }, []);
 
-  const handleEdit = useCallback((room: InterviewRoom) => {
+  const handleSubmit = useCallback(
+    (room: InterviewRoomWithRelations, isEdit: boolean) => {
+      if (isEdit && editingRoom) {
+        setRooms((prev) => prev.map((r) => (r.id === room.id ? room : r)));
+        setEditingRoom(null);
+        setCreateOpen(false);
+      } else {
+        setRooms((prev) => [...prev, room]);
+        setCreateOpen(false);
+      }
+    },
+    [editingRoom]
+  );
+
+  const handleEdit = useCallback((room: InterviewRoomWithRelations) => {
     setEditingRoom(room);
     setCreateOpen(true);
   }, []);
 
   const handleDelete = useCallback(
-    (room: InterviewRoom) => {
-      setRooms((prev) => prev.filter((r) => r.id !== room.id));
-      if (editingRoom?.id === room.id) {
-        setEditingRoom(null);
-        setCreateOpen(false);
+    async (room: InterviewRoomWithRelations) => {
+      const confirm = window.confirm(`Are you sure you want to delete room "${room.jobTitle}"?`);
+      if (!confirm) return;
+
+      try {
+        const response = await axios.delete(`/api/interview-rooms/${room.id}`);
+        if (response.status === HTTP_STATUS.NO_CONTENT) {
+          setRooms((prev) => prev.filter((r) => r.id !== room.id));
+          if (editingRoom?.id === room.id) {
+            setEditingRoom(null);
+            setCreateOpen(false);
+          }
+          toast.success('Interview room deleted successfully');
+        } else {
+          toast.error('Failed to delete interview room');
+        }
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          const message = error.response?.data?.error || 'Request failed';
+          toast.error(message);
+        } else {
+          toast.error('Something went wrong while deleting room');
+        }
       }
     },
     [editingRoom]

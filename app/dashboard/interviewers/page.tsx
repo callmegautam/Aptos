@@ -2,102 +2,119 @@
 import { Button } from '@/components/ui/button';
 // import InterviewTable from '@/features/dashboard/components/interview-table';
 import { PlusIcon } from 'lucide-react';
-import InterviewersTable from '@/features/interviewers/components/table';
-import { useCallback, useState } from 'react';
+import InterviewersTable, {
+  type InterviewersTableItem
+} from '@/features/interviewers/components/table';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CreateInterviewerDialog } from '@/features/interviewers/components/create-interviewer-dialog';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import { HTTP_STATUS } from '@/types/http';
-
-type Interviewer = {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  avatarUrl: string;
-  total_interviews: number;
-  status: 'active' | 'inactive';
-};
+import { Interviewer } from '@/types/interviewer';
 
 const InterviewersPage = () => {
   const [createOpen, setCreateOpen] = useState(false);
   const [editingInterviewer, setEditingInterviewer] = useState<Interviewer | null>(null);
   const [interviewers, setInterviewers] = useState<Interviewer[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const createInterviewer = async (data: any) => {
-    try {
-      const response = await axios.post('/api/interviewers', data);
-      if (response.status === HTTP_STATUS.CREATED) {
-        toast.success(response.data.message || 'Interviewer created successfully');
-        return response.data;
-      } else {
-        toast.error(response.data.error || 'Failed to create interviewer');
-        return null;
+  useEffect(() => {
+    const fetchInterviewers = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get('/api/interviewers');
+        if (response.status === HTTP_STATUS.OK) {
+          const data = response.data.interviewers;
+          const list: Interviewer[] = Array.isArray(data) ? data : [data];
+          setInterviewers(list);
+        } else {
+          toast.error(response.data?.error ?? 'Failed to load interviewers');
+        }
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          const message = error.response?.data?.error || 'Request failed';
+          toast.error(message);
+        } else {
+          toast.error('Something went wrong while loading interviewers');
+        }
+      } finally {
+        setLoading(false);
       }
-    } catch (error: any) {
-      toast.error(error?.response?.data?.error || 'Failed to create interviewer');
-      return null;
-    }
-  };
-
-  const handleCreateInterviewer = useCallback((data: Omit<Interviewer, 'id' | 'createdAt'>) => {
-    const interviewer: Interviewer = {
-      id: crypto.randomUUID(),
-      name: data.name,
-      email: data.email,
-      phone: data.phone,
-      avatarUrl: data.avatarUrl ?? '',
-      total_interviews: 0,
-      status: 'active'
     };
-    setInterviewers((prev) => [interviewer, ...prev]);
+
+    fetchInterviewers();
   }, []);
 
-  const handleSubmit = async (
-    data: Omit<Interviewer, 'id' | 'createdAt'> & { createdAt?: Date },
-    isEdit: boolean
-  ) => {
-    if (isEdit && editingInterviewer) {
-      setInterviewers((prev) =>
-        prev.map((i) =>
-          i.id === editingInterviewer.id
-            ? {
-                ...i,
-                name: data.name,
-                email: data.email,
-                phone: data.phone,
-                avatarUrl: data.avatarUrl ?? '',
-                total_interviews: data.total_interviews,
-                status: data.status
-              }
-            : i
-        )
-      );
-      setEditingInterviewer(null);
-
-      toast.success('Interviewer updated successfully');
-    } else {
-      const response = await createInterviewer(data);
-      if (response) {
-        handleCreateInterviewer(data);
-      }
-    }
-  };
-
-  const handleEdit = useCallback((interviewer: Interviewer) => {
-    setEditingInterviewer(interviewer);
-    setCreateOpen(true);
-  }, []);
-
-  const handleDelete = useCallback(
-    (interviewer: Interviewer) => {
-      setInterviewers((prev) => prev.filter((i) => i.id !== interviewer.id));
-      if (editingInterviewer?.id === interviewer.id) {
+  const handleSubmit = useCallback(
+    (interviewer: Interviewer, isEdit: boolean) => {
+      if (isEdit && editingInterviewer) {
+        setInterviewers((prev) => prev.map((i) => (i.id === interviewer.id ? interviewer : i)));
         setEditingInterviewer(null);
+        setCreateOpen(false);
+      } else {
+        setInterviewers((prev) => [...prev, interviewer]);
         setCreateOpen(false);
       }
     },
     [editingInterviewer]
+  );
+
+  const handleEdit = useCallback(
+    (id: number) => {
+      const interviewer = interviewers.find((i) => i.id === id) ?? null;
+      if (!interviewer) return;
+      setEditingInterviewer(interviewer);
+      setCreateOpen(true);
+    },
+    [interviewers]
+  );
+
+  const handleDelete = useCallback(
+    async (id: number) => {
+      const interviewer = interviewers.find((i) => i.id === id);
+      if (!interviewer) return;
+
+      const confirm = window.confirm(
+        `Are you sure you want to delete interviewer "${interviewer.name}"?`
+      );
+      if (!confirm) return;
+
+      try {
+        const response = await axios.delete(`/api/interviewers/${id}`);
+        if (response.status === HTTP_STATUS.NO_CONTENT) {
+          setInterviewers((prev) => prev.filter((i) => i.id !== id));
+          if (editingInterviewer?.id === id) {
+            setEditingInterviewer(null);
+            setCreateOpen(false);
+          }
+          toast.success('Interviewer deleted successfully');
+        } else {
+          toast.error('Failed to delete interviewer');
+        }
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          const message = error.response?.data?.error || 'Request failed';
+          toast.error(message);
+        } else {
+          toast.error('Something went wrong while deleting interviewer');
+        }
+      }
+    },
+    [editingInterviewer, interviewers]
+  );
+
+  const tableItems: InterviewersTableItem[] = useMemo(
+    () =>
+      interviewers.map((i) => ({
+        id: i.id,
+        avatar: (i as any).avatarUrl ?? null,
+        name: i.name,
+        email: i.email,
+        phone: (i as any).phone ?? '',
+        total_interviews: (i as any).totalInterviews ?? 0,
+        status: 'active'
+      })),
+    [interviewers]
   );
 
   return (
@@ -117,7 +134,7 @@ const InterviewersPage = () => {
           </Button>
         </div>
       </div>
-      <InterviewersTable />
+      <InterviewersTable items={tableItems} onEdit={handleEdit} onDelete={handleDelete} />
       <CreateInterviewerDialog
         open={createOpen}
         onOpenChange={setCreateOpen}

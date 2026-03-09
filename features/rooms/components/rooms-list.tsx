@@ -2,13 +2,13 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import { RoomCard } from '@/features/rooms/components/room-card';
-import type { InterviewRoom } from '@/features/rooms/types/room';
+import type { InterviewRoomWithRelations } from '@/types/interview-room';
 import { Video } from 'lucide-react';
 
 type RoomsListProps = {
-  rooms: InterviewRoom[];
-  onEdit: (room: InterviewRoom) => void;
-  onDelete: (room: InterviewRoom) => void;
+  rooms: InterviewRoomWithRelations[];
+  onEdit: (room: InterviewRoomWithRelations) => void;
+  onDelete: (room: InterviewRoomWithRelations) => void;
 };
 
 export function RoomsList({ rooms, onEdit, onDelete }: RoomsListProps) {

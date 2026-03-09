@@ -26,27 +26,25 @@ import {
   interviewFieldEnum,
   InterviewRoom,
   InterviewRoomStatus,
+  InterviewRoomWithRelations,
   interviewStatusEnum,
   updateInterviewRoomSchema
 } from '@/types/interview-room';
 import toast from 'react-hot-toast';
 import { FileText, Loader2Icon, Trash2Icon, Upload } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 import axios from 'axios';
-const interviewers = [
-  { id: 1, name: 'John' },
-  { id: 2, name: 'Sarah' },
-  { id: 3, name: 'Alex' }
-];
+import { Interviewer } from '@/types/interviewer';
+import { HTTP_STATUS } from '@/types/http';
 
 type RoomFormData = CreateInterviewRoom;
 
 type CreateRoomDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  editingRoom: CreateInterviewRoom | null;
-  onSubmit: (data: RoomFormData, isEdit: boolean) => void;
+  editingRoom: InterviewRoomWithRelations | null;
+  onSubmit: (data: InterviewRoomWithRelations, isEdit: boolean) => void;
 };
 
 const defaultFormState = (): RoomFormData => ({
@@ -83,9 +81,9 @@ export function CreateRoomDialog({
   const [form, setForm] = React.useState<RoomFormData>(defaultFormState());
   const [resume, setResume] = React.useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [interviewRoom, setInterviewRoom] = useState<InterviewRoom | {}>({});
+  const [interviewers, setInterviewers] = useState<Interviewer[]>([]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (editingRoom) {
       setForm({
         jobTitle: editingRoom.jobTitle,
@@ -100,6 +98,18 @@ export function CreateRoomDialog({
       setForm(defaultFormState());
     }
   }, [editingRoom, open]);
+
+  useEffect(() => {
+    const fetchInterviewers = async () => {
+      const response = await axios.get('/api/interviewers');
+      if (response.status === HTTP_STATUS.OK) {
+        setInterviewers(response.data.interviewers);
+      } else {
+        toast.error('Failed to fetch interviewers');
+      }
+    };
+    fetchInterviewers();
+  }, []);
 
   const handleFileSelect = (files: FileList | null) => {
     if (!files) return;
@@ -163,25 +173,18 @@ export function CreateRoomDialog({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const parsed = createRoomSchema.safeParse(form);
-
-    if (!parsed.success) {
-      toast.error('Invalid form data');
-      return;
-    }
-
     const loadingToast = toast.loading(`${isEdit ? 'Editing' : 'Creating'} Interview Room...`);
     setIsLoading(true);
 
     const formData = new FormData();
 
-    formData.append('jobTitle', parsed.data.jobTitle);
-    formData.append('jobDescription', parsed.data.jobDescription ?? '');
-    formData.append('status', parsed.data.status);
-    formData.append('field', parsed.data.field);
-    formData.append('candidateName', parsed.data.candidateName ?? '');
-    formData.append('interviewerId', String(parsed.data.interviewerId));
-    formData.append('scheduledAt', parsed.data.scheduledAt.toISOString());
+    formData.append('jobTitle', form.jobTitle);
+    formData.append('jobDescription', form.jobDescription ?? '');
+    formData.append('status', form.status);
+    formData.append('field', form.field);
+    formData.append('candidateName', form.candidateName ?? '');
+    formData.append('interviewerId', String(form.interviewerId));
+    formData.append('scheduledAt', form.scheduledAt.toISOString());
 
     if (resume) {
       formData.append('resume', resume);
@@ -190,19 +193,22 @@ export function CreateRoomDialog({
     let response;
 
     try {
-      if (isEdit) {
-        response = await axios.patch('/api/interview-room', formData);
+      if (isEdit && editingRoom) {
+        response = await axios.patch(`/api/interview-rooms/${editingRoom.id}`, formData);
+        toast.success('Interview room updated', { id: loadingToast });
       } else {
-        response = await axios.post('/api/interview-room', formData);
+        console.log('----', formData);
+        response = await axios.post('/api/interview-rooms', formData);
+        toast.success('Interview room created', { id: loadingToast });
       }
-
-      toast.success('Interview room created', { id: loadingToast });
 
       setForm(defaultFormState());
       setUploadedFiles([]);
       setFileProgresses({});
       setResume(null);
-      onSubmit();
+      const room: InterviewRoomWithRelations = (response.data.room ??
+        response.data) as InterviewRoomWithRelations;
+      onSubmit(room, isEdit);
 
       onOpenChange(false);
     } catch (error) {
