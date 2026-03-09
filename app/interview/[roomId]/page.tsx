@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, use, Suspense } from 'react';
+import { useEffect, useMemo, useState, use, Suspense } from 'react';
 import {
   StreamVideo,
   StreamCall,
@@ -22,7 +22,21 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { RoomProvider } from '@liveblocks/react';
 import CollabEditor from '@/components/collab-editor';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+
+type JoinResponse =
+  | {
+      role: 'INTERVIEWER';
+      viewerId: number;
+      interviewRoom: { roomCode: string };
+    }
+  | {
+      role: 'CANDIDATE';
+      viewerId: number;
+      interviewRoom: { roomCode: string; resumeUrl?: string | null };
+      needsResumeUpload: boolean;
+      redirectTo: string | null;
+    };
 
 function VideoLayout() {
   const { useParticipants } = useCallStateHooks();
@@ -49,6 +63,7 @@ function VideoLayout() {
 
 export default function InterviewRoom({ params }: { params: Promise<{ roomId: string }> }) {
   const { roomId } = use(params);
+  const router = useRouter();
 
   const [videoClient, setVideoClient] = useState<any>(null);
   const [call, setCall] = useState<any>(null);
@@ -60,31 +75,84 @@ export default function InterviewRoom({ params }: { params: Promise<{ roomId: st
   const { useLocalParticipant } = useCallStateHooks();
   const localParticipant = useLocalParticipant();
 
+  const [joinState, setJoinState] = useState<
+    | { kind: 'loading' }
+    | { kind: 'error'; message: string }
+    | { kind: 'ok'; join: JoinResponse }
+  >({ kind: 'loading' });
+
+  const joinUrl = useMemo(
+    () => `/api/interview-rooms/join/${encodeURIComponent(roomId)}`,
+    [roomId]
+  );
+
   useEffect(() => {
-    async function init() {
-      // const userId = 'candidate-' + Math.floor(Math.random() * 1000);
-      const userId = 'candidate-123';
+    let cancelled = false;
 
-      // const userId = 'interviewer-1';
+    async function run() {
+      try {
+        const res = await fetch(joinUrl, { method: 'GET' });
+        const data = (await res.json()) as JoinResponse | { error?: string };
 
-      const videoClient = await createVideoClient(userId);
-      const callInstance = await joinInterviewCall(videoClient, roomId);
+        if (!res.ok) {
+          if (cancelled) return;
+          const message =
+            data && typeof data === 'object' && 'error' in data && typeof data.error === 'string'
+              ? data.error
+              : 'Access denied';
+          setJoinState({ kind: 'error', message });
+          return;
+        }
 
-      // const chatClient = await createChatClient(userId);
-      // const channelInstance = await createInterviewChannel(chatClient, roomId, [
-      //   'candidate-123',
-      //   'interviewer-1'
-      // ]);
+        const join = data as JoinResponse;
 
-      setVideoClient(videoClient);
-      setCall(callInstance);
-      // setChatClient(chatClient);
-      // setChannel(channelInstance);
+        if (join.role === 'CANDIDATE' && join.needsResumeUpload && join.redirectTo) {
+          router.replace(join.redirectTo);
+          return;
+        }
+
+        if (cancelled) return;
+        setJoinState({ kind: 'ok', join });
+      } catch {
+        if (cancelled) return;
+        setJoinState({ kind: 'error', message: 'Failed to join interview' });
+      }
     }
 
-    init();
-  }, [roomId]);
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [joinUrl, router]);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    async function init(join: JoinResponse) {
+      const streamUserId =
+        join.role === 'INTERVIEWER'
+          ? `interviewer-${join.viewerId}`
+          : `candidate-${join.viewerId}`;
+
+      const videoClient = await createVideoClient(streamUserId);
+      const callInstance = await joinInterviewCall(videoClient, join.interviewRoom.roomCode);
+
+      if (cancelled) return;
+      setVideoClient(videoClient);
+      setCall(callInstance);
+    }
+
+    if (joinState.kind === 'ok') {
+      init(joinState.join);
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [joinState]);
+
+  if (joinState.kind === 'loading') return <div>Checking access...</div>;
+  if (joinState.kind === 'error') return <div className="p-6 text-red-600">{joinState.message}</div>;
   if (!videoClient || !call) return <div>Connecting...</div>;
   // if (!videoClient || !call || !chatClient || !channel) {
   //   return <div>Connecting...</div>;
