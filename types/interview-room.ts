@@ -38,10 +38,9 @@ export const updateInterviewRoomSchema = interviewRoomSchema.pick({
   resumeUrl: true,
   status: true,
   field: true,
-  scheduledAt: true,
-  completedAt: true,
-  durationSeconds: true
-}).partial();
+  scheduledAt: true
+});
+// .partial();
 
 export type InterviewRoom = z.infer<typeof interviewRoomSchema>;
 export type CreateInterviewRoom = z.infer<typeof createRoomSchema>;
