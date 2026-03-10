@@ -14,6 +14,12 @@ import { cn } from '@/lib/utils';
 import { LucideIcon, Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import React, { useState } from 'react';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem
+} from '@/components/ui/dropdown-menu';
 
 const MobileNavbar = () => {
   //   const { isSignedIn, signOut } = useAuth();
@@ -44,7 +50,7 @@ const MobileNavbar = () => {
           </SheetClose>
           <div className="flex flex-col items-start w-full py-2 mt-10">
             <div className="flex items-center justify-evenly w-full space-x-2">
-              {isSignedIn ? (
+              {/* {isSignedIn ? (
                 <Link
                   href="/dashboard"
                   className={buttonVariants({ variant: 'outline', className: 'w-full' })}
@@ -63,7 +69,41 @@ const MobileNavbar = () => {
                     Sign Up
                   </Link>
                 </>
-              )}
+              )} */}
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    Sign In
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem asChild>
+                    <Link href="/login">As Company</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/login/interviewer">As Interviewer</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/login/candidate">As Candidate</Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    Get Started
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem asChild>
+                    <Link href="/register">As Company</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/register/candidate">As Candidate</Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
             <ul className="flex flex-col items-start w-full mt-6">
               <Accordion type="single" collapsible className="!w-full">

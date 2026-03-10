@@ -1,6 +1,6 @@
 'use client';
 
-import { buttonVariants } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -19,6 +19,12 @@ import React, { useEffect, useState } from 'react';
 import MaxWidthWrapper from './max-width-wrapper';
 import MobileNavbar from './mobile-navbar';
 import AnimationContainer from './animation-container';
+import {
+  DropdownMenu,
+  DropdownMenuItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
 
 const Navbar = () => {
   //   const { user } = useClerk();
@@ -127,13 +133,46 @@ const Navbar = () => {
               </div>
             ) : (
               <div className="flex items-center gap-x-4">
-                <Link href="/login" className={buttonVariants({ size: 'sm', variant: 'ghost' })}>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm">
+                      Sign In
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem asChild>
+                      <Link href="/login">As Company</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/login/interviewer">As Interviewer</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/login/candidate">As Candidate</Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm">
+                      Get Started
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem asChild>
+                      <Link href="/register">As Company</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/register/candidate">As Candidate</Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                {/* <Link href="/login" className={buttonVariants({ size: 'sm', variant: 'ghost' })}>
                   Sign In
                 </Link>
                 <Link href="/register" className={buttonVariants({ size: 'sm' })}>
                   Get Started
                   <ZapIcon className="size-3.5 ml-1.5 text-orange-500 fill-orange-500" />
-                </Link>
+                </Link> */}
               </div>
             )}
           </div>
