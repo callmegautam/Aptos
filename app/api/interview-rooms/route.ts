@@ -7,6 +7,7 @@ import { getCurrentCompany, getCurrentUser } from '@/lib/auth/auth';
 import { createRoomSchema, InterviewField, InterviewRoomStatus } from '@/types/interview-room';
 import { generateRoomCode } from '@/utils/room-code';
 import { savePublicFile } from '@/lib/storage/public-files';
+import { extractTextFromBuffer } from '@/lib/pdf/pdf-parser';
 
 export async function GET(_req: Request) {
   try {
@@ -105,7 +106,6 @@ export async function POST(req: Request) {
     });
 
     if (!parsed.success) {
-      console.log('----', parsed.error.flatten());
       return NextResponse.json(
         { error: 'Invalid input', details: parsed.error.flatten() },
         { status: HTTP_STATUS.BAD_REQUEST }
@@ -116,6 +116,8 @@ export async function POST(req: Request) {
 
     if (resume) {
       resumePath = await savePublicFile({ file: resume, publicSubdir: 'resumes' });
+      const parsedData = await extractTextFromBuffer(Buffer.from(await resume.arrayBuffer()));
+      console.log('----', parsedData);
     }
 
     const roomCode = generateRoomCode();
