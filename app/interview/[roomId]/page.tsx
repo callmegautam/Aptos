@@ -236,7 +236,21 @@ export default function InterviewRoom({ params }: { params: Promise<{ roomId: st
       <div className="flex flex-col w-1/2 border-r">
         {/* VIDEO */}
         <div className="h-1/2 border-b p-3">
-          <VideoPanel localVideoRef={room.localVideoRef} remoteStreams={room.remoteStreams} />
+          <VideoPanel
+            localVideoRef={room.localVideoRef as React.RefObject<HTMLVideoElement>}
+            remoteStreams={room.remoteStreams}
+            isAudioEnabled={room.isAudioEnabled}
+            isVideoEnabled={room.isVideoEnabled}
+            isScreenSharing={room.isScreenSharing}
+            isRecording={room.isRecording}
+            recordingUrl={room.recordingUrl}
+            toggleMute={room.toggleMute}
+            toggleVideo={room.toggleVideo}
+            startScreenShare={room.startScreenShare}
+            stopScreenShare={room.stopScreenShare}
+            startRecording={room.startRecording}
+            stopRecording={room.stopRecording}
+          />
         </div>
 
         {/* CHAT */}
