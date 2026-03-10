@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { CreateRoomDialog } from '@/features/rooms/components/create-room-dialog';
 import { RoomsList } from '@/features/rooms/components/rooms-list';
-import { Link, PlusIcon, TableIcon } from 'lucide-react';
+import { PlusIcon, TableIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { InterviewRoomWithRelations } from '@/types/interview-room';
 import toast from 'react-hot-toast';
@@ -18,6 +18,7 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog';
+import Link from 'next/link';
 
 const RoomsPage = () => {
   const [rooms, setRooms] = useState<InterviewRoomWithRelations[]>([]);
