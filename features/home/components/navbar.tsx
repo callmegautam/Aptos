@@ -43,7 +43,7 @@ const Navbar = () => {
   return (
     <header
       className={cn(
-        'sticky top-0 inset-x-0 h-14 w-full border-b border-transparent z-[99999] select-none',
+        'sticky top-0 inset-x-0 h-14 w-full border-b border-transparent z-99999 select-none',
         scroll && 'border-background/80 bg-background/40 backdrop-blur-md'
       )}
     >
@@ -51,7 +51,7 @@ const Navbar = () => {
         <MaxWidthWrapper className="flex items-center justify-between">
           <div className="flex items-center space-x-12">
             <Link href="/#home">
-              <span className="text-lg font-bold font-heading !leading-none">Aptos</span>
+              <span className="text-lg font-bold font-heading leading-none!">Aptos</span>
             </Link>
 
             <div className="flex items-center gap-x-4">
@@ -163,7 +163,7 @@ const ListItem = React.forwardRef<
         >
           <div className="flex items-center space-x-2 text-neutral-300">
             <Icon className="h-4 w-4" />
-            <h6 className="text-sm font-medium !leading-none">{title}</h6>
+            <h6 className="text-sm font-medium leading-none!">{title}</h6>
           </div>
           <p
             title={children! as string}

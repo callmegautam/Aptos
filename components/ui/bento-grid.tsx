@@ -109,7 +109,7 @@ export const CARDS = [
     cta: 'Learn more',
     className: 'col-span-3 lg:col-span-1',
     background: (
-      <Card className="absolute top-10 left-10 origin-top rounded-none rounded-tl-md transition-all duration-300 ease-out [mask-image:linear-gradient(to_top,transparent_0%,#000_100%)] group-hover:scale-105 border border-border border-r-0">
+      <Card className="absolute top-10 left-10 origin-top rounded-none rounded-tl-md transition-all duration-300 ease-out mask-[linear-gradient(to_top,transparent_0%,#000_100%)] group-hover:scale-105 border border-border border-r-0">
         <CardHeader>
           <CardTitle>Create Interview Room</CardTitle>
           <CardDescription>
@@ -135,7 +135,7 @@ export const CARDS = [
     cta: 'Learn more',
     className: 'col-span-3 lg:col-span-2',
     background: (
-      <Command className="absolute right-10 top-10 w-[70%] origin-to translate-x-0 border border-border transition-all duration-300 ease-out [mask-image:linear-gradient(to_top,transparent_40%,#000_100%)] group-hover:-translate-x-10 p-2">
+      <Command className="absolute right-10 top-10 w-[70%] origin-to translate-x-0 border border-border transition-all duration-300 ease-out mask-[linear-gradient(to_top,transparent_40%,#000_100%)] group-hover:-translate-x-10 p-2">
         <Input placeholder="Search candidates..." />
         <div className="mt-1 cursor-pointer">
           <div className="px-4 py-2 hover:bg-muted rounded-md">Rahul Sharma — Frontend</div>
@@ -183,7 +183,7 @@ export const CARDS = [
     cta: 'Learn more',
     className: 'col-span-3 lg:col-span-2 max-w-full overflow-hidden',
     background: (
-      <div className="absolute right-2 pl-28 md:pl-0 top-4 h-[300px] w-[600px] border-none transition-all duration-300 ease-out [mask-image:linear-gradient(to_top,transparent_10%,#000_100%)] group-hover:scale-105 p-6">
+      <div className="absolute right-2 pl-28 md:pl-0 top-4 h-[300px] w-[600px] border-none transition-all duration-300 ease-out mask-[linear-gradient(to_top,transparent_10%,#000_100%)] group-hover:scale-105 p-6">
         <div className="rounded-lg border border-border p-4 space-y-2">
           <p className="text-sm font-medium">Candidate Score</p>
           <p className="text-3xl font-bold">8.7 / 10</p>
@@ -205,7 +205,7 @@ export const CARDS = [
       <Calendar
         mode="single"
         selected={new Date(2024, 4, 11, 0, 0, 0)}
-        className="absolute right-0 top-10 origin-top rounded-md border border-border transition-all duration-300 ease-out [mask-image:linear-gradient(to_top,transparent_40%,#000_100%)] group-hover:scale-105"
+        className="absolute right-0 top-10 origin-top rounded-md border border-border transition-all duration-300 ease-out mask-[linear-gradient(to_top,transparent_40%,#000_100%)] group-hover:scale-105"
       />
     )
   }
@@ -264,7 +264,7 @@ const BentoCard = ({
         <ArrowRightIcon className="ml-2 h-4 w-4" />
       </Link> */}
     </div>
-    <div className="pointer-events-none absolute inset-0 transition-all duration-300 group-hover:bg-black/[.03] group-hover:dark:bg-neutral-800/10" />
+    <div className="pointer-events-none absolute inset-0 transition-all duration-300 group-hover:bg-black/3 group-hover:dark:bg-neutral-800/10" />
   </div>
 );
 
