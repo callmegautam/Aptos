@@ -18,6 +18,7 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog';
+import Link from 'next/link';
 
 const RoomsPage = () => {
   const [rooms, setRooms] = useState<InterviewRoomWithRelations[]>([]);
@@ -33,6 +34,7 @@ const RoomsPage = () => {
   useEffect(() => {
     const fetchRooms = async () => {
       // const toastId = toast.loading('Loading interview rooms...');
+      setLoading(true);
       try {
         const response = await axios.get('/api/interview-rooms');
         if (response.status === HTTP_STATUS.OK) {
@@ -55,6 +57,7 @@ const RoomsPage = () => {
         }
       } finally {
         // toast.dismiss(toastId);
+        setLoading(false);
       }
     };
 
@@ -111,10 +114,12 @@ const RoomsPage = () => {
       <div className="flex items-center justify-between mb-10">
         <h1 className="text-2xl font-bold">Interview rooms</h1>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => router.push('/dashboard/rooms/table')}>
-            <TableIcon className="w-4 h-4" />
-            View more
-          </Button>
+          <Link href="/dashboard/rooms/table">
+            <Button variant="outline">
+              <TableIcon className="w-4 h-4" />
+              View more
+            </Button>
+          </Link>
           <Button
             variant="outline"
             onClick={() => {
