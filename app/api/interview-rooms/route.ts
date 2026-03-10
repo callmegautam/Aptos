@@ -8,6 +8,7 @@ import { createRoomSchema, InterviewField, InterviewRoomStatus } from '@/types/i
 import { generateRoomCode } from '@/utils/room-code';
 import { savePublicFile } from '@/lib/storage/public-files';
 import { extractTextFromBuffer } from '@/lib/pdf/pdf-parser';
+import { compressResume, firstNWords, getResumeAnalysis } from '@/lib/ai/ai';
 
 export async function GET(_req: Request) {
   try {
@@ -85,14 +86,6 @@ export async function POST(req: Request) {
     const resumeValue = formData.get('resume');
     const resume = resumeValue instanceof File ? resumeValue : null;
 
-    console.log('----', formData.get('interviewerId'));
-    console.log('----', formData.get('candidateName'));
-    console.log('----', formData.get('jobTitle'));
-    console.log('----', formData.get('jobDescription'));
-    console.log('----', formData.get('status'));
-    console.log('----', formData.get('field'));
-    console.log('----', formData.get('scheduledAt'));
-
     const parsed = createRoomSchema.safeParse({
       interviewerId: formData.get('interviewerId')
         ? Number(formData.get('interviewerId'))
@@ -117,7 +110,21 @@ export async function POST(req: Request) {
     if (resume) {
       resumePath = await savePublicFile({ file: resume, publicSubdir: 'resumes' });
       const parsedData = await extractTextFromBuffer(Buffer.from(await resume.arrayBuffer()));
-      console.log('----', parsedData);
+      console.log('---- parsedData --- \n', parsedData);
+      try {
+        const smallParsedData = firstNWords(parsedData, 500);
+        console.log('---- smallParsedData --- \n', smallParsedData);
+        // const compressedResume = await compressResume(smallParsedData);
+        // console.log('---- compressedResume --- \n', compressedResume);
+        const resumeAnalysis = await getResumeAnalysis({
+          resumeText: smallParsedData,
+          jobTitle: parsed.data.jobTitle,
+          jobDescription: parsed.data.jobDescription ?? ''
+        });
+        console.log('---- resumeAnalysis --- \n', resumeAnalysis);
+      } catch (error) {
+        console.error('Error analyzing resume:', error);
+      }
     }
 
     const roomCode = generateRoomCode();

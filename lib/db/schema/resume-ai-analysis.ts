@@ -1,4 +1,4 @@
-import { bigserial, pgTable, text, bigint, integer } from 'drizzle-orm/pg-core';
+import { bigserial, pgTable, text, bigint, integer, jsonb } from 'drizzle-orm/pg-core';
 import { interviewRooms } from './interview-rooms';
 import { resumes } from './resumes';
 
@@ -12,6 +12,12 @@ export const resumeAiAnalysis = pgTable('resume_ai_analysis', {
   resumeId: bigint('resume_id', { mode: 'number' })
     .references(() => resumes.id, { onDelete: 'cascade' })
     .notNull(),
+
+  aiResult: jsonb('ai_result').$type<{
+    theoryQuestions: string[];
+    practicalQuestions: string[];
+    resumeScore: number;
+  }>(),
 
   matchScore: integer('match_score').notNull(),
 

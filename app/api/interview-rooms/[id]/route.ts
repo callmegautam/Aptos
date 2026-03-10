@@ -7,6 +7,7 @@ import { parseId } from '@/utils/parse';
 import { getCurrentCompany, getCurrentUser } from '@/lib/auth/auth';
 import { updateInterviewRoomSchema } from '@/types/interview-room';
 import { deletePublicFileByUrl, savePublicFile } from '@/lib/storage/public-files';
+import { extractTextFromBuffer } from '@/lib/pdf/pdf-parser';
 
 export async function GET(_req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
@@ -185,6 +186,7 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
 
     if (resume) {
       updates.resumeUrl = await savePublicFile({ file: resume, publicSubdir: 'resumes' });
+      const parsedData = await extractTextFromBuffer(Buffer.from(await resume.arrayBuffer()));
     }
 
     if (Object.keys(updates).length === 0) {

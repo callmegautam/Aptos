@@ -1,4 +1,4 @@
-import { bigserial, pgTable, text, bigint, integer } from 'drizzle-orm/pg-core';
+import { bigserial, pgTable, text, bigint, integer, jsonb } from 'drizzle-orm/pg-core';
 import { interviewRooms } from './interview-rooms';
 import { questionTypeEnum } from './enums';
 import { difficultyEnum } from './enums';
@@ -9,6 +9,12 @@ export const questions = pgTable('questions', {
   roomId: bigint('room_id', { mode: 'number' })
     .references(() => interviewRooms.id, { onDelete: 'cascade' })
     .notNull(),
+
+  aiResult: jsonb('ai_result').$type<{
+    theoryQuestions: string[];
+    practicalQuestions: string[];
+    resumeScore: number;
+  }>(),
 
   type: questionTypeEnum('type').notNull(),
 

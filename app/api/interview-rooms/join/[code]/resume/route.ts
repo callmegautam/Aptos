@@ -5,6 +5,7 @@ import { and, eq, isNull } from 'drizzle-orm';
 import { HTTP_STATUS } from '@/types/http';
 import { getCurrentUser } from '@/lib/auth/auth';
 import { savePublicFile } from '@/lib/storage/public-files';
+import { extractTextFromBuffer } from '@/lib/pdf/pdf-parser';
 
 export async function POST(req: NextRequest, context: { params: Promise<{ code: string }> }) {
   try {
@@ -56,6 +57,7 @@ export async function POST(req: NextRequest, context: { params: Promise<{ code: 
     }
 
     const resumeUrl = await savePublicFile({ file: resume, publicSubdir: 'resumes' });
+    const parsedData = await extractTextFromBuffer(Buffer.from(await resume.arrayBuffer()));
 
     const whereCondition =
       room.candidateId == null
