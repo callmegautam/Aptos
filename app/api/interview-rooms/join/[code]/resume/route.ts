@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { interviewRooms } from '@/lib/db/schema';
 import { and, eq, isNull } from 'drizzle-orm';
@@ -6,9 +6,9 @@ import { HTTP_STATUS } from '@/types/http';
 import { getCurrentUser } from '@/lib/auth/auth';
 import { savePublicFile } from '@/lib/storage/public-files';
 
-export async function POST(req: Request, { params }: { params: { code: string } }) {
+export async function POST(req: NextRequest, context: { params: Promise<{ code: string }> }) {
   try {
-    const { code } = await params;
+    const { code } = await context.params;
     const roomCode = (code ?? '').trim();
     if (!roomCode) {
       return NextResponse.json({ error: 'Invalid code' }, { status: HTTP_STATUS.BAD_REQUEST });

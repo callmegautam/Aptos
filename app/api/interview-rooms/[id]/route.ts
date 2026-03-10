@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { interviewRooms } from '@/lib/db/schema';
 import { and, eq } from 'drizzle-orm';
@@ -8,9 +8,9 @@ import { getCurrentCompany, getCurrentUser } from '@/lib/auth/auth';
 import { updateInterviewRoomSchema } from '@/types/interview-room';
 import { deletePublicFileByUrl, savePublicFile } from '@/lib/storage/public-files';
 
-export async function GET(_req: Request, { params }: { params: { id: string } }) {
+export async function GET(_req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = await params;
+    const { id } = await context.params;
     const roomId = parseId(id);
 
     if (roomId == null) {
@@ -66,9 +66,9 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
   }
 }
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = await params;
+    const { id } = await context.params;
     const roomId = parseId(id);
 
     if (roomId == null) {
@@ -229,9 +229,9 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   }
 }
 
-export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = await params;
+    const { id } = await context.params;
     const roomId = parseId(id);
 
     if (roomId == null) {

@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { interviewRooms } from '@/lib/db/schema';
 import { and, eq, isNull } from 'drizzle-orm';
@@ -9,9 +9,9 @@ function hasResume(resumeUrl: unknown): resumeUrl is string {
   return typeof resumeUrl === 'string' && resumeUrl.trim().length > 0;
 }
 
-export async function GET(_req: Request, { params }: { params: { code: string } }) {
+export async function GET(_req: NextRequest, context: { params: Promise<{ code: string }> }) {
   try {
-    const { code } = await params;
+    const { code } = await context.params;
     const roomCode = (code ?? '').trim();
 
     if (!roomCode) {

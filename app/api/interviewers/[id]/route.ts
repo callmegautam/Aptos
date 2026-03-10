@@ -9,7 +9,7 @@ import { getCurrentCompany, getCurrentUser } from '@/lib/auth/auth';
 import { updateInterviewerSchema } from '@/types/interviewer';
 import { deletePublicFileByUrl, savePublicFile } from '@/lib/storage/public-files';
 
-export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(_req: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const user = await getCurrentUser();
     if (!user) {
@@ -28,8 +28,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       return NextResponse.json({ error: 'Unauthorized' }, { status: HTTP_STATUS.UNAUTHORIZED });
     }
 
-    const { id } = await params;
-    const interviewerId = parseId(id);
+    const { id } = await context.params;
+    const interviewerId = parseId(id as string);
 
     if (interviewerId == null) {
       return NextResponse.json({ error: 'Invalid id' }, { status: HTTP_STATUS.BAD_REQUEST });
@@ -52,7 +52,10 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       .select({ total: count() })
       .from(interviewRooms)
       .where(
-        and(eq(interviewRooms.interviewerId, interviewerId), eq(interviewRooms.companyId, companyId))
+        and(
+          eq(interviewRooms.interviewerId, interviewerId),
+          eq(interviewRooms.companyId, companyId)
+        )
       );
 
     const { passwordHash, ...rest } = interviewer;
@@ -70,7 +73,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   }
 }
 
-export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function PATCH(req: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const user = await getCurrentUser();
     if (!user) {
@@ -89,7 +92,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       return NextResponse.json({ error: 'Unauthorized' }, { status: HTTP_STATUS.UNAUTHORIZED });
     }
 
-    const { id } = await params;
+    const { id } = await context.params;
     const interviewerId = parseId(id);
 
     if (interviewerId == null) {
@@ -113,10 +116,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         email: (formData.get('email') as string | null) ?? undefined,
         password: (formData.get('password') as string | null) ?? undefined,
         phone: phoneRaw == null || phoneRaw === '' ? undefined : String(phoneRaw),
-        avatarUrl:
-          avatarUrlRaw == null || avatarUrlRaw === ''
-            ? undefined
-            : String(avatarUrlRaw)
+        avatarUrl: avatarUrlRaw == null || avatarUrlRaw === '' ? undefined : String(avatarUrlRaw)
       });
 
       const avatarValue = formData.get('avatar');
