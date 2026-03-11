@@ -1,15 +1,17 @@
 'use client';
 
 import {
+  Building2,
   ChevronRight,
   ChevronsUpDown,
   FileCheck,
   HelpCircle,
   LayoutDashboard,
-  Loader,
   LogOut,
   Settings,
+  ShieldCheck,
   User,
+  UserCog,
   Users,
   Video
 } from 'lucide-react';
@@ -17,7 +19,7 @@ import * as React from 'react';
 
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Breadcrumb,
@@ -60,12 +62,12 @@ import {
 import axios from 'axios';
 import { HTTP_STATUS } from '@/types/http';
 import toast from 'react-hot-toast';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useUserStore } from '@/lib/store/user-store';
-import { Spinner } from '@/components/ui/spinner';
 
 const logout = () => {
   document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
+  useUserStore.getState().clearUser();
 };
 
 // Base nav item - used by simple sidebars
@@ -119,52 +121,93 @@ type SidebarData = {
   activeWorkspace?: string;
 };
 
-// Shared sidebar data - Aptos AI Interview Platform
-const sidebarData: SidebarData = {
-  logo: {
-    src: 'https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/shadcnblocks-logo.svg',
-    alt: 'Aptos',
-    title: 'Aptos',
-    description: 'AI Interview Platform'
-  },
-  navGroups: [
-    {
-      title: 'Overview',
-      defaultOpen: true,
-      items: [
-        { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
-        { label: 'Rooms', icon: Video, href: '/dashboard/rooms' },
-        { label: 'Reports', icon: FileCheck, href: '/dashboard/reports' }
-      ]
-    },
-    {
-      title: 'Team',
-      defaultOpen: true,
-      items: [{ label: 'Interviewers', icon: Users, href: '/dashboard/interviewers' }]
-    }
-  ],
-  footerGroup: {
-    title: 'Support',
-    items: [
-      { label: 'Help Center', icon: HelpCircle, href: '/dashboard/help' },
-      { label: 'Settings', icon: Settings, href: '/dashboard/settings' }
-    ]
-  },
-  user: {
-    name: 'Interviewer',
-    email: 'interviewer@company.com',
-    avatar: 'https://deifkwefumgah.cloudfront.net/shadcnblocks/block/avatar-1.webp'
-  },
-  workspaces: [
-    {
-      id: '1',
-      name: 'My Company',
-      logo: 'https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/shadcnblocks-logo.svg',
-      plan: 'Company'
-    }
-  ],
-  activeWorkspace: '1'
+const logoData: SidebarData['logo'] = {
+  src: 'https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/shadcnblocks-logo.svg',
+  alt: 'Aptos',
+  title: 'Aptos',
+  description: 'AI Interview Platform'
 };
+
+const defaultAvatar =
+  'https://deifkwefumgah.cloudfront.net/shadcnblocks/block/avatar-1.webp';
+
+function getSidebarData(user: ReturnType<typeof useUserStore.getState>['user']): SidebarData {
+  const role = user?.role;
+  const isStaff = role === 'ADMIN' || role === 'SUPER_ADMIN';
+  const isSuperAdmin = role === 'SUPER_ADMIN';
+
+  if (isStaff) {
+    return {
+      logo: logoData,
+      navGroups: [
+        {
+          title: 'Overview',
+          defaultOpen: true,
+          items: [
+            { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
+            { label: 'Companies', icon: Building2, href: '/dashboard/companies' },
+            { label: 'Interviewers', icon: Users, href: '/dashboard/interviewers' },
+            { label: 'Candidates', icon: User, href: '/dashboard/candidates' }
+          ]
+        },
+        ...(isSuperAdmin
+          ? [
+              {
+                title: 'Platform',
+                defaultOpen: true,
+                items: [
+                  { label: 'Admins', icon: UserCog, href: '/dashboard/admins' },
+                  { label: 'Settings', icon: Settings, href: '/dashboard/settings' }
+                ]
+              }
+            ]
+          : [])
+      ],
+      footerGroup: {
+        title: 'Support',
+        items: [{ label: 'Help Center', icon: HelpCircle, href: '/dashboard/help' }]
+      },
+      user: user
+        ? {
+            name: user.name,
+            email: user.email,
+            avatar: user.avatar || defaultAvatar
+          }
+        : undefined
+    };
+  }
+
+  return {
+    logo: logoData,
+    navGroups: [
+      {
+        title: 'Overview',
+        defaultOpen: true,
+        items: [
+          { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
+          { label: 'Rooms', icon: Video, href: '/dashboard/rooms' },
+          { label: 'Reports', icon: FileCheck, href: '/dashboard/reports' }
+        ]
+      },
+      {
+        title: 'Team',
+        defaultOpen: true,
+        items: [{ label: 'Interviewers', icon: Users, href: '/dashboard/interviewers' }]
+      }
+    ],
+    footerGroup: {
+      title: 'Support',
+      items: [{ label: 'Help Center', icon: HelpCircle, href: '/dashboard/help' }]
+    },
+    user: user
+      ? {
+          name: user.name,
+          email: user.email,
+          avatar: user.avatar || defaultAvatar
+        }
+      : undefined
+  };
+}
 
 const SidebarLogo = ({ logo }: { logo: SidebarData['logo'] }) => {
   return (
@@ -234,7 +277,9 @@ const NavMenuItem = ({ item }: { item: NavItem }) => {
   );
 };
 
-const NavUser = ({ user }: { user: UserData }) => {
+const NavUser = ({ user, role }: { user: UserData; role?: string }) => {
+  const isStaff = role === 'ADMIN' || role === 'SUPER_ADMIN';
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -290,14 +335,23 @@ const NavUser = ({ user }: { user: UserData }) => {
                 Account
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href="/dashboard/subscription">
-                <Settings className="mr-2 size-4" />
-                Subscription
-              </Link>
-            </DropdownMenuItem>
+            {!isStaff && (
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard/subscription">
+                  <Settings className="mr-2 size-4" />
+                  Subscription
+                </Link>
+              </DropdownMenuItem>
+            )}
+            {role === 'SUPER_ADMIN' && (
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard/settings">
+                  <ShieldCheck className="mr-2 size-4" />
+                  System Settings
+                </Link>
+              </DropdownMenuItem>
+            )}
             <DropdownMenuSeparator />
-            {/* todo */}
             <DropdownMenuItem onClick={logout}>
               <LogOut className="mr-2 size-4" />
               Log out
@@ -317,15 +371,8 @@ function isActivePath(pathname: string, href: string): boolean {
 
 const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
   const pathname = usePathname();
-
-  // const user = useUserStore((state) => state.user);
-  // if (!user) return null;
-
-  // sidebarData.user = {
-  //   name: user.name,
-  //   email: user.email,
-  //   avatar: user.avatar || 'https://deifkwefumgah.cloudfront.net/shadcnblocks/block/avatar-1.webp'
-  // };
+  const user = useUserStore((state) => state.user);
+  const sidebarData = getSidebarData(user);
 
   return (
     <Sidebar {...props}>
@@ -354,7 +401,9 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
           ))}
         </ScrollArea>
       </SidebarContent>
-      <SidebarFooter>{sidebarData.user && <NavUser user={sidebarData.user} />}</SidebarFooter>
+      <SidebarFooter>
+        {sidebarData.user && <NavUser user={sidebarData.user} role={user?.role} />}
+      </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   );
@@ -382,34 +431,29 @@ function getPageTitle(pathname: string): string {
 }
 
 export function DashboardLayout({ children, className }: DashboardLayoutProps) {
-  const [isLoading, setIsLoading] = useState(false);
   const pathname = usePathname();
-  const router = useRouter();
 
   useEffect(() => {
-    setIsLoading(true);
     const fetchMe = async () => {
       try {
         const response = await axios.get('/api/auth/me');
         const data = response.data;
         if (response.status === HTTP_STATUS.OK) {
-          sidebarData.user = {
+          useUserStore.getState().setUser({
             name: data.name,
             email: data.email,
+            role: data.role,
             avatar: data.avatarUrl
-          };
-          useUserStore.getState().setUser(data);
+          });
         }
       } catch (error) {
         console.error('Error fetching me:', error);
         toast.error('Failed to fetch user data');
-      } finally {
-        setIsLoading(false);
       }
     };
 
     fetchMe();
-  }, [router]);
+  }, []);
 
   return (
     <SidebarProvider className={cn(className)}>
@@ -424,12 +468,12 @@ export function DashboardLayout({ children, className }: DashboardLayoutProps) {
           <a href="/dashboard" className="flex items-center gap-2 md:hidden">
             <div className="flex aspect-square size-8 items-center justify-center rounded-sm bg-primary">
               <img
-                src={sidebarData.logo.src}
-                alt={sidebarData.logo.alt}
+                src={logoData.src}
+                alt={logoData.alt}
                 className="size-6 text-primary-foreground invert dark:invert-0"
               />
             </div>
-            <span className="font-semibold">{sidebarData.logo.title}</span>
+            <span className="font-semibold">{logoData.title}</span>
           </a>
           <Breadcrumb className="hidden md:block">
             <BreadcrumbList>

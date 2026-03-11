@@ -1,187 +1,114 @@
-'use client';
-import { Button } from '@/components/ui/button';
-// import InterviewTable from '@/features/dashboard/components/interview-table';
-import { PlusIcon } from 'lucide-react';
-import InterviewersTable, {
-  type InterviewersTableItem
-} from '@/features/interviewers/components/table';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { CreateInterviewerDialog } from '@/features/interviewers/components/create-interviewer-dialog';
-import toast from 'react-hot-toast';
-import axios from 'axios';
-import { HTTP_STATUS } from '@/types/http';
-import { Interviewer } from '@/types/interviewer';
+import { redirect } from 'next/navigation';
+import { getCurrentUser } from '@/lib/auth/auth';
+import { getStaffDashboardData, isStaffRole } from '@/lib/dashboard/staff';
+import CompanyInterviewersPage from '@/features/interviewers/components/company-interviewers-page';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle
-} from '@/components/ui/dialog';
+  DashboardTable,
+  DateCell,
+  PageIntro,
+  StaffStatsGrid,
+  VerificationBadge
+} from '@/features/dashboard/components/staff-dashboard-primitives';
 
-const InterviewersPage = () => {
-  const [createOpen, setCreateOpen] = useState(false);
-  const [editingInterviewer, setEditingInterviewer] = useState<Interviewer | null>(null);
-  const [interviewers, setInterviewers] = useState<Interviewer[]>([]);
-  const [loading, setLoading] = useState(false);
+const InterviewersPage = async () => {
+  const user = await getCurrentUser();
 
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [interviewerToDelete, setInterviewerToDelete] = useState<Interviewer | null>(null);
+  if (!user) {
+    redirect('/login');
+  }
 
-  useEffect(() => {
-    const fetchInterviewers = async () => {
-      setLoading(true);
-      try {
-        const response = await axios.get('/api/interviewers');
-        if (response.status === HTTP_STATUS.OK) {
-          const data = response.data.interviewers;
-          const list: Interviewer[] = Array.isArray(data) ? data : [data];
-          setInterviewers(list);
-        } else {
-          toast.error(response.data?.error ?? 'Failed to load interviewers');
-        }
-      } catch (error) {
-        if (axios.isAxiosError(error)) {
-          const message = error.response?.data?.error || 'Request failed';
-          toast.error(message);
-        } else {
-          toast.error('Something went wrong while loading interviewers');
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
+  if (!isStaffRole(user.role)) {
+    return <CompanyInterviewersPage />;
+  }
 
-    fetchInterviewers();
-  }, []);
+  const data = await getStaffDashboardData();
+  const interviewerRows = data.interviewerRows;
 
-  const handleSubmit = useCallback(
-    (interviewer: Interviewer, isEdit: boolean) => {
-      if (isEdit && editingInterviewer) {
-        setInterviewers((prev) => prev.map((i) => (i.id === interviewer.id ? interviewer : i)));
-        setEditingInterviewer(null);
-        setCreateOpen(false);
-      } else {
-        setInterviewers((prev) => [...prev, interviewer]);
-        setCreateOpen(false);
-      }
+  const stats = [
+    {
+      label: 'Interviewers',
+      value: interviewerRows.length,
+      description: 'Total interviewer accounts across all companies'
     },
-    [editingInterviewer]
-  );
-
-  const handleEdit = useCallback(
-    (id: number) => {
-      const interviewer = interviewers.find((i) => i.id === id) ?? null;
-      if (!interviewer) return;
-      setEditingInterviewer(interviewer);
-      setCreateOpen(true);
+    {
+      label: 'Candidate interactions',
+      value: interviewerRows.reduce((sum, row) => sum + row.candidatesInterviewedCount, 0),
+      description: 'Candidate touches aggregated by interviewer'
     },
-    [interviewers]
-  );
-
-  const handleDelete = useCallback(
-    async (id: number) => {
-      const interviewer = interviewers.find((i) => i.id === id);
-      if (!interviewer) return;
-
-      setInterviewerToDelete(interviewer);
-      setDeleteDialogOpen(true);
+    {
+      label: 'Completed interviews',
+      value: interviewerRows.reduce((sum, row) => sum + row.completedInterviews, 0),
+      description: 'Finished interviews handled by interviewer accounts'
     },
-    [interviewers]
-  );
-
-  const tableItems: InterviewersTableItem[] = useMemo(
-    () =>
-      interviewers.map((i) => ({
-        id: i.id,
-        avatar: (i as any).avatarUrl ?? null,
-        name: i.name,
-        email: i.email,
-        phone: (i as any).phone ?? '',
-        total_interviews: (i as any).totalInterviews ?? 0,
-        status: 'active'
-      })),
-    [interviewers]
-  );
+    {
+      label: 'Verified interviewers',
+      value: interviewerRows.filter((row) => row.emailVerified).length,
+      description: 'Interviewer accounts with verified email status'
+    }
+  ];
 
   return (
-    <div className="flex flex-col gap-10">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Interviewers</h1>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={() => {
-              setEditingInterviewer(null);
-              setCreateOpen(true);
-            }}
-          >
-            <PlusIcon className="w-4 h-4" />
-            Add Interviewer
-          </Button>
-        </div>
-      </div>
-      <InterviewersTable items={tableItems} onEdit={handleEdit} onDelete={handleDelete} />
-      <CreateInterviewerDialog
-        open={createOpen}
-        onOpenChange={setCreateOpen}
-        editingInterviewer={editingInterviewer}
-        onSubmit={handleSubmit}
+    <div className="space-y-8">
+      <PageIntro
+        title="Interviewer Management"
+        description="See interviewer performance, related companies, candidate coverage, and recent interview activity from the admin dashboard."
       />
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Interviewer</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete "{interviewerToDelete?.name}"? This action cannot be
-              undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={async () => {
-                if (!interviewerToDelete) return;
 
-                try {
-                  const response = await axios.delete(
-                    `/api/interviewers/${interviewerToDelete.id}`
-                  );
-                  if (response.status === HTTP_STATUS.NO_CONTENT) {
-                    setInterviewers((prev) => prev.filter((i) => i.id !== interviewerToDelete.id));
-                    if (editingInterviewer?.id === interviewerToDelete.id) {
-                      setEditingInterviewer(null);
-                      setCreateOpen(false);
-                    }
-                    toast.success('Interviewer deleted successfully');
-                  } else {
-                    toast.error('Failed to delete interviewer');
-                  }
-                } catch (error) {
-                  if (axios.isAxiosError(error)) {
-                    const message = error.response?.data?.error || 'Request failed';
-                    toast.error(message);
-                  } else {
-                    toast.error('Something went wrong while deleting interviewer');
-                  }
-                } finally {
-                  setDeleteDialogOpen(false);
-                  setInterviewerToDelete(null);
-                }
-              }}
-            >
-              Confirm
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <StaffStatsGrid stats={stats} />
 
-      <div className="flex justify-center">{/* <InterviewTable /> */}</div>
-      <div className="flex justify-center">{/* <DemoTable /> */}</div>
+      <DashboardTable
+        title="All interviewers"
+        description="Platform-wide interviewer stats grouped with their assigned company."
+        rows={interviewerRows}
+        emptyLabel="No interviewers found."
+        columns={[
+          {
+            key: 'name',
+            header: 'Interviewer',
+            cell: (row) => (
+              <div>
+                <p className="font-medium">{row.name}</p>
+                <p className="text-sm text-muted-foreground">{row.email}</p>
+              </div>
+            )
+          },
+          {
+            key: 'companyName',
+            header: 'Company',
+            cell: (row) => row.companyName
+          },
+          {
+            key: 'candidatesInterviewedCount',
+            header: 'Candidates interviewed',
+            cell: (row) => row.candidatesInterviewedCount
+          },
+          {
+            key: 'totalInterviews',
+            header: 'Total interviews',
+            cell: (row) => row.totalInterviews
+          },
+          {
+            key: 'completedInterviews',
+            header: 'Completed',
+            cell: (row) => row.completedInterviews
+          },
+          {
+            key: 'activeInterviews',
+            header: 'Active',
+            cell: (row) => row.activeInterviews
+          },
+          {
+            key: 'emailVerified',
+            header: 'Verification',
+            cell: (row) => <VerificationBadge verified={row.emailVerified} />
+          },
+          {
+            key: 'lastInterviewAt',
+            header: 'Last interview',
+            cell: (row) => <DateCell value={row.lastInterviewAt} />
+          }
+        ]}
+      />
     </div>
   );
 };

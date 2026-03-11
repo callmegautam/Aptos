@@ -4,9 +4,7 @@ import { admins, companies, candidates, interviewers } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcrypt';
 import { HTTP_STATUS } from '@/types/http';
-import { setToken, signToken } from '@/lib/auth/jwt';
-import { COOKIE_OPTIONS } from '@/utils/constants/cookies';
-import { cookies } from 'next/headers';
+import { setToken } from '@/lib/auth/jwt';
 import { loginSchema, UserRole } from '@/types/auth';
 
 async function findDbUser(email: string, role: UserRole) {
@@ -74,10 +72,22 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Email not verified' }, { status: HTTP_STATUS.FORBIDDEN });
     }
 
+    const requestedRole = parsed.data.role;
+    const isAdminLogin = requestedRole === 'ADMIN' || requestedRole === 'SUPER_ADMIN';
+    const resolvedRole =
+      isAdminLogin && 'role' in user ? (user.role === 'SUPER_ADMIN' ? 'SUPER_ADMIN' : 'ADMIN') : requestedRole;
+
+    if (requestedRole === 'SUPER_ADMIN' && (!('role' in user) || user.role !== 'SUPER_ADMIN')) {
+      return NextResponse.json(
+        { error: 'Super admin access is not available for this account' },
+        { status: HTTP_STATUS.UNAUTHORIZED }
+      );
+    }
+
     await setToken({
       id: user.id,
       email: user.email,
-      role: parsed.data.role
+      role: resolvedRole
     });
 
     return NextResponse.json(
@@ -86,7 +96,7 @@ export async function POST(req: Request) {
         user: {
           id: user.id,
           email: user.email,
-          role: parsed.data.role
+          role: resolvedRole
         }
       },
       { status: HTTP_STATUS.OK }

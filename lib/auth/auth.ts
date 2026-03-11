@@ -47,6 +47,6 @@ export async function getCurrentUserByEmail(email: string): Promise<Payload | nu
     .limit(1);
   if (interviewer) return { id: interviewer.id, email, role: 'INTERVIEWER' };
   const [admin] = await db.select().from(admins).where(eq(admins.email, email)).limit(1);
-  if (admin) return { id: admin.id, email, role: 'ADMIN' };
+  if (admin) return { id: admin.id, email, role: admin.role };
   return null;
 }
