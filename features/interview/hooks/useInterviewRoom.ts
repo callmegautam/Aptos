@@ -3,8 +3,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { getSocket } from '@/lib/realtime/socket';
 
-export function useInterviewRoom(roomId: string) {
-  const socket = getSocket();
+export function useInterviewRoom(roomId: string | null) {
+  // const socket = getSocket();
+  const socketRef = useRef(getSocket());
+  const socket = socketRef.current;
 
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
   const peersRef = useRef<Map<string, RTCPeerConnection>>(new Map());
@@ -22,18 +24,56 @@ export function useInterviewRoom(roomId: string) {
   const [recordingUrl, setRecordingUrl] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!roomId) return;
+    // async function init() {
+    //   try {
+    //     const stream = await navigator.mediaDevices.getUserMedia({
+    //       video: true,
+    //       audio: true
+    //     });
+
+    //     localStreamRef.current = stream;
+
+    //     if (localVideoRef.current) {
+    //       localVideoRef.current.srcObject = stream;
+    //     }
+
+    //     socket.emit('join-room', roomId);
+    //   } catch (err) {
+    //     console.error('Camera/mic permission denied', err);
+    //     alert('Camera and microphone access is required for the interview.');
+    //   }
+    // }
+
     async function init() {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true
-      });
+      let stream: MediaStream | null = null;
 
-      localStreamRef.current = stream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: true
+        });
+      } catch (err) {
+        console.warn('Full media access denied, trying audio only');
 
-      if (localVideoRef.current) {
-        localVideoRef.current.srcObject = stream;
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            audio: true
+          });
+        } catch (err) {
+          console.warn('Audio also denied, joining without media');
+        }
       }
 
+      if (stream) {
+        localStreamRef.current = stream;
+
+        if (localVideoRef.current) {
+          localVideoRef.current.srcObject = stream;
+        }
+      }
+
+      // IMPORTANT: join room regardless
       socket.emit('join-room', roomId);
     }
 
@@ -43,6 +83,17 @@ export function useInterviewRoom(roomId: string) {
       const pc = new RTCPeerConnection({
         iceServers: [{ urls: ['stun:stun.l.google.com:19302'] }]
       });
+
+      // const pc = new RTCPeerConnection({
+      //   iceServers: [
+      //     { urls: 'stun:stun.l.google.com:19302' },
+      //     {
+      //       urls: 'turn:openrelay.metered.ca:80',
+      //       username: 'openrelayproject',
+      //       credential: 'openrelayproject'
+      //     }
+      //   ]
+      // });
 
       localStreamRef.current?.getTracks().forEach((track) => {
         pc.addTrack(track, localStreamRef.current!);
@@ -82,7 +133,12 @@ export function useInterviewRoom(roomId: string) {
     });
 
     socket.on('offer', async ({ from, sdp }) => {
-      const pc = createPeer(from);
+      // const pc = createPeer(from);
+      let pc = peersRef.current.get(from);
+
+      if (!pc) {
+        pc = createPeer(from);
+      }
 
       await pc.setRemoteDescription(new RTCSessionDescription(sdp));
 
@@ -110,13 +166,24 @@ export function useInterviewRoom(roomId: string) {
       setMessages((prev) => [...prev, { ...msg, fromSelf: false }]);
     });
 
+    socket.on('user-disconnected', (userId: string) => {
+      const pc = peersRef.current.get(userId);
+
+      if (pc) {
+        pc.close();
+        peersRef.current.delete(userId);
+      }
+
+      setRemoteStreams((prev) => prev.filter((stream) => stream.id !== userId));
+    });
+
     return () => {
       socket.off('all-users');
       socket.off('offer');
       socket.off('answer');
       socket.off('ice-candidate');
       socket.off('chat-message');
-
+      socket.off('user-disconnected');
       // Stop local media
       localStreamRef.current?.getTracks().forEach((t) => t.stop());
       localStreamRef.current = null;
@@ -197,9 +264,7 @@ export function useInterviewRoom(roomId: string) {
 
       // Replace outgoing video tracks in all peer connections
       peersRef.current.forEach((pc) => {
-        const sender = pc
-          .getSenders()
-          .find((s) => s.track && s.track.kind === 'video');
+        const sender = pc.getSenders().find((s) => s.track && s.track.kind === 'video');
         if (sender && screenTrack) {
           sender.replaceTrack(screenTrack);
         }
@@ -240,9 +305,7 @@ export function useInterviewRoom(roomId: string) {
     // Switch peers back to camera video
     if (cameraTrack) {
       peersRef.current.forEach((pc) => {
-        const sender = pc
-          .getSenders()
-          .find((s) => s.track && s.track.kind === 'video');
+        const sender = pc.getSenders().find((s) => s.track && s.track.kind === 'video');
         if (sender) {
           sender.replaceTrack(cameraTrack);
         }
@@ -257,12 +320,58 @@ export function useInterviewRoom(roomId: string) {
     setIsScreenSharing(false);
   }
 
+  // function startRecording() {
+  //   if (isRecording || !localStreamRef.current) return;
+
+  //   try {
+  //     recordedChunksRef.current = [];
+  //     const recorder = new MediaRecorder(localStreamRef.current, {
+  //       mimeType: 'video/webm;codecs=vp9'
+  //     });
+
+  //     recorder.ondataavailable = (event) => {
+  //       if (event.data && event.data.size > 0) {
+  //         recordedChunksRef.current.push(event.data);
+  //       }
+  //     };
+
+  //     recorder.onstop = () => {
+  //       const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
+  //       const url = URL.createObjectURL(blob);
+  //       setRecordingUrl(url);
+  //       setIsRecording(false);
+  //     };
+
+  //     mediaRecorderRef.current = recorder;
+  //     recorder.start();
+  //     setIsRecording(true);
+  //   } catch (e) {
+  //     console.error('Recording error', e);
+  //   }
+  // }
+
   function startRecording() {
-    if (isRecording || !localStreamRef.current) return;
+    if (isRecording) return;
+
+    const localStream = localStreamRef.current;
+    const remoteStream = remoteStreams[0]?.stream;
+
+    if (!localStream) return;
+
+    const combinedTracks: MediaStreamTrack[] = [];
+
+    localStream.getTracks().forEach((t) => combinedTracks.push(t));
+
+    if (remoteStream) {
+      remoteStream.getTracks().forEach((t: any) => combinedTracks.push(t));
+    }
+
+    const combinedStream = new MediaStream(combinedTracks);
 
     try {
       recordedChunksRef.current = [];
-      const recorder = new MediaRecorder(localStreamRef.current, {
+
+      const recorder = new MediaRecorder(combinedStream, {
         mimeType: 'video/webm;codecs=vp9'
       });
 
@@ -275,15 +384,18 @@ export function useInterviewRoom(roomId: string) {
       recorder.onstop = () => {
         const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
         const url = URL.createObjectURL(blob);
+
         setRecordingUrl(url);
         setIsRecording(false);
       };
 
       mediaRecorderRef.current = recorder;
+
       recorder.start();
+
       setIsRecording(true);
-    } catch (e) {
-      console.error('Recording error', e);
+    } catch (err) {
+      console.error('Recording failed', err);
     }
   }
 

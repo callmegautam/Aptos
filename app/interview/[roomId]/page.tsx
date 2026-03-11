@@ -18,6 +18,7 @@
 // import { RoomProvider } from '@liveblocks/react';
 // import CollabEditor from '@/features/interview/components/collab-editor';
 // import { useParams, useRouter } from 'next/navigation';
+// import { createChatClient } from '@/lib/stream/chat-client';
 
 // type JoinResponse =
 //   | {
@@ -118,22 +119,85 @@
 //     };
 //   }, [joinUrl, router]);
 
+//   // useEffect(() => {
+//   //   let cancelled = false;
+
+//   //   async function init(join: JoinResponse) {
+//   //     const streamUserId =
+//   //       join.role === 'INTERVIEWER' ? `interviewer-${join.viewerId}` : `candidate-${join.viewerId}`;
+
+//   //     const videoClient = await createVideoClient(
+//   //       streamUserId,
+//   //       join.role === 'INTERVIEWER' ? 'Interviewer' : 'Candidate'
+//   //     );
+//   //     const callInstance = await joinInterviewCall(videoClient, join.interviewRoom.roomCode);
+
+//   //     if (cancelled) return;
+//   //     setVideoClient(videoClient);
+//   //     setCall(callInstance);
+
+//   //     const chatClient = await createChatClient(streamUserId);
+
+//   //     const channel = chatClient.channel('messaging', join.interviewRoom.roomCode, {
+//   //       members: [streamUserId]
+//   //     });
+
+//   //     await channel.watch();
+
+//   //     if (cancelled) return;
+
+//   //     setChatClient(chatClient);
+//   //     setChannel(channel);
+//   //   }
+
+//   //   if (joinState.kind === 'ok') {
+//   //     init(joinState.join);
+//   //   }
+
+//   //   return () => {
+//   //     cancelled = true;
+
+//   //     callInstance?.leave();
+//   //     videoClient?.disconnectUser?.();
+//   //     chatClient?.disconnectUser?.();
+//   //   };
+//   // }, [joinState]);
+
 //   useEffect(() => {
 //     let cancelled = false;
+
+//     let videoClientInstance: any;
+//     let callInstance: any;
+//     let chatClientInstance: any;
 
 //     async function init(join: JoinResponse) {
 //       const streamUserId =
 //         join.role === 'INTERVIEWER' ? `interviewer-${join.viewerId}` : `candidate-${join.viewerId}`;
 
-//       const videoClient = await createVideoClient(
+//       videoClientInstance = await createVideoClient(
 //         streamUserId,
 //         join.role === 'INTERVIEWER' ? 'Interviewer' : 'Candidate'
 //       );
-//       const callInstance = await joinInterviewCall(videoClient, join.interviewRoom.roomCode);
+
+//       callInstance = await joinInterviewCall(videoClientInstance, join.interviewRoom.roomCode);
 
 //       if (cancelled) return;
-//       setVideoClient(videoClient);
+
+//       setVideoClient(videoClientInstance);
 //       setCall(callInstance);
+
+//       chatClientInstance = await createChatClient(streamUserId);
+
+//       const channel = chatClientInstance.channel('messaging', join.interviewRoom.roomCode, {
+//         members: [streamUserId]
+//       });
+
+//       await channel.watch();
+
+//       if (cancelled) return;
+
+//       setChatClient(chatClientInstance);
+//       setChannel(channel);
 //     }
 
 //     if (joinState.kind === 'ok') {
@@ -142,6 +206,10 @@
 
 //     return () => {
 //       cancelled = true;
+
+//       callInstance?.leave();
+//       videoClientInstance?.disconnectUser?.();
+//       chatClientInstance?.disconnectUser?.();
 //     };
 //   }, [joinState]);
 
@@ -149,9 +217,9 @@
 //   if (joinState.kind === 'error')
 //     return <div className="p-6 text-red-600">{joinState.message}</div>;
 //   if (!videoClient || !call) return <div>Connecting...</div>;
-//   // if (!videoClient || !call || !chatClient || !channel) {
-//   //   return <div>Connecting...</div>;
-//   // }
+//   if (!videoClient || !call || !chatClient || !channel) {
+//     return <div>Connecting...</div>;
+//   }
 
 //   return (
 //     <div className="flex flex-row w-full p-4 h-screen">
@@ -177,8 +245,8 @@
 //             </ResizablePanel>
 //             {/* <ResizableHandle withHandle /> */}
 //             <ResizablePanel className="w-full h-full" defaultSize="42%">
-//               Chat will be here
-//               {/* <InterviewChat client={chatClient} channel={channel} /> */}
+//               {/* Chat will be here */}
+//               <InterviewChat client={chatClient} channel={channel} />
 //             </ResizablePanel>
 //           </ResizablePanelGroup>
 //         </div>
@@ -219,11 +287,15 @@
 
 'use client';
 
-import { use, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import { useInterviewRoom } from '@/features/interview/hooks/useInterviewRoom';
 import VideoPanel from '@/features/interview/components/video-panel';
 import ChatPanel from '@/features/interview/components/chat-panel';
 import CodeEditor from '@/features/interview/components/code-editor';
+import axios from 'axios';
+import { HTTP_STATUS } from '@/types/http';
+import { useRouter } from 'next/navigation';
+import InterviewStatus from '@/features/interview/components/interview-status';
 
 type QuestionStatus = 'pending' | 'completed' | 'cancelled';
 
@@ -253,10 +325,29 @@ const INTERVIEW_QUESTIONS: { id: number; text: string }[] = [
   { id: 10, text: 'How do you approach debugging a production incident?' }
 ];
 
+type JoinResponse =
+  | {
+      role: 'INTERVIEWER';
+      viewerId: number;
+      interviewRoom: { roomCode: string };
+    }
+  | {
+      role: 'CANDIDATE';
+      viewerId: number;
+      interviewRoom: { roomCode: string; resumeUrl?: string | null };
+      needsResumeUpload: boolean;
+      redirectTo: string | null;
+    };
+
 export default function InterviewRoom({ params }: { params: Promise<{ roomId: string }> }) {
   const { roomId } = use(params);
 
-  const room = useInterviewRoom(roomId);
+  const [joinState, setJoinState] = useState<
+    { kind: 'loading' } | { kind: 'error'; message: string } | { kind: 'ok'; join: JoinResponse }
+  >({ kind: 'loading' });
+
+  // const room = useInterviewRoom(roomId);
+  const room = useInterviewRoom(joinState.kind === 'ok' ? roomId : null);
 
   const [activeTab, setActiveTab] = useState<'theory' | 'practical'>('theory');
   const [theoryQuestions, setTheoryQuestions] = useState<TheoryQuestion[]>(
@@ -276,20 +367,58 @@ export default function InterviewRoom({ params }: { params: Promise<{ roomId: st
   );
   const [activePracticalId, setActivePracticalId] = useState<number | null>(null);
 
+  const router = useRouter();
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function init() {
+      try {
+        setJoinState({ kind: 'loading' });
+
+        const response = await axios.get(`/api/interview-rooms/join/${roomId}`);
+        const data = response.data as JoinResponse;
+
+        if (response.status !== HTTP_STATUS.OK) {
+          throw new Error('Access denied');
+        }
+
+        // candidate must upload resume
+        if (data.role === 'CANDIDATE' && data.needsResumeUpload && data.redirectTo) {
+          router.replace(data.redirectTo);
+          return;
+        }
+
+        if (!cancelled) {
+          setJoinState({ kind: 'ok', join: data });
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setJoinState({
+            kind: 'error',
+            message: 'Failed to join interview'
+          });
+        }
+      }
+    }
+
+    init();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [roomId, router]);
+
   function handleTheoryMarksChange(id: number, marks: string) {
     if (Number.isNaN(Number(marks)) || Number(marks) < 0 || Number(marks) > 10) {
       // Still allow editing, just clamp later on complete if needed
     }
 
-    setTheoryQuestions((prev) =>
-      prev.map((q) => (q.id === id ? { ...q, marks } : q))
-    );
+    setTheoryQuestions((prev) => prev.map((q) => (q.id === id ? { ...q, marks } : q)));
   }
 
   function handleTheoryStatusChange(id: number, status: QuestionStatus) {
-    setTheoryQuestions((prev) =>
-      prev.map((q) => (q.id === id ? { ...q, status } : q))
-    );
+    setTheoryQuestions((prev) => prev.map((q) => (q.id === id ? { ...q, status } : q)));
   }
 
   function handleAskPractical(id: number) {
@@ -319,6 +448,18 @@ export default function InterviewRoom({ params }: { params: Promise<{ roomId: st
     );
 
     setActivePracticalId(null);
+  }
+
+  if (joinState.kind === 'loading') {
+    return <InterviewStatus type="loading" />;
+  }
+
+  if (joinState.kind === 'error') {
+    return <InterviewStatus type="error" message={joinState.message} />;
+  }
+
+  if (!room) {
+    return <InterviewStatus type="error" message="Interview room not found" />;
   }
 
   return (
@@ -362,10 +503,7 @@ export default function InterviewRoom({ params }: { params: Promise<{ roomId: st
               {activePracticalId ? (
                 <span className="text-[11px] text-zinc-400">
                   Question {activePracticalId}:{' '}
-                  {
-                    practicalQuestions.find((q) => q.id === activePracticalId)
-                      ?.text
-                  }
+                  {practicalQuestions.find((q) => q.id === activePracticalId)?.text}
                 </span>
               ) : (
                 <span className="text-[11px] text-zinc-500">
