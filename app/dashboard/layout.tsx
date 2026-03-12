@@ -333,26 +333,20 @@ const NavUser = ({ user, role }: { user: UserData; role?: string }) => {
                 </div>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link href="/dashboard/account">
-                <User className="mr-2 size-4" />
-                Account
-              </Link>
-            </DropdownMenuItem>
+            {role !== 'SUPER_ADMIN' && <DropdownMenuSeparator />}
+            {role !== 'SUPER_ADMIN' && (
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard/account">
+                  <User className="mr-2 size-4" />
+                  Account
+                </Link>
+              </DropdownMenuItem>
+            )}
             {!isStaff && (
               <DropdownMenuItem asChild>
                 <Link href="/dashboard/subscription">
                   <Settings className="mr-2 size-4" />
                   Subscription
-                </Link>
-              </DropdownMenuItem>
-            )}
-            {role === 'SUPER_ADMIN' && (
-              <DropdownMenuItem asChild>
-                <Link href="/dashboard/settings">
-                  <ShieldCheck className="mr-2 size-4" />
-                  System Settings
                 </Link>
               </DropdownMenuItem>
             )}

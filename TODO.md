@@ -1,61 +1,11 @@
-## Company Dashboard
+- admin accont page
 
-- Account page
-  - edit profile
-  - manage subscription
-  - reset password
-  - delete account
+- super admin system settings page
 
-- Interview room page
-  - list of interview rooms
-    - table
-    - card
-  - CRUD interview room
+- candidate join room page
 
-- Interviewers page
-  - list of interviewers
-  - CRUD interviewer
+- candidate resume page
 
-- Reports page
-  - list of reports
-  - download report
-  - delete report
+- bug fix in interview room
 
-- Dashboard
-  - Stats
-  - Interview rooms
-    - upcoming interviews
-    - ongoing interviews
-  - Recent Activity
-
-## Interviewer Dashboard
-
-- Account page
-  - edit profile
-
-- Interview room page
-  - list of interview rooms (only upcoming and ongoing interviews)
-    - table
-    - card
-  - CRUD interview room (only upcoming and ongoing interviews)
-
-- Reports page
-  - list of reports (only reports of the current interviewer)
-  - download report (only reports of the current interviewer)
-
-- Dashboard
-  - Stats
-  - Interview rooms
-    - upcoming interviews
-    - ongoing interviews
-
-## Candidate Page
-
-- Account page
-  - edit profile
-  - delete account
-  - reset password
-
-- Joining interview page
-
----
+- local pg
