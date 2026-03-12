@@ -27,32 +27,41 @@ export const GET = async (req: Request, context: { params: Promise<{ roomCode: s
       return NextResponse.json({ error: 'Resume not found' }, { status: 404 });
     }
 
-    const analysis = await getResumeAnalysis({
-      resumeText: resume.parsedText,
-      jobTitle: room.jobTitle,
-      jobDescription: room.jobDescription ?? ''
-    });
+    const [isQuestionGenerated] = await db
+      .select()
+      .from(questions)
+      .where(eq(questions.resumeId, resume.id))
+      .limit(1);
+    if (!isQuestionGenerated) {
+      const analysis = await getResumeAnalysis({
+        resumeText: resume.parsedText,
+        jobTitle: room.jobTitle,
+        jobDescription: room.jobDescription ?? ''
+      });
 
-    const [question] = await db
-      .insert(questions)
-      .values({
+      const [question] = await db
+        .insert(questions)
+        .values({
+          resumeId: resume.id,
+          aiResult: {
+            theoryQuestions: analysis.theoryQuestions,
+            practicalQuestions: analysis.practicalQuestions
+          }
+        })
+        .returning();
+
+      await db.insert(resumeAiAnalysis).values({
         resumeId: resume.id,
-        aiResult: {
-          theoryQuestions: analysis.theoryQuestions,
-          practicalQuestions: analysis.practicalQuestions
-        }
-      })
-      .returning();
+        theoryScore: 0,
+        practicalScore: 0,
+        resumeScore: analysis.resumeScore,
+        overallScore: 0
+      });
 
-    await db.insert(resumeAiAnalysis).values({
-      resumeId: resume.id,
-      theoryScore: 0,
-      practicalScore: 0,
-      resumeScore: analysis.resumeScore,
-      overallScore: 0
-    });
+      return NextResponse.json(question.aiResult, { status: HTTP_STATUS.OK });
+    }
 
-    return NextResponse.json(question?.aiResult, { status: HTTP_STATUS.OK });
+    return NextResponse.json(isQuestionGenerated.aiResult, { status: HTTP_STATUS.OK });
   } catch (error) {
     return NextResponse.json(
       { error: 'Failed to get questions' },

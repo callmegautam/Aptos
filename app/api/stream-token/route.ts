@@ -1,3 +1,4 @@
+import { HTTP_STATUS } from '@/types/http';
 import { StreamClient } from '@stream-io/node-sdk';
 import { NextResponse } from 'next/server';
 
@@ -10,7 +11,7 @@ export async function POST(req: Request) {
   const { userId, name } = await req.json();
 
   if (!userId) {
-    return NextResponse.json({ error: 'userId required' }, { status: 400 });
+    return NextResponse.json({ error: 'userId required' }, { status: HTTP_STATUS.BAD_REQUEST });
   }
 
   await client.upsertUsers([
@@ -22,5 +23,5 @@ export async function POST(req: Request) {
 
   const token = client.createToken(userId);
 
-  return NextResponse.json({ token });
+  return NextResponse.json({ token }, { status: HTTP_STATUS.OK });
 }

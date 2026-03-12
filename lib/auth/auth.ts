@@ -1,3 +1,4 @@
+'use server';
 import { cookies } from 'next/headers';
 import { Payload, verifyToken } from '@/lib/auth/jwt';
 import { eq } from 'drizzle-orm';
