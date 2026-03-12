@@ -12,6 +12,7 @@ type VideoPanelProps = {
   stopScreenShare: () => void;
   startRecording: () => void;
   stopRecording: () => void;
+  endInterview: () => void;
 };
 
 export default function VideoPanel({
@@ -27,7 +28,8 @@ export default function VideoPanel({
   startScreenShare,
   stopScreenShare,
   startRecording,
-  stopRecording
+  stopRecording,
+  endInterview
 }: VideoPanelProps) {
   return (
     <div className="flex flex-col h-full gap-2">
@@ -84,6 +86,13 @@ export default function VideoPanel({
               Stop Share
             </button>
           )}
+
+          <button
+            onClick={() => endInterview()}
+            className="px-3 py-1 rounded bg-zinc-900 text-white border border-zinc-700"
+          >
+            End Interview
+          </button>
         </div>
 
         <div className="flex items-center gap-2">

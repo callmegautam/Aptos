@@ -297,8 +297,8 @@ const NavUser = ({ user, role }: { user: UserData; role?: string }) => {
               <Avatar className="size-8 rounded-lg">
                 <AvatarImage src={user.avatar} alt={user.name} />
                 <AvatarFallback className="rounded-lg">
-                  {user.name
-                    .split(' ')
+                  {user?.name
+                    ?.split(' ')
                     .map((n) => n[0])
                     .join('')}
                 </AvatarFallback>

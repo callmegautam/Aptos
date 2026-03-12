@@ -1,4 +1,11 @@
 import { openrouter } from '@/lib/ai/openrouter';
+import { db } from '../db';
+
+type ResumeAnalysis = {
+  theoryQuestions: string[];
+  practicalQuestions: string[];
+  resumeScore: number;
+};
 
 export async function getResumeAnalysis({
   resumeText,
@@ -8,7 +15,7 @@ export async function getResumeAnalysis({
   resumeText: string;
   jobTitle: string;
   jobDescription: string;
-}) {
+}): Promise<ResumeAnalysis> {
   const oldprompt = `
 You are a technical interviewer.
 
@@ -114,6 +121,7 @@ No markdown.
   });
 
   const data = JSON.parse(completion.choices[0].message.content ?? '{}');
+
   return data;
 }
 
@@ -149,6 +157,17 @@ ${resumeText}
   });
 
   return JSON.parse(completion.choices[0].message.content!);
+}
+
+export async function getResult({
+  practicalQuestions,
+  practicalAnswers
+}: {
+  practicalQuestions: string[];
+  practicalAnswers: string[];
+}) {
+  const num = Math.floor(Math.random() * 11);
+  return num;
 }
 
 export function firstNWords(text: string, limit = 1000): string {

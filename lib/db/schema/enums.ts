@@ -8,15 +8,4 @@ export const interviewStatusEnum = pgEnum('interview_status', interviewStatusEnu
 
 export const interviewFieldEnum = pgEnum('interview_field', interviewFieldEnumValues);
 
-export const questionTypeEnum = pgEnum('question_type', ['theoretical', 'coding', 'mcq']);
-
-export const difficultyEnum = pgEnum('difficulty', ['easy', 'medium', 'hard']);
-
-export const hiringRecommendationEnum = pgEnum('hiring_recommendation', [
-  'strong_yes',
-  'yes',
-  'no',
-  'strong_no'
-]);
-
-export const uploadedByEnum = pgEnum('uploaded_by', ['candidate', 'company']);
+export const uploadedByEnum = pgEnum('uploaded_by', ['CANDIDATE', 'INTERVIEWER', 'COMPANY']);

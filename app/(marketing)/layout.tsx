@@ -1,13 +1,30 @@
+'use client';
 import React from 'react';
 // import { Footer, Navbar } from '@/components
 import Navbar from '@/features/home/components/navbar';
 import Footer from '@/features/home/components/footer';
+import { useUserStore } from '@/lib/store/user-store';
+import { redirect } from 'next/navigation';
 
 interface Props {
   children: React.ReactNode;
 }
 
 const MarketingLayout = ({ children }: Props) => {
+  const user = useUserStore((state) => state.user);
+
+  if (user && user?.role === 'CANDIDATE') {
+    return redirect('/candidate');
+  } else if (user && user?.role === 'COMPANY') {
+    return redirect('/dashboard');
+  } else if (user && user?.role === 'INTERVIEWER') {
+    return redirect('/dashboard');
+  } else if (user && user?.role === 'ADMIN') {
+    return redirect('/dashboard');
+  } else if (user && user?.role === 'SUPER_ADMIN') {
+    return redirect('/dashboard');
+  }
+
   return (
     <>
       <div className="bg-[#0A0A0A]">

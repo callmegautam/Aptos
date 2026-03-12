@@ -1,6 +1,12 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { interviewers, interviewRooms } from '@/lib/db/schema';
+import {
+  interviewers,
+  interviewRooms,
+  questions,
+  resumeAiAnalysis,
+  resumes
+} from '@/lib/db/schema';
 import { eq, desc, and } from 'drizzle-orm';
 import { HTTP_STATUS } from '@/types/http';
 import { getCurrentCompany, getCurrentUser } from '@/lib/auth/auth';
@@ -9,6 +15,8 @@ import { generateRoomCode } from '@/utils/room-code';
 import { savePublicFile } from '@/lib/storage/public-files';
 import { extractTextFromBuffer } from '@/lib/pdf/pdf-parser';
 import { compressResume, firstNWords, getResumeAnalysis } from '@/lib/ai/ai';
+import { uploadedByEnum } from '@/lib/db/schema/enums';
+import { storeResume } from '@/lib/ai/resume';
 
 export async function GET(_req: Request) {
   try {
@@ -109,22 +117,6 @@ export async function POST(req: Request) {
 
     if (resume) {
       resumePath = await savePublicFile({ file: resume, publicSubdir: 'resumes' });
-      const parsedData = await extractTextFromBuffer(Buffer.from(await resume.arrayBuffer()));
-      console.log('---- parsedData --- \n', parsedData);
-      try {
-        const smallParsedData = firstNWords(parsedData, 500);
-        console.log('---- smallParsedData --- \n', smallParsedData);
-        // const compressedResume = await compressResume(smallParsedData);
-        // console.log('---- compressedResume --- \n', compressedResume);
-        const resumeAnalysis = await getResumeAnalysis({
-          resumeText: smallParsedData,
-          jobTitle: parsed.data.jobTitle,
-          jobDescription: parsed.data.jobDescription ?? ''
-        });
-        console.log('---- resumeAnalysis --- \n', resumeAnalysis);
-      } catch (error) {
-        console.error('Error analyzing resume:', error);
-      }
     }
 
     const roomCode = generateRoomCode();
@@ -144,6 +136,18 @@ export async function POST(req: Request) {
         scheduledAt: parsed.data.scheduledAt as Date
       })
       .returning();
+
+    if (resume) {
+      await storeResume({
+        resume,
+        fileUrl: resumePath ?? '',
+        companyId,
+        interviewerId: parsed.data.interviewerId,
+        roomId: room.id,
+        uploadedBy: user.role as (typeof uploadedByEnum.enumValues)[number],
+        parsedTextSize: 500
+      });
+    }
 
     const roomWithInterviewer = await db.query.interviewRooms.findFirst({
       where: eq(interviewRooms.id, room.id),

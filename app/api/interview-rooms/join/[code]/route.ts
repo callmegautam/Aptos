@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { interviewRooms } from '@/lib/db/schema';
+import { interviewRooms, resumeAiAnalysis, resumes } from '@/lib/db/schema';
 import { and, eq, isNull } from 'drizzle-orm';
 import { HTTP_STATUS } from '@/types/http';
 import { getCurrentUser } from '@/lib/auth/auth';
+import { getResumeAnalysis } from '@/lib/ai/ai';
 
 function hasResume(resumeUrl: unknown): resumeUrl is string {
   return typeof resumeUrl === 'string' && resumeUrl.trim().length > 0;
@@ -24,6 +25,10 @@ export async function GET(_req: NextRequest, context: { params: Promise<{ code: 
       .where(eq(interviewRooms.roomCode, roomCode))
       .limit(1);
 
+    const resume = await db.query.resumes.findFirst({
+      where: eq(resumes.roomId, room.id)
+    });
+
     if (!room) {
       return NextResponse.json(
         { error: 'Interview room not found' },
@@ -43,6 +48,27 @@ export async function GET(_req: NextRequest, context: { params: Promise<{ code: 
       if (room.interviewerId !== user.id) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: HTTP_STATUS.UNAUTHORIZED });
       }
+
+      // if (resume) {
+      //   const isAnalysisCompleted = await db.query.resumeAiAnalysis.findFirst({
+      //     where: eq(resumeAiAnalysis.resumeId, resume!.id)
+      //   });
+      //   if (!isAnalysisCompleted) {
+      //     const analysis = await getResumeAnalysis({
+      //       resumeText: resume.parsedText,
+      //       jobTitle: room.jobTitle,
+      //       jobDescription: room.jobDescription ?? ''
+      //     });
+
+      //     await db.insert(resumeAiAnalysis).values({
+      //       resumeId: resume.id,
+      //       theoryScore: 0,
+      //       practicalScore: 0,
+      //       resumeScore: analysis.resumeScore,
+      //       overallScore: 0
+      //     });
+      //   }
+      // }
 
       return NextResponse.json(
         {
@@ -71,6 +97,40 @@ export async function GET(_req: NextRequest, context: { params: Promise<{ code: 
         : room;
 
       const resumePresent = hasResume(roomAfterCandidateUpdate.resumeUrl);
+
+      // if (resumePresent) {
+      //   const isAnalysisCompleted = await db.query.resumeAiAnalysis.findFirst({
+      //     where: eq(resumeAiAnalysis.resumeId, resume!.id)
+      //   });
+      //   if (isAnalysisCompleted) {
+      //     return NextResponse.json(
+      //       {
+      //         role: 'CANDIDATE' as const,
+      //         viewerId: user.id,
+      //         interviewRoom: roomAfterCandidateUpdate,
+      //         needsResumeUpload: !resumePresent,
+      //         redirectTo: resumePresent ? null : `/interview/${roomCode}/resume`
+      //       },
+      //       { status: HTTP_STATUS.OK }
+      //     );
+      //   }
+      // }
+
+      // if (resume) {
+      //   const analysis = await getResumeAnalysis({
+      //     resumeText: resume.parsedText,
+      //     jobTitle: room.jobTitle,
+      //     jobDescription: room.jobDescription ?? ''
+      //   });
+
+      //   await db.insert(resumeAiAnalysis).values({
+      //     resumeId: resume.id,
+      //     theoryScore: 0,
+      //     practicalScore: 0,
+      //     resumeScore: analysis.resumeScore,
+      //     overallScore: 0
+      //   });
+      // }
 
       return NextResponse.json(
         {

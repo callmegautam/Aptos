@@ -6,6 +6,7 @@ import { HTTP_STATUS } from '@/types/http';
 import { getCurrentUser } from '@/lib/auth/auth';
 import { savePublicFile } from '@/lib/storage/public-files';
 import { extractTextFromBuffer } from '@/lib/pdf/pdf-parser';
+import { storeResume } from '@/lib/ai/resume';
 
 export async function POST(req: NextRequest, context: { params: Promise<{ code: string }> }) {
   try {
@@ -57,7 +58,16 @@ export async function POST(req: NextRequest, context: { params: Promise<{ code: 
     }
 
     const resumeUrl = await savePublicFile({ file: resume, publicSubdir: 'resumes' });
-    const parsedData = await extractTextFromBuffer(Buffer.from(await resume.arrayBuffer()));
+    await storeResume({
+      resume,
+      fileUrl: resumeUrl,
+      companyId: room.companyId,
+      interviewerId: room.interviewerId,
+      candidateId: user.id,
+      roomId: room.id,
+      uploadedBy: 'CANDIDATE',
+      parsedTextSize: 500
+    });
 
     const whereCondition =
       room.candidateId == null

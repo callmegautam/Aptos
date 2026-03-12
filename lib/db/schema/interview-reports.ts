@@ -1,7 +1,6 @@
 import { bigserial, integer, pgTable, text, bigint } from 'drizzle-orm/pg-core';
 import { interviewRooms } from './interview-rooms';
 import { candidates } from './candidates';
-import { hiringRecommendationEnum } from './enums';
 import { companies } from './companies';
 import { interviewers } from './interviewers';
 
@@ -35,8 +34,6 @@ export const interviewReports = pgTable('interview_reports', {
   strengths: text('strengths').notNull(),
 
   weaknesses: text('weaknesses').notNull(),
-
-  hiringRecommendation: hiringRecommendationEnum('hiring_recommendation').notNull(),
 
   aiSummary: text('ai_summary').notNull()
 });
