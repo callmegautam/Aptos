@@ -1,5 +1,11 @@
+'use client';
 import { getCurrentUser } from '@/lib/auth/auth';
-import { getStaffDashboardData, isStaffRole } from '@/lib/dashboard/staff';
+import {
+  DashboardStat,
+  getStaffDashboardData,
+  isStaffRole,
+  StaffDashboardData
+} from '@/lib/dashboard/staff';
 import CompanyDashboardHome from '@/features/dashboard/components/company-dashboard-home';
 import {
   DashboardTable,
@@ -9,24 +15,79 @@ import {
   StaffStatsGrid,
   VerificationBadge
 } from '@/features/dashboard/components/staff-dashboard-primitives';
+import { Card, CardContent } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
+import { TrendingDown, TrendingUp } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { useEffect, useState } from 'react';
+import { useUserStore } from '@/lib/store/user-store';
 
-const DashboardPage = async () => {
-  const user = await getCurrentUser();
+const dashboardStatsData: DashboardStatsProps['data'] = [
+  {
+    name: 'Total candidates',
+    stat: '3,450',
+    change: '+12.1%',
+    changeType: 'positive'
+  },
+  {
+    name: 'Weekly sessions',
+    stat: '1,342',
+    change: '-9.8%',
+    changeType: 'negative'
+  },
+  {
+    name: 'Average duration',
+    stat: '5.2min',
+    change: '+7.7%',
+    changeType: 'positive'
+  },
+  {
+    name: 'Total interviews',
+    stat: '100',
+    change: '+100%',
+    changeType: 'positive'
+  }
+];
 
-  if (!isStaffRole(user?.role)) {
+const DashboardPage = () => {
+  const user = useUserStore((state) => state.user);
+  const [data, setData] = useState<StaffDashboardData | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await fetch('/api/staff/dashboard');
+      const data = await response.json();
+      setData(data);
+    };
+    fetchData();
+  }, []);
+
+  if (!user || (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN')) {
     return <CompanyDashboardHome />;
   }
 
-  const data = await getStaffDashboardData();
+  if (!data) {
+    return <div>Loading...</div>;
+  }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 ">
       <PageIntro
         title={user.role === 'SUPER_ADMIN' ? 'Super Admin Dashboard' : 'Admin Dashboard'}
         description="Track platform-wide usage, compare company performance, and monitor interviewer and candidate activity from one place."
       />
 
-      <StaffStatsGrid stats={data.overviewStats} />
+      {/* <StaffStatsGrid stats={data.overviewStats} /> */}
+      <div>
+        <DashboardStats
+          dashboardStatsData={data.overviewStats.map((stat) => ({
+            name: stat.label,
+            stat: stat.value.toString(),
+            change: '',
+            changeType: 'positive'
+          }))}
+        />
+      </div>
 
       <DashboardTable
         title="Company snapshot"
@@ -172,3 +233,55 @@ const DashboardPage = async () => {
 };
 
 export default DashboardPage;
+
+interface DashboardStatsProps {
+  data: {
+    name: string;
+    stat: string;
+    change: string;
+    changeType: 'positive' | 'negative';
+  }[];
+}
+
+export function DashboardStats({
+  dashboardStatsData
+}: {
+  dashboardStatsData: DashboardStatsProps['data'];
+}) {
+  return (
+    <div className="px-10">
+      <dl className="flex flex-wrap gap-6">
+        {dashboardStatsData.map((item) => (
+          <Card key={item.name} className="w-[220px] p-6 py-4">
+            <CardContent className="p-0">
+              <div className="flex items-center justify-between">
+                <dt className="text-sm font-medium text-muted-foreground">{item.name}</dt>
+
+                {/* <Badge
+                  variant="outline"
+                  className={cn(
+                    'font-medium inline-flex items-center px-1.5 ps-2.5 py-0.5 text-xs',
+                    item.changeType === 'positive'
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                      : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                  )}
+                >
+                  {item.changeType === 'positive' ? (
+                    <TrendingUp className="mr-1 h-4 w-4 text-green-500" />
+                  ) : (
+                    <TrendingDown className="mr-1 h-4 w-4 text-red-500" />
+                  )}
+                  {item.change}
+                </Badge> */}
+              </div>
+
+              <dd className="mt-2 text-3xl font-semibold tabular-nums text-foreground">
+                {item.stat}
+              </dd>
+            </CardContent>
+          </Card>
+        ))}
+      </dl>
+    </div>
+  );
+}
