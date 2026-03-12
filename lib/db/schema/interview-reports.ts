@@ -2,9 +2,19 @@ import { bigserial, integer, pgTable, text, bigint } from 'drizzle-orm/pg-core';
 import { interviewRooms } from './interview-rooms';
 import { candidates } from './candidates';
 import { hiringRecommendationEnum } from './enums';
+import { companies } from './companies';
+import { interviewers } from './interviewers';
 
 export const interviewReports = pgTable('interview_reports', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),
+
+  companyId: bigint('company_id', { mode: 'number' })
+    .references(() => companies.id, { onDelete: 'cascade' })
+    .notNull(),
+
+  interviewerId: bigint('interviewer_id', { mode: 'number' })
+    .references(() => interviewers.id, { onDelete: 'cascade' })
+    .notNull(),
 
   roomId: bigint('room_id', { mode: 'number' })
     .references(() => interviewRooms.id)

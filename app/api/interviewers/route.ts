@@ -27,12 +27,13 @@ export async function GET(_req: Request) {
         where: eq(interviewers.id, user.id)
       });
       if (!interviewer) {
+        console.error('Interviewer not found');
         return NextResponse.json(
           { error: 'Interviewer not found' },
           { status: HTTP_STATUS.NOT_FOUND }
         );
       }
-      return NextResponse.json({ interviewers: interviewer }, { status: HTTP_STATUS.OK });
+      return NextResponse.json({ interviewers: [interviewer] }, { status: HTTP_STATUS.OK });
     }
 
     if (user.role !== 'COMPANY') {

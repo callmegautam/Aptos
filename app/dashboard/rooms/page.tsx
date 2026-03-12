@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/dialog';
 import Link from 'next/link';
 import { getMe } from '@/lib/user/me';
+import { useUserStore } from '@/lib/store/user-store';
 
 const RoomsPage = () => {
   const [rooms, setRooms] = useState<InterviewRoomWithRelations[]>([]);
@@ -29,8 +30,14 @@ const RoomsPage = () => {
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [roomToDelete, setRoomToDelete] = useState<InterviewRoomWithRelations | null>(null);
-
+  const user = useUserStore((state) => state.user);
   const router = useRouter();
+
+  // useEffect(() => {
+  //   if (user?.role !== 'COMPANY') {
+  //     router.push('/dashboard');
+  //   }
+  // }, [user]);
 
   useEffect(() => {
     const fetchRooms = async () => {

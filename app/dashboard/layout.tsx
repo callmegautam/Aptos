@@ -68,6 +68,7 @@ import { useUserStore } from '@/lib/store/user-store';
 const logout = () => {
   document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
   useUserStore.getState().clearUser();
+  window.location.href = '/login';
 };
 
 // Base nav item - used by simple sidebars
@@ -128,8 +129,7 @@ const logoData: SidebarData['logo'] = {
   description: 'AI Interview Platform'
 };
 
-const defaultAvatar =
-  'https://deifkwefumgah.cloudfront.net/shadcnblocks/block/avatar-1.webp';
+const defaultAvatar = 'https://deifkwefumgah.cloudfront.net/shadcnblocks/block/avatar-1.webp';
 
 function getSidebarData(user: ReturnType<typeof useUserStore.getState>['user']): SidebarData {
   const role = user?.role;
@@ -179,6 +179,7 @@ function getSidebarData(user: ReturnType<typeof useUserStore.getState>['user']):
 
   return {
     logo: logoData,
+
     navGroups: [
       {
         title: 'Overview',
@@ -189,11 +190,15 @@ function getSidebarData(user: ReturnType<typeof useUserStore.getState>['user']):
           { label: 'Reports', icon: FileCheck, href: '/dashboard/reports' }
         ]
       },
-      {
-        title: 'Team',
-        defaultOpen: true,
-        items: [{ label: 'Interviewers', icon: Users, href: '/dashboard/interviewers' }]
-      }
+      ...(user?.role === 'COMPANY'
+        ? [
+            {
+              title: 'Team',
+              defaultOpen: true,
+              items: [{ label: 'Interviewers', icon: Users, href: '/dashboard/interviewers' }]
+            }
+          ]
+        : [])
     ],
     footerGroup: {
       title: 'Support',
