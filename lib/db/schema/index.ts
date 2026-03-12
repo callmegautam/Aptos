@@ -9,5 +9,6 @@ export * from './interview-reports';
 export * from './verification-tokens';
 export * from './email-otp';
 export * from './admins';
+export * from './platform-settings';
 
 export * from './relations';
