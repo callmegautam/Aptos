@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, FormEvent } from 'react';
+import { useState, useMemo, FormEvent, useEffect } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,9 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 
-const DEFAULT_NAME = 'Interviewer';
-const DEFAULT_EMAIL = 'interviewer@company.com';
-const DEFAULT_AVATAR = 'https://deifkwefumgah.cloudfront.net/shadcnblocks/block/avatar-1.webp';
+// const DEFAULT_NAME = 'Interviewer';
+// const DEFAULT_EMAIL = 'interviewer@company.com';
+// const DEFAULT_AVATAR = 'https://deifkwefumgah.cloudfront.net/shadcnblocks/block/avatar-1.webp';
 
 import {
   Dialog,
@@ -23,6 +23,7 @@ import {
   DialogTrigger
 } from '@/components/ui/dialog';
 import { AlertTriangleIcon } from 'lucide-react';
+import { getMe, User } from '@/lib/user/me';
 
 const DeleteAccountDialog = ({
   open,
@@ -60,27 +61,40 @@ const DeleteAccountDialog = ({
 };
 
 const AccountPage = () => {
-  const [name, setName] = useState(DEFAULT_NAME);
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [isEdit, setIsEdit] = useState(false);
   const [open, setOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  useEffect(() => {
+    const fetchMe = async () => {
+      const me = await getMe();
+      if (me) {
+        setUser(me);
+      }
+    };
+    fetchMe();
+  }, []);
 
-  const avatarPreview = useMemo(() => {
-    if (avatarFile) {
-      return URL.createObjectURL(avatarFile);
-    }
-    return DEFAULT_AVATAR;
-  }, [avatarFile]);
+  if (!user) {
+    return <div>Unauthorized</div>;
+  }
+
+  // const avatarPreview = useMemo(() => {
+  //   if (avatarFile) {
+  //     return URL.createObjectURL(avatarFile);
+  //   }
+  //   return DEFAULT_AVATAR;
+  // }, [avatarFile]);
 
   const initials = useMemo(
     () =>
-      name
+      user.name
         .split(' ')
         .filter(Boolean)
         .map((n) => n[0])
         .join('')
         .toUpperCase(),
-    [name]
+    [user.name]
   );
 
   const handleProfileSubmit = (e: FormEvent) => {
@@ -114,13 +128,13 @@ const AccountPage = () => {
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-4 sm:gap-6">
                   <Avatar className="size-20 rounded-full ring-2 ring-primary/20 ring-offset-2 ring-offset-background">
-                    <AvatarImage src={avatarPreview} alt={name} />
+                    <AvatarImage src={user.avatarUrl} alt={user.name} />
                     <AvatarFallback className="rounded-full text-lg font-semibold">
                       {initials || 'IN'}
                     </AvatarFallback>
                   </Avatar>
                   <div className="space-y-1.5">
-                    <p className="text-sm font-medium leading-none">{name || DEFAULT_NAME}</p>
+                    <p className="text-sm font-medium leading-none">{user.name}</p>
                     <p className="text-xs text-muted-foreground">
                       This is your public avatar. Upload a square image for best results.
                     </p>
@@ -163,8 +177,8 @@ const AccountPage = () => {
                   <Label htmlFor="name">Name</Label>
                   <Input
                     id="name"
-                    value={name}
-                    onChange={(event) => setName(event.target.value)}
+                    value={user.name}
+                    onChange={(event) => setUser({ ...user, name: event.target.value })}
                     placeholder="Your name"
                   />
                 </div>
@@ -173,7 +187,7 @@ const AccountPage = () => {
                   <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
-                    value={DEFAULT_EMAIL}
+                    value={user.email}
                     disabled
                     aria-readonly="true"
                     className="bg-muted/40"

@@ -19,6 +19,7 @@ import {
   DialogTitle
 } from '@/components/ui/dialog';
 import Link from 'next/link';
+import { getMe } from '@/lib/user/me';
 
 const RoomsPage = () => {
   const [rooms, setRooms] = useState<InterviewRoomWithRelations[]>([]);

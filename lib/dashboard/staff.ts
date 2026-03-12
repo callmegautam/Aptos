@@ -79,7 +79,9 @@ export function isStaffRole(role: UserRole | string | undefined | null): role is
   return role === 'ADMIN' || role === 'SUPER_ADMIN';
 }
 
-export function isSuperAdminRole(role: UserRole | string | undefined | null): role is 'SUPER_ADMIN' {
+export function isSuperAdminRole(
+  role: UserRole | string | undefined | null
+): role is 'SUPER_ADMIN' {
   return role === 'SUPER_ADMIN';
 }
 
@@ -89,17 +91,11 @@ function getLatestDate(current: Date | null, next: Date | null | undefined) {
   return next.getTime() > current.getTime() ? next : current;
 }
 
-function getInterviewMoment(room: {
-  completedAt: Date | null;
-  scheduledAt: Date;
-}) {
+function getInterviewMoment(room: { completedAt: Date | null; scheduledAt: Date }) {
   return room.completedAt ?? room.scheduledAt;
 }
 
-function getCandidateKey(room: {
-  candidateId: number | null;
-  candidateName: string | null;
-}) {
+function getCandidateKey(room: { candidateId: number | null; candidateName: string | null }) {
   if (room.candidateId) return `candidate:${room.candidateId}`;
   if (room.candidateName?.trim()) return `name:${room.candidateName.trim().toLowerCase()}`;
   return null;
@@ -196,16 +192,14 @@ export async function getStaffDashboardData(): Promise<StaffDashboardData> {
     const candidateKey = getCandidateKey(room);
 
     if (room.companyId) {
-      const current =
-        companyStats.get(room.companyId) ??
-        {
-          interviewers: new Set<number>(),
-          candidates: new Set<string>(),
-          totalInterviews: 0,
-          completedInterviews: 0,
-          activeInterviews: 0,
-          lastInterviewAt: null
-        };
+      const current = companyStats.get(room.companyId) ?? {
+        interviewers: new Set<number>(),
+        candidates: new Set<string>(),
+        totalInterviews: 0,
+        completedInterviews: 0,
+        activeInterviews: 0,
+        lastInterviewAt: null
+      };
 
       current.totalInterviews += 1;
       if (room.status === 'COMPLETED') current.completedInterviews += 1;
@@ -218,15 +212,13 @@ export async function getStaffDashboardData(): Promise<StaffDashboardData> {
     }
 
     if (room.interviewerId) {
-      const current =
-        interviewerStats.get(room.interviewerId) ??
-        {
-          candidates: new Set<string>(),
-          totalInterviews: 0,
-          completedInterviews: 0,
-          activeInterviews: 0,
-          lastInterviewAt: null
-        };
+      const current = interviewerStats.get(room.interviewerId) ?? {
+        candidates: new Set<string>(),
+        totalInterviews: 0,
+        completedInterviews: 0,
+        activeInterviews: 0,
+        lastInterviewAt: null
+      };
 
       current.totalInterviews += 1;
       if (room.status === 'COMPLETED') current.completedInterviews += 1;
@@ -238,15 +230,13 @@ export async function getStaffDashboardData(): Promise<StaffDashboardData> {
     }
 
     if (room.candidateId && candidatesById.has(room.candidateId)) {
-      const current =
-        candidateStats.get(room.candidateId) ??
-        {
-          companies: new Set<number>(),
-          interviewers: new Set<number>(),
-          totalInterviews: 0,
-          completedInterviews: 0,
-          lastInterviewAt: null
-        };
+      const current = candidateStats.get(room.candidateId) ?? {
+        companies: new Set<number>(),
+        interviewers: new Set<number>(),
+        totalInterviews: 0,
+        completedInterviews: 0,
+        lastInterviewAt: null
+      };
 
       current.totalInterviews += 1;
       if (room.status === 'COMPLETED') current.completedInterviews += 1;
@@ -392,7 +382,8 @@ export async function getStaffDashboardData(): Promise<StaffDashboardData> {
             process.env.RESEND_API_KEY || process.env.MAILTRAP_TOKEN
               ? 'Configured'
               : 'No email provider token found',
-          status: process.env.RESEND_API_KEY || process.env.MAILTRAP_TOKEN ? 'configured' : 'missing'
+          status:
+            process.env.RESEND_API_KEY || process.env.MAILTRAP_TOKEN ? 'configured' : 'missing'
         },
         {
           label: 'File uploads',
