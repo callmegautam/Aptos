@@ -19,7 +19,7 @@ import * as React from 'react';
 
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Breadcrumb,
@@ -431,6 +431,7 @@ function getPageTitle(pathname: string): string {
 
 export function DashboardLayout({ children, className }: DashboardLayoutProps) {
   const pathname = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
     const fetchMe = async () => {
@@ -444,6 +445,9 @@ export function DashboardLayout({ children, className }: DashboardLayoutProps) {
             role: data.role,
             avatar: data.avatarUrl
           });
+        }
+        if (data.role === 'CANDIDATE') {
+          router.push(`/candidate`);
         }
       } catch (error) {
         console.error('Error fetching me:', error);

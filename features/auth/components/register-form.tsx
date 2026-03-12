@@ -106,6 +106,11 @@ export default function RegisterForm({
 
       toast.success(data.message, { id: loadingToast });
 
+      if (data.user.role === 'CANDIDATE') {
+        router.push(`/verify-email?email=${data.user.email}&redirect=/candidate`);
+        return;
+      }
+
       router.push(`/verify-email?email=${data.user.email}&redirect=/dashboard`);
     } catch (error: any) {
       const message = error?.response?.data?.error || 'Something went wrong';

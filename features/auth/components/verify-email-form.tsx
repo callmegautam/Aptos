@@ -72,6 +72,11 @@ export function VerifyEmailForm({ className }: VerifyEmailFormProps) {
         role: response.data.user.role
       });
 
+      if (response.data.user.role === 'CANDIDATE') {
+        router.push(`/candidate`);
+        return;
+      }
+
       router.push(redirect || '/dashboard');
     } catch (error: any) {
       toast.error(error?.response?.data?.error);

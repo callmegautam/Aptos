@@ -90,6 +90,11 @@ export function LoginForm({
 
       toast.success(response.data.message, { id: loadingToast });
 
+      if (user === 'CANDIDATE') {
+        router.push(`/candidate`);
+        return;
+      }
+
       router.push('/dashboard');
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -98,6 +103,11 @@ export function LoginForm({
 
         if (status === HTTP_STATUS.FORBIDDEN) {
           toast.error(message, { id: loadingToast });
+
+          if (user === 'CANDIDATE') {
+            router.push(`/verify-email?email=${loginForm.email}&redirect=/candidate`);
+            return;
+          }
 
           router.push(`/verify-email?email=${loginForm.email}&redirect=/dashboard`);
 
