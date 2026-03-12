@@ -1,13 +1,8 @@
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth/auth';
 import { getStaffDashboardData, isStaffRole } from '@/lib/dashboard/staff';
-import {
-  DashboardTable,
-  DateCell,
-  PageIntro,
-  StaffStatsGrid,
-  VerificationBadge
-} from '@/features/dashboard/components/staff-dashboard-primitives';
+import { PageIntro, StaffStatsGrid } from '@/features/dashboard/components/staff-dashboard-primitives';
+import { StaffCandidatesTable } from '@/features/dashboard/components/staff-candidates-table';
 
 const CandidatesPage = async () => {
   const user = await getCurrentUser();
@@ -51,57 +46,11 @@ const CandidatesPage = async () => {
 
       <StaffStatsGrid stats={stats} />
 
-      <DashboardTable
-        title="All candidates"
-        description="Candidate interview activity across companies and interviewers."
-        rows={candidateRows}
-        emptyLabel="No candidates found."
-        columns={[
-          {
-            key: 'name',
-            header: 'Candidate',
-            cell: (row) => (
-              <div>
-                <p className="font-medium">{row.name}</p>
-                <p className="text-sm text-muted-foreground">{row.email}</p>
-              </div>
-            )
-          },
-          {
-            key: 'companiesInterviewedCount',
-            header: 'Companies interviewed',
-            cell: (row) => row.companiesInterviewedCount
-          },
-          {
-            key: 'interviewersMetCount',
-            header: 'Interviewers met',
-            cell: (row) => row.interviewersMetCount
-          },
-          {
-            key: 'totalInterviews',
-            header: 'Total interviews',
-            cell: (row) => row.totalInterviews
-          },
-          {
-            key: 'completedInterviews',
-            header: 'Completed',
-            cell: (row) => row.completedInterviews
-          },
-          {
-            key: 'emailVerified',
-            header: 'Verification',
-            cell: (row) => <VerificationBadge verified={row.emailVerified} />
-          },
-          {
-            key: 'lastInterviewAt',
-            header: 'Last interview',
-            cell: (row) => <DateCell value={row.lastInterviewAt} />
-          }
-        ]}
-      />
+      <StaffCandidatesTable rows={candidateRows} />
     </div>
   );
 };
 
 export default CandidatesPage;
+
 

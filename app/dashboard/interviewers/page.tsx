@@ -2,13 +2,8 @@ import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth/auth';
 import { getStaffDashboardData, isStaffRole } from '@/lib/dashboard/staff';
 import CompanyInterviewersPage from '@/features/interviewers/components/company-interviewers-page';
-import {
-  DashboardTable,
-  DateCell,
-  PageIntro,
-  StaffStatsGrid,
-  VerificationBadge
-} from '@/features/dashboard/components/staff-dashboard-primitives';
+import { PageIntro, StaffStatsGrid } from '@/features/dashboard/components/staff-dashboard-primitives';
+import { StaffInterviewersTable } from '@/features/dashboard/components/staff-interviewers-table';
 
 const InterviewersPage = async () => {
   const user = await getCurrentUser();
@@ -56,61 +51,10 @@ const InterviewersPage = async () => {
 
       <StaffStatsGrid stats={stats} />
 
-      <DashboardTable
-        title="All interviewers"
-        description="Platform-wide interviewer stats grouped with their assigned company."
-        rows={interviewerRows}
-        emptyLabel="No interviewers found."
-        columns={[
-          {
-            key: 'name',
-            header: 'Interviewer',
-            cell: (row) => (
-              <div>
-                <p className="font-medium">{row.name}</p>
-                <p className="text-sm text-muted-foreground">{row.email}</p>
-              </div>
-            )
-          },
-          {
-            key: 'companyName',
-            header: 'Company',
-            cell: (row) => row.companyName
-          },
-          {
-            key: 'candidatesInterviewedCount',
-            header: 'Candidates interviewed',
-            cell: (row) => row.candidatesInterviewedCount
-          },
-          {
-            key: 'totalInterviews',
-            header: 'Total interviews',
-            cell: (row) => row.totalInterviews
-          },
-          {
-            key: 'completedInterviews',
-            header: 'Completed',
-            cell: (row) => row.completedInterviews
-          },
-          {
-            key: 'activeInterviews',
-            header: 'Active',
-            cell: (row) => row.activeInterviews
-          },
-          {
-            key: 'emailVerified',
-            header: 'Verification',
-            cell: (row) => <VerificationBadge verified={row.emailVerified} />
-          },
-          {
-            key: 'lastInterviewAt',
-            header: 'Last interview',
-            cell: (row) => <DateCell value={row.lastInterviewAt} />
-          }
-        ]}
-      />
+      <StaffInterviewersTable rows={interviewerRows} />
     </div>
   );
 };
 
 export default InterviewersPage;
+

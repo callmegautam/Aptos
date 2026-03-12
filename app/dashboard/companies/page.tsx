@@ -1,12 +1,8 @@
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth/auth';
 import { getStaffDashboardData, isStaffRole } from '@/lib/dashboard/staff';
-import {
-  DashboardTable,
-  DateCell,
-  PageIntro,
-  StaffStatsGrid
-} from '@/features/dashboard/components/staff-dashboard-primitives';
+import { PageIntro, StaffStatsGrid } from '@/features/dashboard/components/staff-dashboard-primitives';
+import { StaffCompaniesTable } from '@/features/dashboard/components/staff-companies-table';
 
 const CompaniesPage = async () => {
   const user = await getCurrentUser();
@@ -50,54 +46,7 @@ const CompaniesPage = async () => {
 
       <StaffStatsGrid stats={stats} />
 
-      <DashboardTable
-        title="All companies"
-        description="Company-level stats for interview operations across the platform."
-        rows={companyRows}
-        emptyLabel="No companies found."
-        columns={[
-          {
-            key: 'name',
-            header: 'Company',
-            cell: (row) => (
-              <div>
-                <p className="font-medium">{row.name}</p>
-                <p className="text-sm text-muted-foreground">{row.email}</p>
-              </div>
-            )
-          },
-          {
-            key: 'interviewersCount',
-            header: 'Interviewers',
-            cell: (row) => row.interviewersCount
-          },
-          {
-            key: 'candidatesInterviewedCount',
-            header: 'Candidates interviewed',
-            cell: (row) => row.candidatesInterviewedCount
-          },
-          {
-            key: 'totalInterviews',
-            header: 'Total interviews',
-            cell: (row) => row.totalInterviews
-          },
-          {
-            key: 'completedInterviews',
-            header: 'Completed',
-            cell: (row) => row.completedInterviews
-          },
-          {
-            key: 'activeInterviews',
-            header: 'Active',
-            cell: (row) => row.activeInterviews
-          },
-          {
-            key: 'lastInterviewAt',
-            header: 'Last interview',
-            cell: (row) => <DateCell value={row.lastInterviewAt} />
-          }
-        ]}
-      />
+      <StaffCompaniesTable rows={companyRows} />
     </div>
   );
 };
