@@ -184,6 +184,29 @@
   --shadow-2xl: var(--shadow-2xl);
 }
 
+.beam-line {
+  width: 90px;
+  height: 8px;
+
+  background: linear-gradient(90deg, #ffaa40, #9c40ff);
+
+  border-radius: 9999px;
+
+  offset-path: rect(0 auto auto 0 round 16px);
+  offset-anchor: 50% 50%;
+
+  animation: move-beam var(--duration) linear infinite;
+}
+
+@keyframes move-beam {
+  from {
+    offset-distance: 0%;
+  }
+  to {
+    offset-distance: 100%;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
