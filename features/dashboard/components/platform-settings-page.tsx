@@ -8,13 +8,7 @@ import { PageIntro } from '@/features/dashboard/components/staff-dashboard-primi
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -60,9 +54,8 @@ const PlatformSettingsPage = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const { data, status } = await axios.get<PlatformSettingsResponse>(
-          '/api/platform/settings'
-        );
+        const { data, status } =
+          await axios.get<PlatformSettingsResponse>('/api/platform/settings');
         if (status !== HTTP_STATUS.OK) {
           throw new Error('Failed to load settings');
         }
@@ -149,14 +142,11 @@ const PlatformSettingsPage = () => {
 
       if (response.status === HTTP_STATUS.OK) {
         toast.success('Super admin credentials updated');
-        setSuperAdmin((prev) =>
-          prev ? { ...prev, email: superAdminEmail.trim() } : prev
-        );
+        setSuperAdmin((prev) => (prev ? { ...prev, email: superAdminEmail.trim() } : prev));
         setSuperAdminPassword('');
       } else {
         const errorMessage =
-          (response.data && (response.data.error as string)) ||
-          'Failed to update super admin';
+          (response.data && (response.data.error as string)) || 'Failed to update super admin';
         toast.error(errorMessage);
       }
     } catch (error) {
@@ -205,11 +195,7 @@ const PlatformSettingsPage = () => {
             </div>
             <div className="space-y-2">
               <Label htmlFor="logoUrl">Logo URL</Label>
-              <Input
-                id="logoUrl"
-                value={logoUrl}
-                onChange={(e) => setLogoUrl(e.target.value)}
-              />
+              <Input id="logoUrl" value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} />
               {logoUrl && (
                 <div className="mt-2 flex items-center gap-3">
                   <span className="text-xs text-muted-foreground">Preview:</span>
@@ -312,7 +298,7 @@ const PlatformSettingsPage = () => {
               Read-only view of environment keys (values partially masked for safety).
             </CardDescription>
           </CardHeader>
-          <CardContent className="max-h-[400px] space-y-2 overflow-auto">
+          <CardContent className="max-h-100 space-y-2 overflow-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -339,4 +325,3 @@ const PlatformSettingsPage = () => {
 };
 
 export default PlatformSettingsPage;
-
