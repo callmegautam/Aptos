@@ -10,7 +10,7 @@ const Footer = () => {
 
       <div className="grid gap-8 xl:grid-cols-3 xl:gap-8 w-full">
         <AnimationContainer delay={0.1}>
-          <div className="flex flex-col items-start justify-start md:max-w-[200px]">
+          <div className="flex flex-col items-start justify-start md:max-w-50">
             <div className="flex items-start">
               <Icons.logo className="w-7 h-7" />
               {/* <Image src="/assets/logo.svg" alt="Aptos" width={28} height={28} /> */}
@@ -148,7 +148,7 @@ const Footer = () => {
         </AnimationContainer>
       </div>
 
-      <div className="h-[20rem] lg:h-[20rem] hidden md:flex items-center justify-center">
+      <div className="h-80 lg:h-80 hidden md:flex items-center justify-center">
         <TextHoverEffect text="APTOS" />
       </div>
     </footer>
