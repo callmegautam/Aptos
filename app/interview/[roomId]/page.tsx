@@ -576,15 +576,13 @@ export default function InterviewRoom({ params }: { params: Promise<{ roomId: st
               )}
             </div>
 
-            {user?.role === 'CANDIDATE' && (
-              <button
-                onClick={handleCompleteFromEditor}
-                // disabled={!activePracticalId}
-                className="px-3 py-1 rounded border text-[11px] disabled:opacity-40 disabled:cursor-not-allowed border-emerald-600 text-emerald-100 bg-emerald-900 hover:bg-emerald-800 transition"
-              >
-                Complete Question
-              </button>
-            )}
+            <button
+              onClick={handleCompleteFromEditor}
+              // disabled={!activePracticalId}
+              className="px-3 py-1 rounded border text-[11px] disabled:opacity-40 disabled:cursor-not-allowed border-emerald-600 text-emerald-100 bg-emerald-900 hover:bg-emerald-800 transition"
+            >
+              Complete Question
+            </button>
           </div>
         </div>
 

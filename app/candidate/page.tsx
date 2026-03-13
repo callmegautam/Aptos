@@ -40,7 +40,7 @@ export default function JoinRoomPage() {
         return;
       }
 
-      router.push(`/room/${roomCode}`);
+      router.push(`/interview/${roomCode}`);
     } catch (err) {
       setError('Something went wrong');
       setLoading(false);
