@@ -295,7 +295,7 @@ const NavUser = ({ user, role }: { user: UserData; role?: string }) => {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="size-8 rounded-lg">
-                <AvatarImage src={user.avatar} alt={user.name} />
+                <AvatarImage src={user.avatar} alt={user?.name} />
                 <AvatarFallback className="rounded-lg">
                   {user?.name
                     ?.split(' ')
@@ -304,8 +304,8 @@ const NavUser = ({ user, role }: { user: UserData; role?: string }) => {
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
-                <span className="truncate text-xs text-muted-foreground">{user.email}</span>
+                <span className="truncate font-medium">{user?.name}</span>
+                <span className="truncate text-xs text-muted-foreground">{user?.email}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
@@ -319,17 +319,17 @@ const NavUser = ({ user, role }: { user: UserData; role?: string }) => {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="size-8 rounded-lg">
-                  <AvatarImage src={user.avatar} alt={user.name} />
+                  <AvatarImage src={user?.avatar} alt={user?.name} />
                   <AvatarFallback className="rounded-lg">
-                    {user.name
-                      .split(' ')
+                    {user?.name
+                      ?.split(' ')
                       .map((n) => n[0])
                       .join('')}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
-                  <span className="truncate text-xs text-muted-foreground">{user.email}</span>
+                  <span className="truncate font-medium">{user?.name}</span>
+                  <span className="truncate text-xs text-muted-foreground">{user?.email}</span>
                 </div>
               </div>
             </DropdownMenuLabel>
