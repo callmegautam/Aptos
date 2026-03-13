@@ -626,7 +626,7 @@ export default function InterviewRoom({ params }: { params: Promise<{ roomId: st
                       <div className="font-medium text-zinc-100">
                         {q.id}. {q.text}
                       </div>
-                      <span
+                      {/* <span
                         className={`px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wide ${
                           q.status === 'completed'
                             ? 'bg-emerald-900 text-emerald-200'
@@ -636,7 +636,7 @@ export default function InterviewRoom({ params }: { params: Promise<{ roomId: st
                         }`}
                       >
                         {q.status}
-                      </span>
+                      </span> */}
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -680,7 +680,7 @@ export default function InterviewRoom({ params }: { params: Promise<{ roomId: st
                       <div className="font-medium text-zinc-100">
                         {q.id}. {q.text}
                       </div>
-                      <div className="mt-1 text-[11px] text-zinc-400">
+                      {/* <div className="mt-1 text-[11px] text-zinc-400">
                         Status:{' '}
                         <span
                           className={`px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wide ${
@@ -693,7 +693,7 @@ export default function InterviewRoom({ params }: { params: Promise<{ roomId: st
                         >
                           {q.status}
                         </span>
-                      </div>
+                      </div> */}
                     </div>
 
                     <button
