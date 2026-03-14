@@ -14,43 +14,43 @@ interface DashboardStatsProps {
   }[];
 }
 
-const data: DashboardStatsProps['data'] = [
-  {
-    name: 'Total candidates',
-    stat: '3,450',
-    change: '+12.1%',
-    changeType: 'positive'
-  },
-  {
-    name: 'Weekly sessions',
-    stat: '1,342',
-    change: '-9.8%',
-    changeType: 'negative'
-  },
-  {
-    name: 'Average duration',
-    stat: '5.2min',
-    change: '+7.7%',
-    changeType: 'positive'
-  },
-  {
-    name: 'Total interviews',
-    stat: '100',
-    change: '+100%',
-    changeType: 'positive'
-  }
-];
+// const data: DashboardStatsProps['data'] = [
+//   {
+//     name: 'Total candidates',
+//     stat: '3,450',
+//     change: '+12.1%',
+//     changeType: 'positive'
+//   },
+//   {
+//     name: 'Weekly sessions',
+//     stat: '1,342',
+//     change: '-9.8%',
+//     changeType: 'negative'
+//   },
+//   {
+//     name: 'Average duration',
+//     stat: '5.2min',
+//     change: '+7.7%',
+//     changeType: 'positive'
+//   },
+//   {
+//     name: 'Total interviews',
+//     stat: '100',
+//     change: '+100%',
+//     changeType: 'positive'
+//   }
+// ];
 
-export function DashboardStats() {
+export function DashboardStats({ data }: { data: any }) {
   return (
     <div className="flex items-center justify-center px-10 w-full">
       <dl className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 w-full">
-        {data.map((item) => (
-          <Card key={item.name} className="p-6 py-4 w-full">
+        {data.map((item: any) => (
+          <Card key={item.label} className="p-6 py-4 w-full">
             <CardContent className="p-0">
               <div className="flex items-center justify-between">
-                <dt className="text-sm font-medium text-muted-foreground">{item.name}</dt>
-                <Badge
+                <dt className="text-sm font-medium text-muted-foreground">{item.label}</dt>
+                {/* <Badge
                   variant="outline"
                   className={cn(
                     'font-medium inline-flex items-center px-1.5 ps-2.5 py-0.5 text-xs',
@@ -69,10 +69,10 @@ export function DashboardStats() {
                     {item.changeType === 'positive' ? 'Increased' : 'Decreased'} by{' '}
                   </span>
                   {item.change}
-                </Badge>
+                </Badge> */}
               </div>
               <dd className="tabular-nums  text-3xl font-semibold text-foreground mt-2">
-                {item.stat}
+                {item.value}
               </dd>
             </CardContent>
           </Card>

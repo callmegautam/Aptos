@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { interviewRooms } from '@/lib/db/schema';
+import { interviewers, interviewRooms } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { HTTP_STATUS } from '@/types/http';
 import { getCurrentCompany, getCurrentUser } from '@/lib/auth/auth';
@@ -56,6 +56,10 @@ export async function GET() {
         where: eq(interviewRooms.companyId, user.id),
         with: { interviewer: true, candidate: true },
         orderBy: (r, { desc }) => [desc(r.scheduledAt)]
+      });
+
+      const interviewer = await db.query.interviewers.findMany({
+        where: eq(interviewers.companyId, user.id)
       });
 
       const uniqueCandidates = new Set<string>();
