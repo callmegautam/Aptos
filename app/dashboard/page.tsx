@@ -249,10 +249,10 @@ export function DashboardStats({
   dashboardStatsData: DashboardStatsProps['data'];
 }) {
   return (
-    <div className="px-10">
-      <dl className="flex flex-wrap gap-6">
+    <div>
+      <dl className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {dashboardStatsData.map((item) => (
-          <Card key={item.name} className="w-[220px] p-6 py-4">
+          <Card key={item.name} className="p-6 py-4">
             <CardContent className="p-0">
               <div className="flex items-center justify-between">
                 <dt className="text-sm font-medium text-muted-foreground">{item.name}</dt>
